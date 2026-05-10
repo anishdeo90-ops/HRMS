@@ -1,0 +1,19 @@
+items:
+  - key: leave_type.earned_leave
+    label: Earned Leave
+    domain: leave
+    kind: leave_type
+    owner: hr
+    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Type, field_or_state: Earned Leave }
+    introduced_in_phase: 1
+    db_table: leave_types
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/leaves/types]
+    ui_surfaces: ["app/(dashboard)/leave/types/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    accrual: monthly
+    carry_forward: true
+    encashment: true
+    negative_balance: false
+    holiday_weekend_behavior: exclude
+    approval_behavior: approver_required

@@ -1,0 +1,25 @@
+items:
+  - key: permission.metadata.manage
+    label: Manage Metadata Governance
+    domain: metadata
+    kind: permission
+    owner: platform
+    source_ref: { system: hirerabbits_hrms, module: metadata, artifact: Phase 1 governance }
+    introduced_in_phase: 1
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/metadata]
+    ui_surfaces: [route.metadata.governance]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: permission.metadata.view
+    label: View Metadata Governance
+    domain: metadata
+    kind: permission
+    owner: platform
+    source_ref: { system: hirerabbits_hrms, module: metadata, artifact: Phase 1 governance }
+    introduced_in_phase: 1
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/metadata]
+    ui_surfaces: [route.metadata.governance]
+    tests: [tests/metadata/registry-contract.test.ts]

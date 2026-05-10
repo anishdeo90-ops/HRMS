@@ -1,0 +1,20 @@
+items:
+  - key: form.expense_claim.request
+    label: Expense Claim
+    domain: expenses
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim form }
+    introduced_in_phase: 1
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/expenses/claims]
+    ui_surfaces: ["app/(dashboard)/expenses/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: claim_amount
+        type: currency
+        storage_mapping: expense_claims.amount
+        validation: [required, positive]
+        privacy_class: financial
+        test_id: claim-amount

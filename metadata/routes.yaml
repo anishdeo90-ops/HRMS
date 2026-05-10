@@ -1,0 +1,19 @@
+items:
+  - key: route.metadata.governance
+    label: Metadata Governance
+    domain: metadata
+    kind: route
+    owner: platform
+    source_ref: { system: hirerabbits_hrms, module: metadata, artifact: Governance route }
+    introduced_in_phase: 1
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: []
+    ui_surfaces: ["app/(dashboard)/metadata/governance/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager]
+    permissions: [permission.metadata.view]
+    sidebar:
+      show: false
+      section: admin
+      order: 900

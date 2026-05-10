@@ -1,0 +1,20 @@
+items:
+  - key: form.employee.profile
+    label: Employee Profile
+    domain: employee_core
+    kind: form
+    owner: hr
+    source_ref: { system: frappe_hrms, module: employee, artifact: Employee form }
+    introduced_in_phase: 1
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/employees]
+    ui_surfaces: ["app/(dashboard)/employees/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: employee_name
+        type: text
+        storage_mapping: employees.name
+        validation: [required]
+        privacy_class: personal
+        test_id: employee-name

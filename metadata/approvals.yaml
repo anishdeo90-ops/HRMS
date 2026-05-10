@@ -1,0 +1,18 @@
+items:
+  - key: approval_rule.expense.department_head
+    label: Expense Department Head Approval
+    domain: expenses
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: Department Head Approval }
+    introduced_in_phase: 1
+    db_table: approval_rules
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/expenses/claims]
+    ui_surfaces: ["app/(dashboard)/expenses/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    approver_resolver: department_head
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: finance_manager_after_48h
+    audit_events: [submitted, approved, rejected, escalated]

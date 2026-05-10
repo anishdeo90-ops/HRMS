@@ -1,0 +1,20 @@
+items:
+  - key: salary_component.basic
+    label: Basic
+    domain: payroll
+    kind: salary_component
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Component, field_or_state: Basic }
+    introduced_in_phase: 1
+    db_table: salary_components
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/payroll/salary-components]
+    ui_surfaces: ["app/(dashboard)/payroll/salary-components/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    category: earning
+    calculation: fixed_or_formula
+    taxable: true
+    recurrence: monthly
+    effective_dates:
+      from: 2026-05-10
+      to: null

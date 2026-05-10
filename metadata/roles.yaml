@@ -1,0 +1,121 @@
+items:
+  - key: role.admin
+    label: Admin
+    domain: security
+    kind: role
+    owner: platform
+    source_ref: { system: hirerabbits_ats, module: security, artifact: Existing roles, field_or_state: admin }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: [components/sidebar.tsx]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.hr_manager
+    label: HR Manager
+    domain: security
+    kind: role
+    owner: hr
+    source_ref: { system: hirerabbits_ats, module: security, artifact: Existing roles, field_or_state: hr_manager }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: [components/sidebar.tsx]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.hr_user
+    label: HR User
+    domain: security
+    kind: role
+    owner: hr
+    source_ref: { system: frappe_hrms, module: core, artifact: HR User }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.recruiter
+    label: Recruiter
+    domain: recruiting
+    kind: role
+    owner: talent
+    source_ref: { system: hirerabbits_ats, module: recruiting, artifact: Existing roles, field_or_state: recruiter }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: [components/sidebar.tsx]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.hod
+    label: HOD
+    domain: recruiting
+    kind: role
+    owner: talent
+    source_ref: { system: hirerabbits_ats, module: recruiting, artifact: Existing roles, field_or_state: hod }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: [components/sidebar.tsx]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.employee
+    label: Employee
+    domain: employee_core
+    kind: role
+    owner: hr
+    source_ref: { system: frappe_hrms, module: employee, artifact: Employee }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.leave_approver
+    label: Leave Approver
+    domain: leave
+    kind: role
+    owner: hr
+    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Approver }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.expense_approver
+    label: Expense Approver
+    domain: expenses
+    kind: role
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Approver }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.interviewer
+    label: Interviewer
+    domain: recruiting
+    kind: role
+    owner: talent
+    source_ref: { system: hirerabbits_ats, module: recruiting, artifact: Interviewer }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.payroll_manager
+    label: Payroll Manager
+    domain: payroll
+    kind: role
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Manager }
+    introduced_in_phase: 1
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: []
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]

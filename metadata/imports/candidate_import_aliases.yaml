@@ -1,0 +1,13 @@
+items:
+  - key: import_alias.candidate.mobile
+    label: Candidate Mobile Alias
+    domain: recruiting
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_ats, module: imports, artifact: Candidate import alias, field_or_state: mobile }
+    introduced_in_phase: 1
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/import]
+    ui_surfaces: [components/import-modal.tsx]
+    tests: [tests/metadata/registry-contract.test.ts]

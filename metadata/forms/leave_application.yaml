@@ -1,0 +1,20 @@
+items:
+  - key: form.leave_application.request
+    label: Leave Application
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Application form }
+    introduced_in_phase: 1
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/leaves/applications]
+    ui_surfaces: ["app/(dashboard)/leave/applications/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: leave_type
+        type: select
+        storage_mapping: leave_applications.leave_type_key
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-type

@@ -1,0 +1,13 @@
+items:
+  - key: import_alias.job.title
+    label: Job Title Alias
+    domain: recruiting
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_ats, module: imports, artifact: Job import alias, field_or_state: title }
+    introduced_in_phase: 1
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/jobs]
+    ui_surfaces: ["app/(dashboard)/jobs/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]

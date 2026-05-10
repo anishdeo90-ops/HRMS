@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hirerabbits.local/metadata/registry.schema.json",
+  "title": "HireRabbits Governed Metadata Item",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "key",
+    "label",
+    "domain",
+    "owner",
+    "source_ref",
+    "introduced_in_phase",
+    "db_table",
+    "ts_export",
+    "api_routes",
+    "ui_surfaces",
+    "tests"
+  ],
+  "properties": {
+    "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$" },
+    "label": { "type": "string", "minLength": 1 },
+    "domain": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "minLength": 1 },
+    "source_ref": { "$ref": "#/$defs/source_ref" },
+    "introduced_in_phase": { "type": "integer", "minimum": 1 },
+    "db_table": { "type": "string", "minLength": 1 },
+    "ts_export": { "type": "string", "minLength": 1 },
+    "api_routes": { "type": "array", "items": { "type": "string" } },
+    "ui_surfaces": { "type": "array", "items": { "type": "string" } },
+    "tests": { "type": "array", "items": { "type": "string" } }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "workflow" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/workflow" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "route" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/route" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "form" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/form" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "report" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/report" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "salary_component" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/salary_component" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "leave_type" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/leave_type" }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "approval_rule" } }, "required": ["kind"] },
+      "then": { "$ref": "#/$defs/approval_rule" }
+    }
+  ],
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "required": ["system", "module", "artifact"],
+      "properties": {
+        "system": { "type": "string" },
+        "module": { "type": "string" },
+        "artifact": { "type": "string" },
+        "field_or_state": { "type": "string" }
+      }
+    },
+    "workflow": {
+      "required": ["states", "transitions", "terminal_states", "permissions"],
+      "properties": {
+        "states": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "transitions": { "type": "array", "items": { "type": "object" } },
+        "terminal_states": { "type": "array", "items": { "type": "string" } },
+        "permissions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "route": {
+      "required": ["roles", "permissions", "sidebar"],
+      "properties": {
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "permissions": { "type": "array", "items": { "type": "string" } },
+        "sidebar": {
+          "type": "object",
+          "required": ["show", "section"],
+          "properties": {
+            "show": { "type": "boolean" },
+            "section": { "type": "string" },
+            "order": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "form": {
+      "required": ["fields"],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["key", "type", "storage_mapping", "validation", "privacy_class", "test_id"],
+            "properties": {
+              "key": { "type": "string" },
+              "type": { "type": "string" },
+              "storage_mapping": { "type": "string" },
+              "validation": { "type": "array", "items": { "type": "string" } },
+              "privacy_class": { "type": "string" },
+              "test_id": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "report": {
+      "required": ["source_tables", "filters", "columns", "permission", "export_behavior", "fixture"],
+      "properties": {
+        "source_tables": { "type": "array", "items": { "type": "string" } },
+        "filters": { "type": "array", "items": { "type": "string" } },
+        "columns": { "type": "array", "items": { "type": "string" } },
+        "permission": { "type": "string" },
+        "export_behavior": { "type": "string" },
+        "fixture": { "type": "string" }
+      }
+    },
+    "salary_component": {
+      "required": ["category", "calculation", "taxable", "recurrence", "effective_dates"],
+      "properties": {
+        "category": { "type": "string" },
+        "calculation": { "type": "string" },
+        "taxable": { "type": "boolean" },
+        "recurrence": { "type": "string" },
+        "effective_dates": { "type": "object" }
+      }
+    },
+    "leave_type": {
+      "required": ["accrual", "carry_forward", "encashment", "negative_balance", "holiday_weekend_behavior", "approval_behavior"],
+      "properties": {
+        "accrual": { "type": "string" },
+        "carry_forward": { "type": "boolean" },
+        "encashment": { "type": "boolean" },
+        "negative_balance": { "type": "boolean" },
+        "holiday_weekend_behavior": { "type": "string" },
+        "approval_behavior": { "type": "string" }
+      }
+    },
+    "approval_rule": {
+      "required": ["approver_resolver", "fallback", "delegation", "timeout_escalation", "audit_events"],
+      "properties": {
+        "approver_resolver": { "type": "string" },
+        "fallback": { "type": "string" },
+        "delegation": { "type": "string" },
+        "timeout_escalation": { "type": "string" },
+        "audit_events": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

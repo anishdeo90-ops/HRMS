@@ -1,0 +1,11 @@
+items:
+  - key: role.hr_manager
+    source_ref: HRMS_SUPERCHARGED_BUILD_PLAN.md#metadata-registry
+    requirement: META-01
+    registry: metadata/roles.yaml
+    db: supabase/generated/metadata_seed.sql
+    typescript: lib/generated/roles.ts
+    api: app/api/metadata
+    ui: components/sidebar.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/01-metadata-governance-foundation/01-METADATA-AUDIT.md

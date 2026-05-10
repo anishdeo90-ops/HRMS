@@ -1,0 +1,19 @@
+items:
+  - key: report.leave.balance
+    label: Leave Balance
+    domain: leave
+    kind: report
+    owner: hr
+    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Balance }
+    introduced_in_phase: 1
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/reports/leave/balance]
+    ui_surfaces: ["app/(dashboard)/reports/leave/balance/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    source_tables: [leave_ledgers, employees]
+    filters: [employee, leave_type]
+    columns: [employee, leave_type, balance]
+    permission: permission.metadata.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/leave_balance.json

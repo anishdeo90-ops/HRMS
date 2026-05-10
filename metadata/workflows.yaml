@@ -1,0 +1,39 @@
+items:
+  - key: workflow.leave_application.submitted
+    label: Leave Application Submitted
+    domain: leave
+    kind: workflow
+    owner: hr
+    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Application, field_or_state: Submitted }
+    introduced_in_phase: 1
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/leaves/applications]
+    ui_surfaces: ["app/(dashboard)/leave/applications/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.metadata.view
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.metadata.view]
+  - key: workflow.leave_application.approved
+    label: Leave Application Approved
+    domain: leave
+    kind: workflow
+    owner: hr
+    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Application, field_or_state: Approved }
+    introduced_in_phase: 1
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: ["app/api/leaves/applications/[id]/approve"]
+    ui_surfaces: ["app/(dashboard)/leave/applications/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: submitted
+        to: approved
+        permission: permission.metadata.manage
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.metadata.manage]

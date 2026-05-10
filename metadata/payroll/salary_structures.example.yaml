@@ -1,0 +1,13 @@
+items:
+  - key: salary_structure.example.standard
+    label: Standard Salary Structure Example
+    domain: payroll
+    kind: salary_structure
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure example }
+    introduced_in_phase: 1
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/payroll/salary-structures]
+    ui_surfaces: ["app/(dashboard)/payroll/salary-structures/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
