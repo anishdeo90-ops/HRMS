@@ -11,7 +11,10 @@
     "metadata:generate": "tsx scripts/metadata/generate.ts",
     "metadata:check-hardcoding": "tsx scripts/metadata/check-hardcoding.ts",
     "metadata:lineage": "tsx scripts/metadata/lineage-report.ts",
-    "test:metadata": "node --import tsx --test tests/metadata/*.test.ts"
+    "test:metadata": "node --import tsx --test tests/metadata/*.test.ts",
+    "test:employee-core": "node --import tsx --test tests/employee-core/*.test.ts",
+    "test:attendance": "node --import tsx --test tests/attendance/*.test.ts",
+    "test:leave": "node --import tsx --test tests/leave/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

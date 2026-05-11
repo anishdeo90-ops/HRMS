@@ -1,0 +1,205 @@
+items:
+  - key: form.attendance.check_in
+    label: Attendance Check In
+    domain: attendance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance, field_or_state: check_in }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/attendance/check-ins]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_check_ins.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: attendance-check-in-employee
+      - key: event_type
+        type: workflow_state
+        storage_mapping: employee_check_ins.event_type
+        validation: [required]
+        privacy_class: internal
+        test_id: attendance-check-in-event-type
+      - key: check_time
+        type: datetime
+        storage_mapping: employee_check_ins.check_time
+        validation: [required]
+        privacy_class: personal
+        test_id: attendance-check-in-time
+      - key: source
+        type: select
+        storage_mapping: employee_check_ins.source
+        validation: [required]
+        privacy_class: internal
+        test_id: attendance-check-in-source
+  - key: form.attendance.correction_request
+    label: Attendance Correction Request
+    domain: attendance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance Correction, field_or_state: request_form }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/attendance/corrections]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    fields:
+      - key: attendance_date
+        type: date
+        storage_mapping: attendance_correction_requests.attendance_date
+        validation: [required]
+        privacy_class: personal
+        test_id: attendance-correction-date
+      - key: requested_status
+        type: workflow_state
+        storage_mapping: attendance_correction_requests.requested_status
+        validation: [required, workflow.attendance.day_status]
+        privacy_class: internal
+        test_id: attendance-correction-status
+      - key: reason
+        type: textarea
+        storage_mapping: attendance_correction_requests.reason
+        validation: [required]
+        privacy_class: personal
+        test_id: attendance-correction-reason
+  - key: form.shift.type
+    label: Shift Type
+    domain: attendance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Type }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/shifts]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    fields:
+      - key: code
+        type: text
+        storage_mapping: attendance_shift_types.code
+        validation: [required, unique]
+        privacy_class: internal
+        test_id: shift-type-code
+      - key: name
+        type: text
+        storage_mapping: attendance_shift_types.name
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-type-name
+      - key: start_time
+        type: time
+        storage_mapping: attendance_shift_types.start_time
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-type-start-time
+      - key: end_time
+        type: time
+        storage_mapping: attendance_shift_types.end_time
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-type-end-time
+  - key: form.shift.assignment
+    label: Shift Assignment
+    domain: attendance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Assignment }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/shifts]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_shift_assignments.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: shift-assignment-employee
+      - key: shift_type_id
+        type: shift_reference
+        storage_mapping: employee_shift_assignments.shift_type_id
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-assignment-type
+      - key: effective_from
+        type: date
+        storage_mapping: employee_shift_assignments.effective_from
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-assignment-from
+      - key: effective_to
+        type: date
+        storage_mapping: employee_shift_assignments.effective_to
+        validation: [optional]
+        privacy_class: internal
+        test_id: shift-assignment-to
+  - key: form.shift.roster
+    label: Shift Roster
+    domain: attendance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Roster }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/shifts]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: shift_roster_entries.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: shift-roster-employee
+      - key: roster_date
+        type: date
+        storage_mapping: shift_roster_entries.roster_date
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-roster-date
+      - key: shift_type_id
+        type: shift_reference
+        storage_mapping: shift_roster_entries.shift_type_id
+        validation: [required]
+        privacy_class: internal
+        test_id: shift-roster-type
+  - key: form.overtime.record
+    label: Overtime Record
+    domain: attendance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: overtime, artifact: Phase 4 Overtime }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/overtime]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: overtime_records.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: overtime-employee
+      - key: overtime_date
+        type: date
+        storage_mapping: overtime_records.overtime_date
+        validation: [required]
+        privacy_class: internal
+        test_id: overtime-date
+      - key: overtime_minutes
+        type: number
+        storage_mapping: overtime_records.overtime_minutes
+        validation: [required, positive]
+        privacy_class: internal
+        test_id: overtime-minutes

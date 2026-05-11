@@ -4,13 +4,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Settings, LogOut,
-  Briefcase, FileText, Activity, ChevronLeft, ChevronRight, ClipboardList,
+  Briefcase, FileText, Activity, ChevronLeft, ChevronRight, ClipboardList, Building2, UserRoundCog,
+  Clock3, CalendarDays, CheckSquare,
 } from "lucide-react";
 import { useState } from "react";
 import { HireRabbitsLogo } from "@/components/hirerabbits-logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
+import { getVisiblePeopleRoutes, getVisibleTimeRoutes } from "@/lib/hrms/route-access";
 
 const NAV = [
   { href: "/dashboard",   icon: LayoutDashboard, label: "Dashboard" },
@@ -39,6 +41,8 @@ export default function Sidebar({ profile }: SidebarProps) {
     if (!item.roles) return true;
     return item.roles.includes(profile.role);
   });
+  const peopleRoutes = getVisiblePeopleRoutes(profile);
+  const timeRoutes = getVisibleTimeRoutes(profile);
 
   return (
     <aside className={cn(
@@ -80,6 +84,56 @@ export default function Sidebar({ profile }: SidebarProps) {
             </Link>
           );
         })}
+        {peopleRoutes.length > 0 && (
+          <div className="pt-3 mt-3 border-t border-gray-800">
+            {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">People</p>}
+            {peopleRoutes.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+              const Icon = item.href.endsWith("/organization") ? Building2 : UserRoundCog;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    active
+                      ? "bg-brand-500 text-white"
+                      : "text-gray-400 hover:text-white hover:bg-gray-800"
+                  )}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <Icon size={18} className="flex-shrink-0" />
+                  {!collapsed && item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+        {timeRoutes.length > 0 && (
+          <div className="pt-3 mt-3 border-t border-gray-800">
+            {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Time</p>}
+            {timeRoutes.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+              const Icon = item.href.endsWith("/shifts") ? CalendarDays : item.href.endsWith("/approvals") ? CheckSquare : Clock3;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    active
+                      ? "bg-brand-500 text-white"
+                      : "text-gray-400 hover:text-white hover:bg-gray-800"
+                  )}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <Icon size={18} className="flex-shrink-0" />
+                  {!collapsed && item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </nav>
 
       {/* Bottom: Settings gear + user + logout */}

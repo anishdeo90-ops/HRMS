@@ -17,3 +17,111 @@ items:
       show: false
       section: admin
       order: 900
+  - key: route.people.employees
+    label: Employees
+    domain: employee_core
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 People navigation }
+    introduced_in_phase: 3
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/employees, "app/api/hrms/employees/[id]/documents"]
+    ui_surfaces: ["app/(app)/people/employees/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user]
+    permissions: [permission.employee.view]
+    sidebar:
+      show: true
+      section: people
+      order: 100
+  - key: route.people.organization
+    label: Organization
+    domain: employee_core
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 People navigation }
+    introduced_in_phase: 3
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/organization]
+    ui_surfaces: ["app/(app)/people/organization/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user]
+    permissions: [permission.organization.manage]
+    sidebar:
+      show: true
+      section: people
+      order: 110
+  - key: route.time.attendance
+    label: Attendance
+    domain: attendance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Time navigation }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/attendance/check-ins, app/api/hrms/attendance/days, app/api/hrms/attendance/corrections]
+    ui_surfaces: ["app/(app)/time/attendance/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.attendance.view_self]
+    sidebar:
+      show: true
+      section: time
+      order: 200
+  - key: route.time.shifts
+    label: Shifts
+    domain: attendance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Time navigation }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/shifts, app/api/hrms/shifts/requests, app/api/hrms/overtime]
+    ui_surfaces: ["app/(app)/time/shifts/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.shifts.view]
+    sidebar:
+      show: true
+      section: time
+      order: 210
+  - key: route.time.leave
+    label: Leave
+    domain: leave
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Time navigation }
+    introduced_in_phase: 5
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/leave/setup, app/api/hrms/leave/balances, app/api/hrms/leave/applications, app/api/hrms/leave/ledger, app/api/hrms/leave/compensatory, app/api/hrms/leave/encashments]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod, role.leave_approver]
+    permissions: [permission.leave.view_self]
+    sidebar:
+      show: true
+      section: time
+      order: 220
+  - key: route.time.approvals
+    label: Time Approvals
+    domain: attendance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Time navigation, field_or_state: approvals }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: ["app/api/hrms/attendance/corrections/[id]", "app/api/hrms/shifts/requests/[id]", "app/api/hrms/overtime/[id]", app/api/hrms/leave/approvals, "app/api/hrms/leave/applications/[id]"]
+    ui_surfaces: ["app/(app)/time/approvals/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hod]
+    permissions: [permission.attendance.corrections.approve, permission.shifts.approve, permission.overtime.approve, permission.leave.approve]
+    sidebar:
+      show: true
+      section: time
+      order: 230

@@ -23,3 +23,363 @@ items:
     api_routes: [app/api/metadata]
     ui_surfaces: [route.metadata.governance]
     tests: [tests/metadata/registry-contract.test.ts]
+  - key: permission.employee.view
+    label: View Employees
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Employee Core }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/employees]
+    ui_surfaces: [route.people.employees]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.employee.manage
+    label: Manage Employees
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Employee Core }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/employees]
+    ui_surfaces: [route.people.employees]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.employee.update_basic
+    label: Update Employee Basic Details
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Employee Core, field_or_state: basic_details }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/employees/[id]"]
+    ui_surfaces: [route.people.employees]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.organization.manage
+    label: Manage Organization Setup
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Organization Setup }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/organization]
+    ui_surfaces: [route.people.organization]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.department_approvers.manage
+    label: Manage Department Approvers
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Department Approvers }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/organization]
+    ui_surfaces: [route.people.organization]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.documents.view
+    label: View Employee Documents
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Employee Documents }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/employees/[id]/documents"]
+    ui_surfaces: [route.people.employees]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.documents.manage
+    label: Manage Employee Documents
+    domain: employee_core
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Employee Documents }
+    introduced_in_phase: 3
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/employees/[id]/documents"]
+    ui_surfaces: [route.people.employees]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+  - key: permission.attendance.check_in
+    label: Check In And Out
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance, field_or_state: check_in }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/attendance/check-ins]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.attendance.view_self
+    label: View Own Attendance
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance, field_or_state: self_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/attendance/days]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.attendance.view_team
+    label: View Team Attendance
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance, field_or_state: team_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/attendance/days]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.attendance.manage
+    label: Manage Attendance
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/attendance/days, app/api/hrms/attendance/check-ins]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.attendance.corrections.request
+    label: Request Attendance Correction
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance Correction, field_or_state: request }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/attendance/corrections]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.attendance.corrections.approve
+    label: Approve Attendance Corrections
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance Correction, field_or_state: approve }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/attendance/corrections/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.shifts.view
+    label: View Shifts
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shifts, field_or_state: view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/shifts]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.shifts.manage
+    label: Manage Shifts
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shifts, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/shifts]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.shifts.request
+    label: Request Shift Change
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Request, field_or_state: request }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/shifts/requests]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.shifts.approve
+    label: Approve Shift Requests
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Request, field_or_state: approve }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/shifts/requests/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.overtime.view
+    label: View Overtime
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: overtime, artifact: Phase 4 Overtime, field_or_state: view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/overtime]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.overtime.manage
+    label: Manage Overtime
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: overtime, artifact: Phase 4 Overtime, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/overtime]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.overtime.approve
+    label: Approve Overtime
+    domain: attendance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: overtime, artifact: Phase 4 Overtime, field_or_state: approve }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/overtime/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+  - key: permission.leave.types.manage
+    label: Manage Leave Types
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: leave_types }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.policies.manage
+    label: Manage Leave Policies
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: policies }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.allocations.manage
+    label: Manage Leave Allocations
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: allocations }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/setup, app/api/hrms/leave/balances]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.view_self
+    label: View Own Leave
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: self_view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/balances, app/api/hrms/leave/applications]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.view_team
+    label: View Team Leave
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: team_view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/balances, app/api/hrms/leave/applications]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.apply
+    label: Apply For Leave
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: apply }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/applications, app/api/hrms/leave/compensatory, app/api/hrms/leave/encashments]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.approve
+    label: Approve Leave
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: approve }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/approvals, "app/api/hrms/leave/applications/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.cancel
+    label: Cancel Leave
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: cancel }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/leave/applications/[id]"]
+    ui_surfaces: [route.time.leave, route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.ledger.view
+    label: View Leave Ledger
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: ledger }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/ledger]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.leave.reports.view
+    label: View Leave Reports
+    domain: leave
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: reports }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/leave/balances, app/api/hrms/leave/ledger]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]

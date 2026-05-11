@@ -4,17 +4,234 @@ items:
     domain: leave
     kind: form
     owner: hr
-    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Application form }
-    introduced_in_phase: 1
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: application_form }
+    introduced_in_phase: 5
     db_table: form_schemas
     ts_export: FORM_KEYS
-    api_routes: [app/api/leaves/applications]
-    ui_surfaces: ["app/(dashboard)/leave/applications/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: [app/api/hrms/leave/applications]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-api-contract.test.ts]
     fields:
-      - key: leave_type
+      - key: employee_id
+        type: employee
+        storage_mapping: leave_applications.employee_id
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-employee
+      - key: leave_type_key
         type: select
         storage_mapping: leave_applications.leave_type_key
         validation: [required]
         privacy_class: employment
         test_id: leave-type
+      - key: from_date
+        type: date
+        storage_mapping: leave_applications.from_date
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-from-date
+      - key: to_date
+        type: date
+        storage_mapping: leave_applications.to_date
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-to-date
+      - key: half_day
+        type: boolean
+        storage_mapping: leave_applications.half_day
+        validation: []
+        privacy_class: employment
+        test_id: leave-half-day
+      - key: reason
+        type: textarea
+        storage_mapping: leave_applications.reason
+        validation: []
+        privacy_class: employment
+        test_id: leave-reason
+      - key: attachment_path
+        type: file
+        storage_mapping: leave_applications.attachment_path
+        validation: []
+        privacy_class: confidential
+        test_id: leave-attachment
+  - key: form.leave.type
+    label: Leave Type
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: leave_type }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: label
+        type: text
+        storage_mapping: leave_types.label
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-type-label
+      - key: accrual
+        type: select
+        storage_mapping: leave_types.accrual
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-type-accrual
+  - key: form.leave.period
+    label: Leave Period
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: period }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: leave_periods.name
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-period-name
+      - key: from_date
+        type: date
+        storage_mapping: leave_periods.from_date
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-period-from-date
+      - key: to_date
+        type: date
+        storage_mapping: leave_periods.to_date
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-period-to-date
+  - key: form.leave.policy
+    label: Leave Policy
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: policy }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: leave_policies.name
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-policy-name
+      - key: code
+        type: text
+        storage_mapping: leave_policies.code
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-policy-code
+  - key: form.leave.policy_detail
+    label: Leave Policy Detail
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: policy_detail }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: leave_type_key
+        type: select
+        storage_mapping: leave_policy_details.leave_type_key
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-policy-detail-type
+      - key: annual_allocation
+        type: number
+        storage_mapping: leave_policy_details.annual_allocation
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-policy-detail-allocation
+  - key: form.leave.allocation
+    label: Leave Allocation
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: allocation }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: employee_id
+        type: employee
+        storage_mapping: leave_allocations.employee_id
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-allocation-employee
+      - key: allocated_days
+        type: number
+        storage_mapping: leave_allocations.allocated_days
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-allocation-days
+  - key: form.leave.holiday_list
+    label: Holiday List
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: holiday_list }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: holiday_lists.name
+        validation: [required]
+        privacy_class: employment
+        test_id: holiday-list-name
+      - key: effective_from
+        type: date
+        storage_mapping: holiday_lists.effective_from
+        validation: [required]
+        privacy_class: employment
+        test_id: holiday-list-from-date
+  - key: form.leave.block_list
+    label: Leave Block List
+    domain: leave
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Setup, field_or_state: block_list }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: leave_block_lists.name
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-block-list-name
+      - key: effective_from
+        type: date
+        storage_mapping: leave_block_lists.effective_from
+        validation: [required]
+        privacy_class: employment
+        test_id: leave-block-list-from-date

@@ -33,17 +33,17 @@ const ignorePatterns = [
 ];
 
 const hrmsLiteralPatterns = [
-  /\bbenefits_admin\b/i,
-  /\bemployee\b/i,
-  /\bhr_user\b/i,
-  /\bleave_approver\b/i,
-  /\bexpense_approver\b/i,
-  /\bpayroll_manager\b/i,
-  /\bLeave Application\b/i,
-  /\bExpense Claim\b/i,
-  /\bSalary Register\b/i,
-  /\bEarned Leave\b/i,
-  /\bDepartment Head Approval\b/i,
+  /^benefits_admin$/i,
+  /^employee$/i,
+  /^hr_user$/i,
+  /^leave_approver$/i,
+  /^expense_approver$/i,
+  /^payroll_manager$/i,
+  /^Leave Application$/i,
+  /^Expense Claim$/i,
+  /^Salary Register$/i,
+  /^Earned Leave$/i,
+  /^Department Head Approval$/i,
 ];
 
 function lineNumberFor(content: string, index: number) {

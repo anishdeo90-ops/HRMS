@@ -72,4 +72,137 @@ describe("metadata registry contract", () => {
       }
     }
   });
+
+  it("Phase 3 Employee Core metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.employee.view",
+      "permission.employee.manage",
+      "permission.employee.update_basic",
+      "permission.organization.manage",
+      "permission.department_approvers.manage",
+      "permission.documents.view",
+      "permission.documents.manage",
+      "route.people.employees",
+      "route.people.organization",
+      "form.employee.profile",
+      "approval_rule.employee_core.department_approver",
+      "workflow.employee.status",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 3`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 4 Attendance metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.attendance.check_in",
+      "permission.attendance.view_self",
+      "permission.attendance.view_team",
+      "permission.attendance.manage",
+      "permission.attendance.corrections.request",
+      "permission.attendance.corrections.approve",
+      "permission.shifts.view",
+      "permission.shifts.manage",
+      "permission.shifts.request",
+      "permission.shifts.approve",
+      "permission.overtime.view",
+      "permission.overtime.manage",
+      "permission.overtime.approve",
+      "route.time.attendance",
+      "route.time.shifts",
+      "route.time.approvals",
+      "form.attendance.check_in",
+      "form.attendance.correction_request",
+      "form.shift.type",
+      "form.shift.assignment",
+      "form.shift.roster",
+      "form.overtime.record",
+      "approval_rule.attendance.correction_department_approver",
+      "approval_rule.shift.request_department_approver",
+      "approval_rule.overtime.department_approver",
+      "workflow.attendance.day_status",
+      "workflow.attendance.correction",
+      "workflow.shift.request",
+      "workflow.overtime.status",
+      "import_alias.attendance.check_in.employee_code",
+      "import_alias.attendance.roster.employee_code",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 4`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 5 Leave metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.leave.types.manage",
+      "permission.leave.policies.manage",
+      "permission.leave.allocations.manage",
+      "permission.leave.view_self",
+      "permission.leave.view_team",
+      "permission.leave.apply",
+      "permission.leave.approve",
+      "permission.leave.cancel",
+      "permission.leave.ledger.view",
+      "permission.leave.reports.view",
+      "route.time.leave",
+      "form.leave_application.request",
+      "form.leave.type",
+      "form.leave.period",
+      "form.leave.policy",
+      "form.leave.policy_detail",
+      "form.leave.allocation",
+      "form.leave.holiday_list",
+      "form.leave.block_list",
+      "workflow.leave.application",
+      "approval_rule.leave.department_approver",
+      "approval_rule.leave.leave_approver",
+      "leave_type.earned_leave",
+      "leave_type.casual_leave",
+      "leave_type.sick_leave",
+      "leave_type.leave_without_pay",
+      "leave_type.compensatory_off",
+      "report.leave.balance",
+      "report.leave.ledger",
+      "import_alias.leave.allocation.employee_code",
+      "import_alias.leave.allocation.leave_type",
+      "import_alias.leave.holiday_list.date",
+      "import_alias.leave.block_list.date",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 5`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
 });

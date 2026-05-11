@@ -16,3 +16,105 @@ items:
     delegation: allowed
     timeout_escalation: finance_manager_after_48h
     audit_events: [submitted, approved, rejected, escalated]
+  - key: approval_rule.employee_core.department_approver
+    label: Department Approver Assignment
+    domain: employee_core
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Department Approver, field_or_state: approval_scope }
+    introduced_in_phase: 3
+    db_table: department_approvers
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/organization]
+    ui_surfaces: [route.people.organization]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+    approver_resolver: department_approver
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [assigned, updated, deactivated]
+  - key: approval_rule.attendance.correction_department_approver
+    label: Attendance Correction Department Approval
+    domain: attendance
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance Correction, field_or_state: department_approver }
+    introduced_in_phase: 4
+    db_table: attendance_correction_requests
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/attendance/corrections/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    approver_resolver: department_approver
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [submitted, approved, rejected, cancelled]
+  - key: approval_rule.shift.request_department_approver
+    label: Shift Request Department Approval
+    domain: attendance
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Request, field_or_state: department_approver }
+    introduced_in_phase: 4
+    db_table: shift_requests
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/shifts/requests/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    approver_resolver: department_approver
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [submitted, approved, rejected, cancelled]
+  - key: approval_rule.overtime.department_approver
+    label: Overtime Department Approval
+    domain: attendance
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: overtime, artifact: Phase 4 Overtime, field_or_state: department_approver }
+    introduced_in_phase: 4
+    db_table: overtime_records
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/overtime/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    approver_resolver: department_approver
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [submitted, approved, rejected, cancelled]
+  - key: approval_rule.leave.department_approver
+    label: Leave Department Approval
+    domain: leave
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: department_approver }
+    introduced_in_phase: 5
+    db_table: leave_applications
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/approvals, "app/api/hrms/leave/applications/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    approver_resolver: department_approver
+    fallback: leave_approver
+    delegation: allowed
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [submitted, approved, rejected, cancelled]
+  - key: approval_rule.leave.leave_approver
+    label: Leave Approver Assignment
+    domain: leave
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: leave_approver }
+    introduced_in_phase: 5
+    db_table: leave_applications
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/approvals, "app/api/hrms/leave/applications/[id]"]
+    ui_surfaces: [route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    approver_resolver: leave_approver
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [submitted, approved, rejected, cancelled]

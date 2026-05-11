@@ -129,3 +129,28 @@ items:
     reason: Existing ATS joining field, not new HRMS employee core metadata.
     expires_after_phase: 12
     replacement_key: legacy.field.candidate.staffingo_employee_id
+  - literal: Employee
+    file: lib/types.ts
+    reason: Governed HRMS role label; registry key is role.employee and generated richer labels are not available yet.
+    expires_after_phase: 3
+    replacement_key: role.employee
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/[id]/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/[id]/documents/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/from-candidate/[candidateId]/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core

@@ -1,39 +1,178 @@
 items:
-  - key: workflow.leave_application.submitted
-    label: Leave Application Submitted
+  - key: workflow.leave.application
+    label: Leave Application
     domain: leave
     kind: workflow
     owner: hr
-    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Application, field_or_state: Submitted }
-    introduced_in_phase: 1
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: application_status }
+    introduced_in_phase: 5
     db_table: workflow_states
     ts_export: WORKFLOW_KEYS
-    api_routes: [app/api/leaves/applications]
-    ui_surfaces: ["app/(dashboard)/leave/applications/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: [app/api/hrms/leave/applications, "app/api/hrms/leave/applications/[id]"]
+    ui_surfaces: [route.time.leave, route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
     states: [draft, submitted, approved, rejected, cancelled]
     transitions:
       - from: draft
         to: submitted
-        permission: permission.metadata.view
-    terminal_states: [approved, rejected, cancelled]
-    permissions: [permission.metadata.view]
-  - key: workflow.leave_application.approved
-    label: Leave Application Approved
-    domain: leave
-    kind: workflow
-    owner: hr
-    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Application, field_or_state: Approved }
-    introduced_in_phase: 1
-    db_table: workflow_states
-    ts_export: WORKFLOW_KEYS
-    api_routes: ["app/api/leaves/applications/[id]/approve"]
-    ui_surfaces: ["app/(dashboard)/leave/applications/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
-    states: [draft, submitted, approved, rejected, cancelled]
-    transitions:
+        permission: permission.leave.apply
       - from: submitted
         to: approved
-        permission: permission.metadata.manage
+        permission: permission.leave.approve
+      - from: submitted
+        to: rejected
+        permission: permission.leave.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.leave.cancel
+      - from: approved
+        to: cancelled
+        permission: permission.leave.cancel
+      - from: draft
+        to: cancelled
+        permission: permission.leave.cancel
     terminal_states: [approved, rejected, cancelled]
-    permissions: [permission.metadata.manage]
+    permissions: [permission.leave.apply, permission.leave.approve, permission.leave.cancel]
+  - key: workflow.employee.status
+    label: Employee Status
+    domain: employee_core
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: employee_core, artifact: Phase 3 Employee Core, field_or_state: employment_status }
+    introduced_in_phase: 3
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/employees, "app/api/hrms/employees/[id]"]
+    ui_surfaces: [route.people.employees]
+    tests: [tests/metadata/registry-contract.test.ts, tests/employee-core/employee-core-sql.test.ts]
+    states: [draft, active, inactive, exited]
+    transitions:
+      - from: draft
+        to: active
+        permission: permission.employee.manage
+      - from: active
+        to: inactive
+        permission: permission.employee.manage
+      - from: inactive
+        to: active
+        permission: permission.employee.manage
+      - from: active
+        to: exited
+        permission: permission.employee.manage
+    terminal_states: [exited]
+    permissions: [permission.employee.view, permission.employee.manage]
+  - key: workflow.attendance.day_status
+    label: Attendance Day Status
+    domain: attendance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance, field_or_state: day_status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/attendance/days]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    states: [present, absent, half_day, late, on_duty, holiday, weekly_off]
+    transitions:
+      - from: absent
+        to: present
+        permission: permission.attendance.manage
+      - from: late
+        to: present
+        permission: permission.attendance.manage
+    terminal_states: []
+    permissions: [permission.attendance.view_self, permission.attendance.manage]
+  - key: workflow.attendance.correction
+    label: Attendance Correction
+    domain: attendance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance Correction, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/attendance/corrections, "app/api/hrms/attendance/corrections/[id]"]
+    ui_surfaces: [route.time.attendance, route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.attendance.corrections.request
+      - from: submitted
+        to: approved
+        permission: permission.attendance.corrections.approve
+      - from: submitted
+        to: rejected
+        permission: permission.attendance.corrections.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.attendance.corrections.request
+      - from: draft
+        to: cancelled
+        permission: permission.attendance.corrections.request
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.attendance.corrections.request, permission.attendance.corrections.approve]
+  - key: workflow.shift.request
+    label: Shift Request
+    domain: attendance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Shift Request, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/shifts/requests, "app/api/hrms/shifts/requests/[id]"]
+    ui_surfaces: [route.time.shifts, route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.shifts.request
+      - from: submitted
+        to: approved
+        permission: permission.shifts.approve
+      - from: submitted
+        to: rejected
+        permission: permission.shifts.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.shifts.request
+      - from: draft
+        to: cancelled
+        permission: permission.shifts.request
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.shifts.request, permission.shifts.approve]
+  - key: workflow.overtime.status
+    label: Overtime Status
+    domain: attendance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: overtime, artifact: Phase 4 Overtime, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/overtime, "app/api/hrms/overtime/[id]"]
+    ui_surfaces: [route.time.shifts, route.time.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.overtime.manage
+      - from: submitted
+        to: approved
+        permission: permission.overtime.approve
+      - from: submitted
+        to: rejected
+        permission: permission.overtime.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.overtime.manage
+      - from: draft
+        to: cancelled
+        permission: permission.overtime.manage
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.overtime.manage, permission.overtime.approve]

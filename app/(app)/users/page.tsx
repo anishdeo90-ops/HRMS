@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import type { Profile, Role } from "@/lib/types";
 import { ROLES } from "@/lib/types";
 
-const ROLE_COLORS: Record<Role, string> = {
+const ROLE_COLORS: Partial<Record<Role, string>> = {
   admin:      "bg-red-100 text-red-700",
   hr_manager: "bg-purple-100 text-purple-700",
   recruiter:  "bg-blue-100 text-blue-700",
@@ -155,7 +155,7 @@ export default function UsersPage() {
                       {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                     </select>
                   ) : (
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${ROLE_COLORS[user.role]}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${ROLE_COLORS[user.role] ?? "bg-gray-100 text-gray-600"}`}>
                       {ROLES.find((r) => r.value === user.role)?.label ?? user.role}
                     </span>
                   )}

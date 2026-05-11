@@ -1,4 +1,15 @@
-export type Role = "admin" | "hr_manager" | "recruiter" | "hod" | "candidate";
+export type Role =
+  | "admin"
+  | "hr_manager"
+  | "hr_user"
+  | "recruiter"
+  | "hod"
+  | "candidate"
+  | "employee"
+  | "leave_approver"
+  | "expense_approver"
+  | "interviewer"
+  | "payroll_manager";
 
 export interface Profile {
   id: string;
@@ -133,6 +144,116 @@ export interface CoSourcer {
   notes?: string;
   // Joined
   recruiter_name?: string;
+}
+
+export interface HrCompany {
+  id: string;
+  name: string;
+  code: string;
+  legal_name?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface HrBranch {
+  id: string;
+  company_id: string;
+  name: string;
+  code: string;
+  city?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface HrDepartment {
+  id: string;
+  company_id: string;
+  branch_id?: string;
+  parent_department_id?: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface HrGrade {
+  id: string;
+  name: string;
+  code: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface HrEmploymentType {
+  id: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export type EmployeeStatus = "draft" | "active" | "inactive" | "exited";
+export type EmployeeDocumentVisibility = "hr_only" | "employee" | "manager";
+
+export interface Employee {
+  id: string;
+  employee_code: string;
+  name: string;
+  profile_id?: string;
+  joined_candidate_id?: string;
+  company_id: string;
+  branch_id?: string;
+  department_id?: string;
+  grade_id?: string;
+  employment_type_id?: string;
+  reporting_manager_id?: string;
+  employment_status: EmployeeStatus;
+  joining_date: string;
+  work_email?: string;
+  mobile?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface DepartmentApprover {
+  id: string;
+  department_id: string;
+  approver_employee_id: string;
+  approval_scope: "employee_core";
+  effective_from: string;
+  effective_to?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface EmployeeDocument {
+  id: string;
+  employee_id: string;
+  document_type: string;
+  file_name: string;
+  storage_path: string;
+  visibility: EmployeeDocumentVisibility;
+  file_size?: number;
+  mime_type?: string;
+  uploaded_by?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // ── Jobs ────────────────────────────────────────────────────
@@ -393,9 +514,15 @@ export const MASTER_TYPES = [
 export const ROLES: { value: Role; label: string }[] = [
   { value: "admin",      label: "Admin" },
   { value: "hr_manager", label: "HR Manager" },
+  { value: "hr_user",    label: "HR User" },
   { value: "recruiter",  label: "Recruiter" },
   { value: "hod",        label: "HOD / Interviewer" },
   { value: "candidate",  label: "Candidate" },
+  { value: "employee",   label: "Employee" },
+  { value: "leave_approver", label: "Leave Approver" },
+  { value: "expense_approver", label: "Expense Approver" },
+  { value: "interviewer", label: "Interviewer" },
+  { value: "payroll_manager", label: "Payroll Manager" },
 ];
 
 export const KANBAN_STAGES = [

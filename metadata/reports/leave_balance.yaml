@@ -4,16 +4,34 @@ items:
     domain: leave
     kind: report
     owner: hr
-    source_ref: { system: frappe_hrms, module: leave, artifact: Leave Balance }
-    introduced_in_phase: 1
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: balance_report }
+    introduced_in_phase: 5
     db_table: report_definitions
     ts_export: REPORT_KEYS
-    api_routes: [app/api/reports/leave/balance]
-    ui_surfaces: ["app/(dashboard)/reports/leave/balance/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
-    source_tables: [leave_ledgers, employees]
-    filters: [employee, leave_type]
-    columns: [employee, leave_type, balance]
-    permission: permission.metadata.view
+    api_routes: [app/api/hrms/leave/balances]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-api-contract.test.ts]
+    source_tables: [leave_ledger_entries, leave_allocations, employees]
+    filters: [employee, leave_type, leave_period]
+    columns: [employee, leave_type, allocated, used, balance]
+    permission: permission.leave.reports.view
     export_behavior: csv
     fixture: tests/fixtures/reports/leave_balance.json
+  - key: report.leave.ledger
+    label: Leave Ledger
+    domain: leave
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Management, field_or_state: ledger_report }
+    introduced_in_phase: 5
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/leave/ledger]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-api-contract.test.ts]
+    source_tables: [leave_ledger_entries, employees]
+    filters: [employee, leave_type, leave_period, posting_date]
+    columns: [employee, leave_type, entry_type, days_delta, balance_after, posting_date]
+    permission: permission.leave.ledger.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/leave_ledger.json
