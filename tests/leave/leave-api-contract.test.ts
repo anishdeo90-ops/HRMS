@@ -55,4 +55,33 @@ describe("Leave API route source contract", () => {
     assert.match(decisionRoute, /buildLedgerReversalEntry/);
     assert.match(decisionRoute, /leave_ledger_entries/);
   });
+
+  it("keeps dynamic leave application params compatible with Next 14 route context", () => {
+    const decisionRoute = readRoute("app/api/hrms/leave/applications/[id]/route.ts");
+    assert.match(decisionRoute, /type Params = \{ params: \{ id: string \} \}/);
+    assert.doesNotMatch(decisionRoute, /params: Promise/);
+    assert.doesNotMatch(decisionRoute, /await params/);
+  });
+
+  it("stores the current approver employee and does not allow view-only application edits", () => {
+    const decisionRoute = readRoute("app/api/hrms/leave/applications/[id]/route.ts");
+    assert.match(decisionRoute, /approverEmployeeId/);
+    assert.doesNotMatch(decisionRoute, /approver_employee_id: target\.id/);
+    assert.match(decisionRoute, /action === "update" && !canRequestLeave\(profile, target\) && !canManageLeaveBalances\(profile\)/);
+    assert.match(decisionRoute, /Only draft or submitted leave can be updated/);
+  });
+
+  it("adds compensatory and encashment decision routes with ledger entries", () => {
+    const compensatoryRoute = readRoute("app/api/hrms/leave/compensatory/route.ts");
+    const encashmentRoute = readRoute("app/api/hrms/leave/encashments/route.ts");
+
+    for (const route of [compensatoryRoute, encashmentRoute]) {
+      assert.match(route, /export async function PATCH/);
+      assert.match(route, /approverEmployeeId/);
+      assert.match(route, /buildLedgerEntry/);
+      assert.match(route, /leave_ledger_entries/);
+    }
+    assert.match(compensatoryRoute, /entry_type: "compensatory_credit"/);
+    assert.match(encashmentRoute, /entry_type: "encashment"/);
+  });
 });

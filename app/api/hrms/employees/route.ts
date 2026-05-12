@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   let query = admin
     .from("employees")
-    .select("*, company:hr_companies(name, code), branch:hr_branches(name, code), department:hr_departments(name, code), grade:hr_grades(name, code), employment_type:hr_employment_types(name, code), reporting_manager:employees!employees_reporting_manager_id_fkey(id, name, employee_code), profile:profiles(name, email)")
+    .select("*, company:hr_companies(name, code), branch:hr_branches(name, code), department:hr_departments(name, code), grade:hr_grades(name, code), employment_type:hr_employment_types(name, code), profile:profiles!employees_profile_id_fkey(name, email)")
     .order("name");
 
   if (!includeInactive) query = query.eq("is_active", true);

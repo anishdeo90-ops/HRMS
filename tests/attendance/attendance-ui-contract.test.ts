@@ -17,12 +17,13 @@ describe("Time route access", () => {
   it("uses generated route keys for the Time navigation routes", () => {
     assert.equal(TIME_ROUTE_ACCESS.attendance.key, "route.time.attendance");
     assert.equal(TIME_ROUTE_ACCESS.shifts.key, "route.time.shifts");
+    assert.equal(TIME_ROUTE_ACCESS.leave.key, "route.time.leave");
     assert.equal(TIME_ROUTE_ACCESS.approvals.key, "route.time.approvals");
   });
 
   it("allows employee self-service access without approval navigation", () => {
     const routes = getVisibleTimeRoutes({ role: "employee" });
-    assert.deepEqual(routes.map((route) => route.key), ["route.time.attendance", "route.time.shifts"]);
+    assert.deepEqual(routes.map((route) => route.key), ["route.time.attendance", "route.time.shifts", "route.time.leave"]);
   });
 
   it("allows HR roles to see all Time routes", () => {
@@ -31,6 +32,7 @@ describe("Time route access", () => {
       assert.deepEqual(routes.map((route) => route.key), [
         "route.time.attendance",
         "route.time.shifts",
+        "route.time.leave",
         "route.time.approvals",
       ]);
     }
@@ -38,6 +40,7 @@ describe("Time route access", () => {
     assert.deepEqual(getVisibleTimeRoutes({ role: "hr_user" }).map((route) => route.key), [
       "route.time.attendance",
       "route.time.shifts",
+      "route.time.leave",
     ]);
   });
 
@@ -45,6 +48,7 @@ describe("Time route access", () => {
     assert.deepEqual(getVisibleTimeRoutes({ role: "hod" }).map((route) => route.key), [
       "route.time.attendance",
       "route.time.shifts",
+      "route.time.leave",
       "route.time.approvals",
     ]);
   });
@@ -64,7 +68,7 @@ describe("Time route access", () => {
     for (const href of ["/dashboard", "/my-activity", "/candidates", "/jobs", "/hod-portal", "/jds", "/settings"]) {
       assert.match(sidebar, new RegExp(href.replaceAll("/", "\\/")), `${href} should remain in sidebar`);
     }
-    for (const href of ["/time/attendance", "/time/shifts", "/time/approvals"]) {
+    for (const href of ["/time/attendance", "/time/shifts", "/time/leave", "/time/approvals"]) {
       assert.match(routeAccess, new RegExp(href.replaceAll("/", "\\/")), `${href} should be available through Time routes`);
     }
 
@@ -77,14 +81,14 @@ describe("Time route access", () => {
     const routesYaml = source("metadata/routes.yaml");
     const routeAccess = source("lib/hrms/route-access.ts");
 
-    for (const key of ["route.time.attendance", "route.time.shifts", "route.time.approvals"]) {
+    for (const key of ["route.time.attendance", "route.time.shifts", "route.time.leave", "route.time.approvals"]) {
       assert.match(routesYaml, new RegExp(`key: ${key}[\\s\\S]*section: time`), `${key} should be registered in the Time section`);
       assert.match(routeAccess, new RegExp(`key: "${key}"`), `${key} should be exposed by route access`);
     }
 
     assert.match(routesYaml, /key: route\.time\.approvals[\s\S]*label: Time Approvals/);
     assert.match(routeAccess, /label: "Time Approvals"/);
-    assert.match(routesYaml, /key: route\.time\.approvals[\s\S]*roles: \[role\.admin, role\.hr_manager, role\.hod\]/);
+    assert.match(routesYaml, /key: route\.time\.approvals[\s\S]*roles: \[role\.admin, role\.hr_manager, role\.hod, role\.leave_approver\]/);
     assert.doesNotMatch(routesYaml, /key: route\.time\.approvals[\s\S]*role\.hr_user[\s\S]*permissions: \[permission\.attendance\.corrections\.approve/);
   });
 

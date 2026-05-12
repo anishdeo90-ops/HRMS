@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canViewLeaveLedger } from "@/lib/hrms/leave-authorization";
+import { canManageLeaveBalances, canViewLeaveLedger } from "@/lib/hrms/leave-authorization";
 import { currentHrmsProfile, resolveLeaveTargetEmployee } from "@/lib/hrms/employee-access";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const { employee, error: employeeError } = await resolveLeaveTargetEmployee(supabase, user.id, searchParams.get("employee_id"));
   if (employeeError) return NextResponse.json({ error: employeeError.message }, { status: 500 });
+  if (!employee?.id && !searchParams.get("employee_id") && canManageLeaveBalances(profile)) return NextResponse.json({ data: [] });
   if (!employee?.id) return NextResponse.json({ error: "Employee not found" }, { status: 404 });
   if (!canViewLeaveLedger(profile, employee)) return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
 

@@ -20,7 +20,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   const { data, error } = await supabase
     .from("employees")
-    .select("*, company:hr_companies(*), branch:hr_branches(*), department:hr_departments(*), grade:hr_grades(*), employment_type:hr_employment_types(*), reporting_manager:employees!employees_reporting_manager_id_fkey(id, name, employee_code), profile:profiles(name, email)")
+    .select("*, company:hr_companies(*), branch:hr_branches(*), department:hr_departments(*), grade:hr_grades(*), employment_type:hr_employment_types(*), profile:profiles!employees_profile_id_fkey(name, email)")
     .eq("id", id)
     .single();
 

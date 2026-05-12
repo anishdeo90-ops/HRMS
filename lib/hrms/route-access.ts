@@ -29,10 +29,19 @@ const TIME_SHIFT_ROUTE_ROLES = new Set([
   "employee",
   "hod",
 ]);
+const TIME_LEAVE_ROUTE_ROLES = new Set([
+  "admin",
+  "hr_manager",
+  "hr_user",
+  "employee",
+  "hod",
+  "leave_approver",
+]);
 const TIME_APPROVAL_ROUTE_ROLES = new Set([
   "admin",
   "hr_manager",
   "hod",
+  "leave_approver",
 ]);
 
 export const PEOPLE_ROUTE_ACCESS = {
@@ -59,6 +68,11 @@ export const TIME_ROUTE_ACCESS = {
     href: "/time/shifts",
     label: "Shifts",
   },
+  leave: {
+    key: "route.time.leave",
+    href: "/time/leave",
+    label: "Leave",
+  },
   approvals: {
     key: "route.time.approvals",
     href: "/time/approvals",
@@ -83,6 +97,7 @@ export function getVisibleTimeRoutes(profile: ProfileLike | null | undefined) {
   return [
     ...(TIME_ATTENDANCE_ROUTE_ROLES.has(role) ? [TIME_ROUTE_ACCESS.attendance] : []),
     ...(TIME_SHIFT_ROUTE_ROLES.has(role) ? [TIME_ROUTE_ACCESS.shifts] : []),
+    ...(TIME_LEAVE_ROUTE_ROLES.has(role) ? [TIME_ROUTE_ACCESS.leave] : []),
     ...(TIME_APPROVAL_ROUTE_ROLES.has(role) ? [TIME_ROUTE_ACCESS.approvals] : []),
   ];
 }

@@ -79,6 +79,8 @@ describe("Leave SQL migration contract", () => {
     assert.match(sql, /can_approve_leave\(employee_id, 'leave_application'\)/);
     assert.match(sql, /can_approve_leave\(employee_id, 'compensatory_leave'\)/);
     assert.match(sql, /can_approve_leave\(employee_id, 'leave_encashment'\)/);
+    assert.match(sql, /select public\.has_role\('role\.admin'\) or public\.has_role\('role\.hr_manager'\)/);
+    assert.doesNotMatch(sql, /select public\.has_permission\('permission\.leave\.types\.manage'\)\s+or public\.has_permission\('permission\.leave\.policies\.manage'\)\s+or public\.has_permission\('permission\.leave\.allocations\.manage'\)/);
   });
 
   it("adds operation-specific policies and keeps the ledger append-only for authenticated users", () => {
@@ -101,6 +103,13 @@ describe("Leave SQL migration contract", () => {
     assert.doesNotMatch(sql, /on public\.leave_ledger_entries for update\b/, "leave ledger should not expose update policy");
     assert.doesNotMatch(sql, /on public\.leave_ledger_entries for delete\b/, "leave ledger should not expose delete policy");
     assert.doesNotMatch(sql, /using \(true\)/, "leave policies should not be open using (true)");
+    assert.match(sql, /drop policy if exists leave_types_fail_closed on public\.leave_types/);
+    assert.match(sql, /leave_ledger_entries_select" on public\.leave_ledger_entries for select to authenticated using \(public\.can_view_leave\(employee_id\) and public\.has_permission\('permission\.leave\.ledger\.view'\)\)/);
+    assert.match(sql, /source_type = 'leave_application' and entry_type in \('application', 'cancellation'\) and public\.can_approve_leave\(employee_id, 'leave_application'\)/);
+    assert.match(sql, /source_type = 'compensatory_leave' and entry_type = 'compensatory_credit' and public\.can_approve_leave\(employee_id, 'compensatory_leave'\)/);
+    assert.match(sql, /source_type = 'leave_encashment' and entry_type = 'encashment' and public\.can_approve_leave\(employee_id, 'leave_encashment'\)/);
+    assert.match(sql, /compensatory_leave_requests_insert" on public\.compensatory_leave_requests for insert to authenticated with check \(public\.can_apply_leave\(employee_id\) and status in \('draft', 'submitted'\)\)/);
+    assert.match(sql, /leave_encashments_insert" on public\.leave_encashments for insert to authenticated with check \(public\.can_apply_leave\(employee_id\) and status in \('draft', 'submitted'\)\)/);
   });
 
   it("constrains leave statuses, ledger entry types, and day quantities", () => {

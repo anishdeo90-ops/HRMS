@@ -118,8 +118,8 @@ items:
     ts_export: ROUTE_KEYS
     api_routes: ["app/api/hrms/attendance/corrections/[id]", "app/api/hrms/shifts/requests/[id]", "app/api/hrms/overtime/[id]", app/api/hrms/leave/approvals, "app/api/hrms/leave/applications/[id]"]
     ui_surfaces: ["app/(app)/time/approvals/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-ui-contract.test.ts]
-    roles: [role.admin, role.hr_manager, role.hod]
+    tests: [tests/metadata/registry-contract.test.ts, tests/attendance/attendance-ui-contract.test.ts, tests/leave/leave-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hod, role.leave_approver]
     permissions: [permission.attendance.corrections.approve, permission.shifts.approve, permission.overtime.approve, permission.leave.approve]
     sidebar:
       show: true

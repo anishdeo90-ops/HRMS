@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildLedgerEntry, buildLedgerReversalEntry, normalizeLeaveApplicationPayload } from "@/lib/hrms/leave";
-import { canApproveLeave, canRequestLeave, canViewLeave } from "@/lib/hrms/leave-authorization";
+import { canApproveLeave, canManageLeaveBalances, canRequestLeave } from "@/lib/hrms/leave-authorization";
 import { currentHrmsProfile } from "@/lib/hrms/employee-access";
 import { createClient } from "@/lib/supabase/server";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: { id: string } };
 type LeaveApplicationWithEmployee = {
   id: string;
   employee_id: string;
@@ -15,13 +15,13 @@ type LeaveApplicationWithEmployee = {
   employee?: {
     profile_id?: string | null;
     department_id?: string | null;
-    reporting_manager?: { profile_id?: string | null } | null;
+    reporting_manager_id?: string | null;
   } | null;
 };
 
 const APPLICATION_SELECT = [
   "*",
-  "employee:employees(id, profile_id, department_id, reporting_manager:employees!employees_reporting_manager_id_fkey(profile_id))",
+  "employee:employees!leave_applications_employee_id_fkey(id, profile_id, department_id, reporting_manager_id)",
 ].join(",");
 
 function targetFromRecord(record: any) {
@@ -29,18 +29,19 @@ function targetFromRecord(record: any) {
     id: record.employee_id,
     profile_id: record.employee?.profile_id,
     department_id: record.employee?.department_id,
-    reporting_manager_profile_id: record.employee?.reporting_manager?.profile_id,
+    reporting_manager_id: record.employee?.reporting_manager_id,
   };
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
+  const { id } = params;
   const supabase = await createClient();
   const { user, profile } = await currentHrmsProfile(supabase);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const action = String(body.action ?? "update");
+  const approverEmployeeId = (profile as { employee_id?: string | null } | null)?.employee_id ?? null;
   const { data: existing, error: existingError } = await supabase.from("leave_applications").select(APPLICATION_SELECT).eq("id", id).single();
   if (existingError) return NextResponse.json({ error: existingError.message }, { status: 500 });
   const application = existing as unknown as LeaveApplicationWithEmployee;
@@ -52,17 +53,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (action === "cancel" && !canRequestLeave(profile, target) && !canApproveLeave(profile, target)) {
     return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
   }
-  if (action === "update" && !canViewLeave(profile, target)) {
+  if (action === "update" && !canRequestLeave(profile, target) && !canManageLeaveBalances(profile)) {
     return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
+  }
+  if (action === "update" && !["draft", "submitted"].includes(application.status)) {
+    return NextResponse.json({ error: "Only draft or submitted leave can be updated" }, { status: 400 });
+  }
+  if (["approve", "reject"].includes(action) && !approverEmployeeId) {
+    return NextResponse.json({ error: "Approver employee record not found" }, { status: 400 });
   }
 
   const patch = action === "approve"
-    ? { status: "approved", approver_comment: body.approver_comment ?? null, approver_employee_id: target.id, decided_at: new Date().toISOString(), updated_by: user.id }
+    ? { status: "approved", approver_comment: body.approver_comment ?? null, approver_employee_id: approverEmployeeId, decided_at: new Date().toISOString(), updated_by: user.id }
     : action === "reject"
-      ? { status: "rejected", approver_comment: body.approver_comment ?? null, approver_employee_id: target.id, decided_at: new Date().toISOString(), updated_by: user.id }
+      ? { status: "rejected", approver_comment: body.approver_comment ?? null, approver_employee_id: approverEmployeeId, decided_at: new Date().toISOString(), updated_by: user.id }
       : action === "cancel"
         ? { status: "cancelled", updated_by: user.id }
-        : { ...normalizeLeaveApplicationPayload(body), updated_by: user.id };
+        : { ...normalizeLeaveApplicationPayload({ ...body, status: application.status, employee_id: application.employee_id }), updated_by: user.id };
 
   const { data, error } = await supabase.from("leave_applications").update(patch).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

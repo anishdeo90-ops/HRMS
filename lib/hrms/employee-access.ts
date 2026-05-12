@@ -9,6 +9,15 @@ export type HrmsEmployeeTarget = {
   reporting_manager_profile_id?: string | null;
 };
 
+export type CurrentHrmsProfile = HrmsProfile & {
+  permissions?: string[];
+  employee_id?: string | null;
+  department_approvals?: {
+    department_id?: string | null;
+    approval_scope?: string | null;
+  }[];
+};
+
 export function employeeAccessTarget(employee: any): HrmsEmployeeTarget | null {
   if (!employee) return null;
   return {
@@ -42,9 +51,10 @@ export async function currentHrmsProfile(supabase: Awaited<ReturnType<typeof cre
     user,
     profile: {
       ...profile,
+      employee_id: approverEmployee?.id ?? null,
       permissions: rolePermissions?.map((permission) => permission.permission_key) ?? [],
       department_approvals: departmentApprovals ?? [],
-    } as HrmsProfile & { permissions: string[] },
+    } as CurrentHrmsProfile,
   };
 }
 
@@ -55,7 +65,7 @@ export async function resolveLeaveTargetEmployee(
 ) {
   let query = supabase
     .from("employees")
-    .select("id, profile_id, department_id, reporting_manager_id, reporting_manager:employees!employees_reporting_manager_id_fkey(profile_id)");
+    .select("id, profile_id, department_id, reporting_manager_id");
 
   query = employeeId ? query.eq("id", employeeId) : query.eq("profile_id", userId);
   const { data, error } = await query.maybeSingle();

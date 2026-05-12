@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Settings, LogOut,
   Briefcase, FileText, Activity, ChevronLeft, ChevronRight, ClipboardList, Building2, UserRoundCog,
-  Clock3, CalendarDays, CheckSquare,
+  Clock3, CalendarDays, CheckSquare, PlaneTakeoff,
 } from "lucide-react";
 import { useState } from "react";
 import { HireRabbitsLogo } from "@/components/hirerabbits-logo";
@@ -22,6 +22,13 @@ const NAV = [
   { href: "/hod-portal",  icon: ClipboardList,    label: "HOD Portal",        roles: ["admin", "hr_manager", "hod"] },
   { href: "/jds",         icon: FileText,         label: "JDs & Forms",       roles: ["admin", "hr_manager"] },
 ];
+
+const TIME_ROUTE_ICONS = {
+  "/time/attendance": Clock3,
+  "/time/shifts": CalendarDays,
+  "/time/leave": PlaneTakeoff,
+  "/time/approvals": CheckSquare,
+} as const;
 
 interface SidebarProps { profile: Profile }
 
@@ -114,7 +121,7 @@ export default function Sidebar({ profile }: SidebarProps) {
             {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Time</p>}
             {timeRoutes.map((item) => {
               const active = pathname === item.href || pathname.startsWith(item.href + "/");
-              const Icon = item.href.endsWith("/shifts") ? CalendarDays : item.href.endsWith("/approvals") ? CheckSquare : Clock3;
+              const Icon = TIME_ROUTE_ICONS[item.href as keyof typeof TIME_ROUTE_ICONS] ?? Clock3;
               return (
                 <Link
                   key={item.href}

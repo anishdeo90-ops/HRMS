@@ -102,6 +102,16 @@ describe("Leave authorization helpers", () => {
     assert.equal(canApproveLeave(approver, { ...employee, department_id: "dept-2" }), false);
   });
 
+  it("does not let setup-only permissions approve leave", () => {
+    const setupOnly = {
+      id: "setup-profile",
+      role: "hr_user",
+      is_active: true,
+      permissions: [LEAVE_PERMISSION_KEYS.typesManage, LEAVE_PERMISSION_KEYS.policiesManage],
+    };
+    assert.equal(canApproveLeave(setupOnly, employee), false);
+  });
+
   it("fails closed for inactive profiles and ledger access without scope", () => {
     const inactive = { id: "profile-1", role: "employee", is_active: false, permissions: [LEAVE_PERMISSION_KEYS.ledgerView] };
     assert.equal(canViewLeave(inactive, employee), false);

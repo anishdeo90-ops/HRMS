@@ -10,7 +10,7 @@ type EmployeeRef = { name?: string | null; employee_code?: string | null };
 type ShiftRef = { name?: string | null; code?: string | null };
 type AttendanceDayRef = { attendance_date?: string | null; status?: string | null };
 
-type ApprovalKind = "corrections" | "shifts" | "overtime";
+type ApprovalKind = "corrections" | "shifts" | "overtime" | "leave_applications" | "compensatory" | "encashments";
 type ApprovalAction = "approve" | "reject" | "cancel";
 
 type BaseApproval = {
@@ -44,18 +44,37 @@ type OvertimeRequest = BaseApproval & {
   attendance_day?: AttendanceDayRef | null;
 };
 
+type LeaveApplication = BaseApproval & {
+  leave_type_key?: string | null;
+  from_date?: string | null;
+  to_date?: string | null;
+  total_days?: number | null;
+};
+
+type LeaveRequest = BaseApproval & {
+  leave_type_key?: string | null;
+  requested_days?: number | null;
+  work_date?: string | null;
+};
+
 type QueueConfig<T extends BaseApproval> = {
   key: ApprovalKind;
   label: string;
   endpoint: string;
   rows: T[];
+  bodyId?: boolean;
 };
 
 const QUEUE_LABELS: Record<ApprovalKind, string> = {
   corrections: "Attendance Corrections",
   shifts: "Shift Requests",
   overtime: "Overtime",
+  leave_applications: "Leave Applications",
+  compensatory: "Compensatory Leave",
+  encashments: "Encashments",
 };
+
+const LEAVE_ONLY_ROLES = new Set(["leave_approver"]);
 
 function employeeLabel(person?: EmployeeRef | null) {
   if (!person) return "Unassigned person";
@@ -84,6 +103,10 @@ function minutesLabel(minutes?: number | null) {
   return hours ? `${hours}h ${remainder}m` : `${remainder}m`;
 }
 
+function label(value?: string | null) {
+  return value ? value.replace(/_/g, " ") : "-";
+}
+
 function statusClass(status?: string | null) {
   if (status === "approved") return "bg-green-100 text-green-700";
   if (status === "rejected") return "bg-red-100 text-red-700";
@@ -94,28 +117,46 @@ function statusClass(status?: string | null) {
 
 export default function TimeApprovalsPage() {
   const router = useRouter();
+  const [role, setRole] = useState("");
   const [corrections, setCorrections] = useState<CorrectionRequest[]>([]);
   const [shifts, setShifts] = useState<ShiftRequest[]>([]);
   const [overtime, setOvertime] = useState<OvertimeRequest[]>([]);
+  const [leaveApplications, setLeaveApplications] = useState<LeaveApplication[]>([]);
+  const [compensatory, setCompensatory] = useState<LeaveRequest[]>([]);
+  const [encashments, setEncashments] = useState<LeaveRequest[]>([]);
   const [active, setActive] = useState<ApprovalKind>("corrections");
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState("");
   const [comments, setComments] = useState<Record<string, string>>({});
 
-  async function load() {
+  async function load(currentRole = role) {
     setLoading(true);
-    const [correctionRes, shiftRes, overtimeRes] = await Promise.all([
+    const leaveOnly = LEAVE_ONLY_ROLES.has(currentRole);
+    const leavePromise = fetch("/api/hrms/leave/approvals");
+    const timePromises = leaveOnly ? [] : [
       fetch("/api/hrms/attendance/corrections?approval_queue=true&status=submitted"),
       fetch("/api/hrms/shifts/requests?status=submitted"),
       fetch("/api/hrms/overtime?status=submitted"),
-    ]);
+    ];
+    const [leaveRes, correctionRes, shiftRes, overtimeRes] = await Promise.all([leavePromise, ...timePromises]);
 
-    if (correctionRes.ok) setCorrections((await correctionRes.json()).data ?? []);
-    else toast.error("Could not load correction approvals");
-    if (shiftRes.ok) setShifts((await shiftRes.json()).data ?? []);
-    else toast.error("Could not load shift approvals");
-    if (overtimeRes.ok) setOvertime((await overtimeRes.json()).data ?? []);
-    else toast.error("Could not load overtime approvals");
+    if (leaveRes.ok) {
+      const json = await leaveRes.json();
+      setLeaveApplications(json.data?.applications ?? []);
+      setCompensatory(json.data?.compensatory ?? []);
+      setEncashments(json.data?.encashments ?? []);
+    } else {
+      setLeaveApplications([]);
+      setCompensatory([]);
+      setEncashments([]);
+    }
+
+    if (!leaveOnly && correctionRes?.ok) setCorrections((await correctionRes.json()).data ?? []);
+    else setCorrections([]);
+    if (!leaveOnly && shiftRes?.ok) setShifts((await shiftRes.json()).data ?? []);
+    else setShifts([]);
+    if (!leaveOnly && overtimeRes?.ok) setOvertime((await overtimeRes.json()).data ?? []);
+    else setOvertime([]);
     setLoading(false);
   }
 
@@ -123,34 +164,50 @@ export default function TimeApprovalsPage() {
     void fetch("/api/me")
       .then((res) => res.ok ? res.json() : null)
       .then((json) => {
-        const allowed = getVisibleTimeRoutes(json?.data).some((route) => route.href === "/time/approvals");
-        if (!allowed) router.replace("/dashboard");
-        else void load();
+        const profile = json?.data;
+        const allowed = getVisibleTimeRoutes(profile).some((route) => route.href === "/time/approvals");
+        if (!allowed) {
+          router.replace("/dashboard");
+          return;
+        }
+        const nextRole = profile?.role ?? "";
+        setRole(nextRole);
+        setActive(LEAVE_ONLY_ROLES.has(nextRole) ? "leave_applications" : "corrections");
+        void load(nextRole);
       })
       .catch(() => router.replace("/dashboard"));
   }, [router]);
 
-  const queues = useMemo<QueueConfig<BaseApproval>[]>(() => [
-    { key: "corrections", label: QUEUE_LABELS.corrections, endpoint: "/api/hrms/attendance/corrections", rows: corrections },
-    { key: "shifts", label: QUEUE_LABELS.shifts, endpoint: "/api/hrms/shifts/requests", rows: shifts },
-    { key: "overtime", label: QUEUE_LABELS.overtime, endpoint: "/api/hrms/overtime", rows: overtime },
-  ], [corrections, overtime, shifts]);
+  const queues = useMemo<QueueConfig<BaseApproval>[]>(() => {
+    const leaveQueues: QueueConfig<BaseApproval>[] = [
+      { key: "leave_applications", label: QUEUE_LABELS.leave_applications, endpoint: "/api/hrms/leave/applications", rows: leaveApplications },
+      { key: "compensatory", label: QUEUE_LABELS.compensatory, endpoint: "/api/hrms/leave/compensatory", rows: compensatory, bodyId: true },
+      { key: "encashments", label: QUEUE_LABELS.encashments, endpoint: "/api/hrms/leave/encashments", rows: encashments, bodyId: true },
+    ];
+    if (LEAVE_ONLY_ROLES.has(role)) return leaveQueues;
+    return [
+      { key: "corrections", label: QUEUE_LABELS.corrections, endpoint: "/api/hrms/attendance/corrections", rows: corrections },
+      { key: "shifts", label: QUEUE_LABELS.shifts, endpoint: "/api/hrms/shifts/requests", rows: shifts },
+      { key: "overtime", label: QUEUE_LABELS.overtime, endpoint: "/api/hrms/overtime", rows: overtime },
+      ...leaveQueues,
+    ];
+  }, [compensatory, corrections, encashments, leaveApplications, overtime, role, shifts]);
 
   const activeQueue = queues.find((queue) => queue.key === active) ?? queues[0];
-  const submittedTotal = corrections.length + shifts.length + overtime.length;
+  const submittedTotal = queues.reduce((sum, queue) => sum + queue.rows.length, 0);
 
   async function decide(queue: QueueConfig<BaseApproval>, row: BaseApproval, action: ApprovalAction) {
     const key = `${queue.key}:${row.id}`;
     setSavingKey(`${key}:${action}`);
-    const res = await fetch(`${queue.endpoint}/${row.id}`, {
+    const res = await fetch(queue.bodyId ? queue.endpoint : `${queue.endpoint}/${row.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, approver_comment: comments[key]?.trim() || null }),
+      body: JSON.stringify({ id: row.id, action, approver_comment: comments[key]?.trim() || null }),
     });
     setSavingKey("");
 
     if (!res.ok) {
-      toast.error((await res.json()).error ?? "Action failed");
+      toast.error((await res.json().catch(() => ({}))).error ?? "Action failed");
       return;
     }
 
@@ -183,12 +240,32 @@ export default function TimeApprovalsPage() {
         </>
       );
     }
-    const item = row as OvertimeRequest;
+    if (queue === "overtime") {
+      const item = row as OvertimeRequest;
+      return (
+        <>
+          <span>{shortDate(item.overtime_date ?? item.attendance_day?.attendance_date)}</span>
+          <span>{minutesLabel(item.overtime_minutes)}</span>
+          <span>{shortDateTime(item.start_time)} to {shortDateTime(item.end_time)}</span>
+        </>
+      );
+    }
+    if (queue === "leave_applications") {
+      const item = row as LeaveApplication;
+      return (
+        <>
+          <span>{label(item.leave_type_key)}</span>
+          <span>{shortDate(item.from_date)} to {shortDate(item.to_date)}</span>
+          <span>{item.total_days ?? "-"} days</span>
+        </>
+      );
+    }
+    const item = row as LeaveRequest;
     return (
       <>
-        <span>{shortDate(item.overtime_date ?? item.attendance_day?.attendance_date)}</span>
-        <span>{minutesLabel(item.overtime_minutes)}</span>
-        <span>{shortDateTime(item.start_time)} to {shortDateTime(item.end_time)}</span>
+        <span>{label(item.leave_type_key)}</span>
+        <span>{item.requested_days ?? "-"} days</span>
+        <span>{queue === "compensatory" ? shortDate(item.work_date) : "Payroll mutation excluded"}</span>
       </>
     );
   }
@@ -198,14 +275,14 @@ export default function TimeApprovalsPage() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Time Approvals</h1>
-          <p className="mt-1 text-sm text-gray-500">Review submitted attendance corrections, shift changes and overtime requests.</p>
+          <p className="mt-1 text-sm text-gray-500">Review submitted attendance corrections, shift changes, overtime, and leave requests.</p>
         </div>
         <button onClick={() => void load()} className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-4 xl:grid-cols-7">
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <p className="text-xs font-medium uppercase text-gray-500">Submitted</p>
           <p className="mt-1 text-2xl font-bold text-gray-900">{submittedTotal}</p>

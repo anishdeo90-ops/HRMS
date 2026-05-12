@@ -153,10 +153,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select public.has_permission('permission.leave.types.manage')
-      or public.has_permission('permission.leave.policies.manage')
-      or public.has_permission('permission.leave.allocations.manage')
-      or public.has_role('role.admin')
+  select public.has_role('role.admin')
       or public.has_role('role.hr_manager');
 $$;
 
@@ -274,6 +271,26 @@ alter table public.leave_types add column if not exists is_active boolean not nu
 alter table public.leave_types add column if not exists created_at timestamptz not null default now();
 alter table public.leave_types add column if not exists updated_at timestamptz not null default now();
 alter table public.leave_types add column if not exists created_by uuid references public.profiles(id) on delete set null;
+update public.leave_types set label = key where label is null;
+alter table public.leave_types alter column label set not null;
+alter table public.leave_types alter column accrual set default 'none';
+alter table public.leave_types alter column carry_forward set default false;
+alter table public.leave_types alter column encashment set default false;
+alter table public.leave_types alter column negative_balance set default false;
+alter table public.leave_types alter column holiday_weekend_behavior set default 'exclude';
+alter table public.leave_types alter column approval_behavior set default 'approver_required';
+alter table public.leave_types alter column is_paid set default true;
+alter table public.leave_types alter column is_active set default true;
+alter table public.leave_types drop constraint if exists leave_types_accrual_check;
+alter table public.leave_types add constraint leave_types_accrual_check check (accrual in ('none', 'monthly', 'quarterly', 'annual', 'manual'));
+alter table public.leave_types drop constraint if exists leave_types_holiday_weekend_behavior_check;
+alter table public.leave_types add constraint leave_types_holiday_weekend_behavior_check check (holiday_weekend_behavior in ('include', 'exclude'));
+alter table public.leave_types drop constraint if exists leave_types_approval_behavior_check;
+alter table public.leave_types add constraint leave_types_approval_behavior_check check (approval_behavior in ('none', 'approver_required'));
+alter table public.leave_types drop constraint if exists leave_types_max_continuous_days_check;
+alter table public.leave_types add constraint leave_types_max_continuous_days_check check (max_continuous_days is null or max_continuous_days > 0);
+alter table public.leave_types drop constraint if exists leave_types_requires_attachment_after_days_check;
+alter table public.leave_types add constraint leave_types_requires_attachment_after_days_check check (requires_attachment_after_days is null or requires_attachment_after_days > 0);
 
 create table if not exists public.leave_periods (
   id uuid primary key default gen_random_uuid(),
@@ -546,6 +563,8 @@ alter table public.leave_block_list_dates enable row level security;
 alter table public.compensatory_leave_requests enable row level security;
 alter table public.leave_encashments enable row level security;
 
+drop policy if exists leave_types_fail_closed on public.leave_types;
+
 drop policy if exists "leave_types_select" on public.leave_types;
 create policy "leave_types_select" on public.leave_types for select to authenticated
   using (public.has_permission('permission.leave.view_self') or public.can_manage_leave());
@@ -638,18 +657,43 @@ create policy "leave_applications_insert" on public.leave_applications for inser
   with check (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'));
 drop policy if exists "leave_applications_update" on public.leave_applications;
 create policy "leave_applications_update" on public.leave_applications for update to authenticated
-  using (public.can_apply_leave(employee_id) or public.can_approve_leave(employee_id, 'leave_application') or public.can_manage_leave())
-  with check (public.can_apply_leave(employee_id) or public.can_approve_leave(employee_id, 'leave_application') or public.can_manage_leave());
+  using (
+    (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'))
+    or (public.can_approve_leave(employee_id, 'leave_application') and status = 'submitted')
+    or public.can_manage_leave()
+  )
+  with check (
+    (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'))
+    or (public.can_approve_leave(employee_id, 'leave_application') and status in ('submitted', 'approved', 'rejected', 'cancelled'))
+    or public.can_manage_leave()
+  );
 drop policy if exists "leave_applications_delete" on public.leave_applications;
 create policy "leave_applications_delete" on public.leave_applications for delete to authenticated
   using (public.has_role('role.admin'));
 
 drop policy if exists "leave_ledger_entries_select" on public.leave_ledger_entries;
 create policy "leave_ledger_entries_select" on public.leave_ledger_entries for select to authenticated
-  using (public.can_view_leave(employee_id) or public.has_permission('permission.leave.ledger.view'));
+  using (public.can_view_leave(employee_id) and public.has_permission('permission.leave.ledger.view'));
 drop policy if exists "leave_ledger_entries_insert" on public.leave_ledger_entries;
 create policy "leave_ledger_entries_insert" on public.leave_ledger_entries for insert to authenticated
-  with check (public.can_manage_leave());
+  with check (
+    public.can_manage_leave()
+    or (
+      source_type = 'leave_application'
+      and entry_type in ('application', 'cancellation')
+      and public.can_approve_leave(employee_id, 'leave_application')
+    )
+    or (
+      source_type = 'compensatory_leave'
+      and entry_type = 'compensatory_credit'
+      and public.can_approve_leave(employee_id, 'compensatory_leave')
+    )
+    or (
+      source_type = 'leave_encashment'
+      and entry_type = 'encashment'
+      and public.can_approve_leave(employee_id, 'leave_encashment')
+    )
+  );
 
 drop policy if exists "holiday_lists_select" on public.holiday_lists;
 create policy "holiday_lists_select" on public.holiday_lists for select to authenticated
@@ -712,11 +756,19 @@ create policy "compensatory_leave_requests_select" on public.compensatory_leave_
   using (public.can_view_leave(employee_id) or public.can_approve_leave(employee_id, 'compensatory_leave'));
 drop policy if exists "compensatory_leave_requests_insert" on public.compensatory_leave_requests;
 create policy "compensatory_leave_requests_insert" on public.compensatory_leave_requests for insert to authenticated
-  with check (public.can_apply_leave(employee_id));
+  with check (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'));
 drop policy if exists "compensatory_leave_requests_update" on public.compensatory_leave_requests;
 create policy "compensatory_leave_requests_update" on public.compensatory_leave_requests for update to authenticated
-  using (public.can_apply_leave(employee_id) or public.can_approve_leave(employee_id, 'compensatory_leave') or public.can_manage_leave())
-  with check (public.can_apply_leave(employee_id) or public.can_approve_leave(employee_id, 'compensatory_leave') or public.can_manage_leave());
+  using (
+    (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'))
+    or (public.can_approve_leave(employee_id, 'compensatory_leave') and status = 'submitted')
+    or public.can_manage_leave()
+  )
+  with check (
+    (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'))
+    or (public.can_approve_leave(employee_id, 'compensatory_leave') and status in ('submitted', 'approved', 'rejected', 'cancelled'))
+    or public.can_manage_leave()
+  );
 drop policy if exists "compensatory_leave_requests_delete" on public.compensatory_leave_requests;
 create policy "compensatory_leave_requests_delete" on public.compensatory_leave_requests for delete to authenticated
   using (public.has_role('role.admin'));
@@ -726,11 +778,19 @@ create policy "leave_encashments_select" on public.leave_encashments for select 
   using (public.can_view_leave(employee_id) or public.can_approve_leave(employee_id, 'leave_encashment'));
 drop policy if exists "leave_encashments_insert" on public.leave_encashments;
 create policy "leave_encashments_insert" on public.leave_encashments for insert to authenticated
-  with check (public.can_apply_leave(employee_id));
+  with check (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'));
 drop policy if exists "leave_encashments_update" on public.leave_encashments;
 create policy "leave_encashments_update" on public.leave_encashments for update to authenticated
-  using (public.can_apply_leave(employee_id) or public.can_approve_leave(employee_id, 'leave_encashment') or public.can_manage_leave())
-  with check (public.can_apply_leave(employee_id) or public.can_approve_leave(employee_id, 'leave_encashment') or public.can_manage_leave());
+  using (
+    (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'))
+    or (public.can_approve_leave(employee_id, 'leave_encashment') and status = 'submitted')
+    or public.can_manage_leave()
+  )
+  with check (
+    (public.can_apply_leave(employee_id) and status in ('draft', 'submitted'))
+    or (public.can_approve_leave(employee_id, 'leave_encashment') and status in ('submitted', 'approved', 'rejected', 'cancelled'))
+    or public.can_manage_leave()
+  );
 drop policy if exists "leave_encashments_delete" on public.leave_encashments;
 create policy "leave_encashments_delete" on public.leave_encashments for delete to authenticated
   using (public.has_role('role.admin'));

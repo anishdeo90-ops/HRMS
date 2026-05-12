@@ -4,6 +4,7 @@ export type LeavePermissionKey = (typeof LEAVE_PERMISSION_KEYS)[keyof typeof LEA
 
 export type LeaveProfile = {
   id?: string | null;
+  employee_id?: string | null;
   role?: Role | string | null;
   is_active?: boolean | null;
   permissions?: readonly string[] | null;
@@ -17,6 +18,7 @@ export type LeaveAccessTarget = {
   id?: string | null;
   profile_id?: string | null;
   department_id?: string | null;
+  reporting_manager_id?: string | null;
   reporting_manager_profile_id?: string | null;
 };
 
@@ -47,7 +49,10 @@ function isSelf(profile: LeaveProfile | null | undefined, target: LeaveAccessTar
 }
 
 function isReportingManager(profile: LeaveProfile | null | undefined, target: LeaveAccessTarget | null | undefined) {
-  return Boolean(profile?.id && target?.reporting_manager_profile_id && profile.id === target.reporting_manager_profile_id);
+  return Boolean(
+    (profile?.employee_id && target?.reporting_manager_id && profile.employee_id === target.reporting_manager_id)
+      || (profile?.id && target?.reporting_manager_profile_id && profile.id === target.reporting_manager_profile_id),
+  );
 }
 
 function hasLeaveCapability(profile: LeaveProfile | null | undefined, permission: LeavePermissionKey) {
@@ -84,14 +89,14 @@ export function canManageLeaveBalances(profile: LeaveProfile | null | undefined)
 export function canViewLeave(profile: LeaveProfile | null | undefined, target: LeaveAccessTarget | null | undefined) {
   const role = activeRole(profile);
   if (!profile || profile.is_active === false || !target) return false;
-  if (canManageLeaveBalances(profile) || canManageLeaveSetup(profile)) return true;
+  if (LEAVE_MANAGERS.has(role)) return true;
   if ((TEAM_LEAVE_ROLES.has(role) || hasLeaveCapability(profile, LEAVE_PERMISSION_KEYS.viewTeam)) && isReportingManager(profile, target)) return true;
   if (isSelf(profile, target)) return role === "employee" || hasLeaveCapability(profile, LEAVE_PERMISSION_KEYS.viewSelf);
   return false;
 }
 
 export function canRequestLeave(profile: LeaveProfile | null | undefined, target: LeaveAccessTarget | null | undefined) {
-  if (canManageLeaveBalances(profile)) return true;
+  if (LEAVE_MANAGERS.has(activeRole(profile))) return true;
   return isSelf(profile, target) && hasLeaveCapability(profile, LEAVE_PERMISSION_KEYS.apply);
 }
 
@@ -100,14 +105,14 @@ export function canApproveLeave(
   target?: LeaveAccessTarget | null,
   approvalScope: "leave_application" | "compensatory_leave" | "leave_encashment" = "leave_application",
 ) {
-  if (canManageLeaveSetup(profile)) return true;
+  if (LEAVE_MANAGERS.has(activeRole(profile))) return true;
   const canApprove = APPROVER_ROLES.has(activeRole(profile)) || hasLeaveCapability(profile, LEAVE_PERMISSION_KEYS.approve);
   if (!target) return canApprove || isDepartmentLeaveApprover(profile, target, approvalScope);
   return (canApprove && isReportingManager(profile, target)) || isDepartmentLeaveApprover(profile, target, approvalScope);
 }
 
 export function canViewLeaveLedger(profile: LeaveProfile | null | undefined, target: LeaveAccessTarget | null | undefined) {
-  return canViewLeave(profile, target) || hasLeaveCapability(profile, LEAVE_PERMISSION_KEYS.ledgerView);
+  return canViewLeave(profile, target) && hasLeaveCapability(profile, LEAVE_PERMISSION_KEYS.ledgerView);
 }
 
 export const canRequestCompensatoryLeave = canRequestLeave;

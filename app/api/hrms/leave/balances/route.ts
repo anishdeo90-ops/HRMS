@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   const employeeId = searchParams.get("employee_id");
   const { employee, error: employeeError } = await resolveLeaveTargetEmployee(supabase, user.id, employeeId);
   if (employeeError) return NextResponse.json({ error: employeeError.message }, { status: 500 });
+  if (!employee?.id && !employeeId && canManageLeaveBalances(profile)) return NextResponse.json({ data: [] });
   if (!employee?.id) return NextResponse.json({ error: "Employee not found" }, { status: 404 });
   if (!canViewLeave(profile, employee) && !canManageLeaveBalances(profile)) {
     return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
