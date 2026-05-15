@@ -1,0 +1,84 @@
+# Team Context Protocol
+
+This directory is the handoff source of truth for tmux-managed Codex workers.
+
+## Sessions
+
+- `bob`: master coordinator
+- `anish`: worker
+- `trisha`: worker
+- `Tannu`: worker
+
+## Logs
+
+- `bob.md`
+- `anish.md`
+- `trisha.md`
+- `Tannu.md`
+
+Each session must keep its own log current enough that a fresh Codex session can continue without relying on terminal scrollback.
+
+## Context Threshold Rule
+
+When a session's visible Codex context indicator reaches 40% remaining or lower:
+
+1. Stop assigning new work to that session.
+2. Ask it to append a concise handoff to its log file.
+3. The handoff must include:
+   - Current objective
+   - Files read
+   - Files changed
+   - Commands run
+   - Decisions made
+   - Current blockers or risks
+   - Exact next action
+4. Start or reuse a fresh tmux session for that team identity.
+5. Start `codex` in the fresh terminal first.
+6. In the new Codex prompt, instruct it to read its log file and continue from the latest handoff.
+7. After the replacement confirms it has the handoff, terminate the old exhausted session.
+
+## Worker Command Template
+
+Use this when starting a fresh worker:
+
+```text
+You are Team {name}. Before doing anything else, read:
+
+.planning/team-context/{name}.md
+
+Continue from the latest handoff. Follow AGENTS.md, preserve existing user changes, and update your team log before context drops to 40% remaining.
+```
+
+## Tmux Command Delivery Rules
+
+Never assume a tmux terminal is ready just because the session exists.
+
+Before sending a task command to a worker:
+
+1. Check the pane with `tmux capture-pane`.
+2. Confirm Codex is live in that terminal. The pane should show the Codex UI or a Codex prompt/status line.
+3. If Codex is not live, start it first by sending `codex` and Enter.
+4. Re-check the pane and confirm Codex has started.
+5. Send the worker prompt.
+6. Submit the prompt with Enter / `C-m`.
+7. Re-check the pane and confirm the prompt is no longer just sitting in the input box. It must show Codex working, running a command, or producing an answer.
+
+Do not pass task instructions into a plain shell prompt or an inactive terminal.
+
+## Delegation Rules
+
+Before Bob assigns work:
+
+1. Understand the phase scope and what has already been completed.
+2. Split the work by independent ownership boundaries, such as backend/API, database/RLS, frontend/UI, tests, documentation, or browser verification.
+3. Assign each tmux team a focused scope with clear files or modules where practical.
+4. Avoid assigning two teams to edit the same files unless Bob explicitly sequences the work.
+5. For complicated work, tell the assigned team to create at least two subagents for its own internal investigation or implementation split when the scope has two or more independent parts.
+6. Each team is allowed to spin up subagents for delegated work, but must keep responsibility for integration, verification, and updating its team log.
+7. Each team must report changed files, commands run, blockers, and verification results back to Bob.
+
+## Coordinator Responsibilities
+
+Bob monitors the visible Codex status lines in tmux panes, delegates independent tasks, prevents write conflicts, and keeps `bob.md` updated with coordinator state.
+
+Bob must also follow the same handoff rule for itself before context reaches 40% remaining.

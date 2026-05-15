@@ -1,0 +1,301 @@
+items:
+  - key: role.hr_manager
+    source_ref: HRMS_SUPERCHARGED_BUILD_PLAN.md#metadata-registry
+    requirement: META-01
+    registry: metadata/roles.yaml
+    db: supabase/generated/metadata_seed.sql
+    typescript: lib/generated/roles.ts
+    api: app/api/metadata
+    ui: components/sidebar.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/01-metadata-governance-foundation/01-METADATA-AUDIT.md
+  - key: permission.employee.manage
+    source_ref: .planning/phases/03-employee-core-and-organization-setup/03-01-PLAN.md#task-1-add-phase-3-metadata-keys
+    requirement: EMP-01
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/employees
+    ui: route.people.employees
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/03-employee-core-and-organization-setup/03-SUMMARY.md
+  - key: route.people.employees
+    source_ref: .planning/phases/03-employee-core-and-organization-setup/03-01-PLAN.md#task-1-add-phase-3-metadata-keys
+    requirement: EMP-01
+    registry: metadata/routes.yaml
+    db: app_routes via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/routes.ts
+    api: app/api/hrms/employees
+    ui: app/(app)/people/employees/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/03-employee-core-and-organization-setup/03-SUMMARY.md
+  - key: form.employee.profile
+    source_ref: .planning/phases/03-employee-core-and-organization-setup/03-01-PLAN.md#task-1-add-phase-3-metadata-keys
+    requirement: EMP-01
+    registry: metadata/forms/employee.yaml
+    db: form_schemas via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/forms.ts
+    api: app/api/hrms/employees
+    ui: app/(app)/people/employees/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/03-employee-core-and-organization-setup/03-SUMMARY.md
+  - key: approval_rule.employee_core.department_approver
+    source_ref: .planning/phases/03-employee-core-and-organization-setup/03-01-PLAN.md#task-1-add-phase-3-metadata-keys
+    requirement: EMP-02
+    registry: metadata/approvals.yaml
+    db: department_approvers via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/organization
+    ui: app/(app)/people/organization/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/03-employee-core-and-organization-setup/03-SUMMARY.md
+  - key: workflow.employee.status
+    source_ref: .planning/phases/03-employee-core-and-organization-setup/03-01-PLAN.md#task-1-add-phase-3-metadata-keys
+    requirement: EMP-01
+    registry: metadata/workflows.yaml
+    db: workflow_states via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/workflows.ts
+    api: app/api/hrms/employees
+    ui: app/(app)/people/employees/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/03-employee-core-and-organization-setup/03-SUMMARY.md
+  - key: permission.attendance.check_in
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-01
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/attendance/check-ins
+    ui: app/(app)/time/attendance/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: permission.attendance.view_team
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-02
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/attendance/days
+    ui: app/(app)/time/attendance/page.tsx
+    tests: tests/attendance/attendance-sql.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: permission.shifts.approve
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-04
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/shifts/requests/[id]
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/attendance/attendance-api-shifts-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: permission.overtime.approve
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-05
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/overtime/[id]
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/attendance/attendance-api-shifts-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: route.time.attendance
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-01
+    registry: metadata/routes.yaml
+    db: app_routes via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/routes.ts
+    api: app/api/hrms/attendance/check-ins
+    ui: app/(app)/time/attendance/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: route.time.shifts
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-04
+    registry: metadata/routes.yaml
+    db: app_routes via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/routes.ts
+    api: app/api/hrms/shifts
+    ui: app/(app)/time/shifts/page.tsx
+    tests: tests/attendance/attendance-ui-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: route.time.approvals
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-05
+    registry: metadata/routes.yaml
+    db: app_routes via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/routes.ts
+    api: app/api/hrms/attendance/corrections/[id]
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/attendance/attendance-ui-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: form.attendance.check_in
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-01
+    registry: metadata/forms/attendance.yaml
+    db: form_schemas via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/forms.ts
+    api: app/api/hrms/attendance/check-ins
+    ui: app/(app)/time/attendance/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: workflow.attendance.correction
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-03
+    registry: metadata/workflows.yaml
+    db: workflow_states via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/workflows.ts
+    api: app/api/hrms/attendance/corrections
+    ui: app/(app)/time/attendance/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: workflow.attendance.day_status
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-02
+    registry: metadata/workflows.yaml
+    db: workflow_states via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/workflows.ts
+    api: app/api/hrms/attendance/days
+    ui: app/(app)/time/attendance/page.tsx
+    tests: tests/attendance/attendance-sql.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: workflow.shift.request
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-04
+    registry: metadata/workflows.yaml
+    db: workflow_states via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/workflows.ts
+    api: app/api/hrms/shifts/requests
+    ui: app/(app)/time/shifts/page.tsx
+    tests: tests/attendance/attendance-api-shifts-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: workflow.overtime.status
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-05
+    registry: metadata/workflows.yaml
+    db: workflow_states via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/workflows.ts
+    api: app/api/hrms/overtime
+    ui: app/(app)/time/shifts/page.tsx
+    tests: tests/attendance/attendance-api-shifts-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: approval_rule.attendance.correction_department_approver
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-05
+    registry: metadata/approvals.yaml
+    db: attendance_correction_requests via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/attendance/corrections/[id]
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: approval_rule.shift.request_department_approver
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-04
+    registry: metadata/approvals.yaml
+    db: shift_requests via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/shifts/requests/[id]
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/attendance/attendance-sql.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: approval_rule.overtime.department_approver
+    source_ref: .planning/phases/04-attendance-check-ins-and-shifts/04-01-PLAN.md#attendance-metadata-keys
+    requirement: ATT-05
+    registry: metadata/approvals.yaml
+    db: overtime_records via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/overtime/[id]
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/attendance/attendance-sql.test.ts
+    audit: .planning/phases/04-attendance-check-ins-and-shifts/04-SUMMARY.md
+  - key: permission.leave.view_self
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-03
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/leave/balances
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/leave/leave-sql.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: permission.leave.approve
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-04
+    registry: metadata/permissions.yaml
+    db: permissions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/permissions.ts
+    api: app/api/hrms/leave/approvals
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/leave/leave-sql.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: route.time.leave
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-03
+    registry: metadata/routes.yaml
+    db: app_routes via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/routes.ts
+    api: app/api/hrms/leave/applications
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: form.leave_application.request
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-03
+    registry: metadata/forms/leave_application.yaml
+    db: form_schemas via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/forms.ts
+    api: app/api/hrms/leave/applications
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: workflow.leave.application
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-04
+    registry: metadata/workflows.yaml
+    db: workflow_states via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/workflows.ts
+    api: app/api/hrms/leave/applications
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/leave/leave-sql.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: approval_rule.leave.department_approver
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-04
+    registry: metadata/approvals.yaml
+    db: leave_applications via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/leave/approvals
+    ui: app/(app)/time/approvals/page.tsx
+    tests: tests/leave/leave-sql.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: leave_type.earned_leave
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-01
+    registry: metadata/leave/leave_types.yaml
+    db: leave_types via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/leave/setup
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: report.leave.balance
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-03
+    registry: metadata/reports/leave_balance.yaml
+    db: report_definitions via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/reports.ts
+    api: app/api/hrms/leave/balances
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md
+  - key: import_alias.leave.allocation.employee_code
+    source_ref: .planning/phases/05-leave-management/05-01-PLAN.md#metadata-scope
+    requirement: LEV-02
+    registry: metadata/imports/leave_import_aliases.yaml
+    db: import_aliases via supabase/generated/metadata_seed.sql
+    typescript: lib/generated/metadata.ts
+    api: app/api/hrms/leave/setup
+    ui: app/(app)/time/leave/page.tsx
+    tests: tests/metadata/registry-contract.test.ts
+    audit: .planning/phases/05-leave-management/05-SUMMARY.md

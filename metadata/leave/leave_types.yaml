@@ -1,0 +1,91 @@
+items:
+  - key: leave_type.earned_leave
+    label: Earned Leave
+    domain: leave
+    kind: leave_type
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Type, field_or_state: earned_leave }
+    introduced_in_phase: 5
+    db_table: leave_types
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    accrual: monthly
+    carry_forward: true
+    encashment: true
+    negative_balance: false
+    holiday_weekend_behavior: exclude
+    approval_behavior: approver_required
+  - key: leave_type.casual_leave
+    label: Casual Leave
+    domain: leave
+    kind: leave_type
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Type, field_or_state: casual_leave }
+    introduced_in_phase: 5
+    db_table: leave_types
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    accrual: annual
+    carry_forward: false
+    encashment: false
+    negative_balance: false
+    holiday_weekend_behavior: exclude
+    approval_behavior: approver_required
+  - key: leave_type.sick_leave
+    label: Sick Leave
+    domain: leave
+    kind: leave_type
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Type, field_or_state: sick_leave }
+    introduced_in_phase: 5
+    db_table: leave_types
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    accrual: annual
+    carry_forward: false
+    encashment: false
+    negative_balance: false
+    holiday_weekend_behavior: exclude
+    approval_behavior: approver_required
+  - key: leave_type.leave_without_pay
+    label: Leave Without Pay
+    domain: leave
+    kind: leave_type
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Type, field_or_state: leave_without_pay }
+    introduced_in_phase: 5
+    db_table: leave_types
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    accrual: none
+    carry_forward: false
+    encashment: false
+    negative_balance: true
+    holiday_weekend_behavior: exclude
+    approval_behavior: approver_required
+  - key: leave_type.compensatory_off
+    label: Compensatory Off
+    domain: leave
+    kind: leave_type
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Type, field_or_state: compensatory_off }
+    introduced_in_phase: 5
+    db_table: leave_types
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup, app/api/hrms/leave/compensatory]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+    accrual: manual
+    carry_forward: true
+    encashment: false
+    negative_balance: false
+    holiday_weekend_behavior: exclude
+    approval_behavior: approver_required

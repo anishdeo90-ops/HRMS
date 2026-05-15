@@ -1,0 +1,156 @@
+items:
+  - literal: admin
+    file: lib/types.ts
+    reason: Existing ATS role; Phase 1 allowlists legacy literals while generated role helpers are introduced.
+    expires_after_phase: 12
+    replacement_key: role.admin
+  - literal: hr_manager
+    file: lib/types.ts
+    reason: Existing ATS role; Phase 1 allowlists legacy literals while generated role helpers are introduced.
+    expires_after_phase: 12
+    replacement_key: role.hr_manager
+  - literal: recruiter
+    file: lib/types.ts
+    reason: Existing ATS role; Phase 1 allowlists legacy literals while generated role helpers are introduced.
+    expires_after_phase: 12
+    replacement_key: role.recruiter
+  - literal: hod
+    file: lib/types.ts
+    reason: Existing ATS role; Phase 1 allowlists legacy literals while generated role helpers are introduced.
+    expires_after_phase: 12
+    replacement_key: role.hod
+  - literal: candidate
+    file: lib/types.ts
+    reason: Existing ATS external user role; not part of new HRMS metadata rollout.
+    expires_after_phase: 12
+    replacement_key: legacy.role.candidate
+  - literal: Dashboard
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.dashboard
+  - literal: My Activity
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.my_activity
+  - literal: Candidates
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.candidates
+  - literal: Jobs
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.jobs
+  - literal: HOD Portal
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.hod_portal
+  - literal: JDs & Forms
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.jds_forms
+  - literal: Settings
+    file: components/sidebar.tsx
+    reason: Existing ATS navigation label.
+    expires_after_phase: 12
+    replacement_key: legacy.route.settings
+  - literal: Sourced
+    file: components/candidate-grid.tsx
+    reason: Existing ATS pipeline status.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.sourced
+  - literal: Appointed/Offered
+    file: components/candidate-grid.tsx
+    reason: Existing ATS pipeline status.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.appointed_offered
+  - literal: Joined
+    file: components/candidate-grid.tsx
+    reason: Existing ATS pipeline status.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.joined
+  - literal: Rejected/Dropped
+    file: components/candidate-grid.tsx
+    reason: Existing ATS pipeline status.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.rejected_dropped
+  - literal: On Hold
+    file: components/candidate-grid.tsx
+    reason: Existing ATS pipeline status.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.on_hold
+  - literal: Offer Letter Dispatch
+    file: components/candidate-detail-panel.tsx
+    reason: Existing ATS candidate communication template.
+    expires_after_phase: 12
+    replacement_key: legacy.template.offer_letter_dispatch
+  - literal: Interview Invite
+    file: components/candidate-detail-panel.tsx
+    reason: Existing ATS candidate communication template.
+    expires_after_phase: 12
+    replacement_key: legacy.template.interview_invite
+  - literal: Add New Candidate
+    file: components/add-candidate-modal.tsx
+    reason: Existing ATS modal title.
+    expires_after_phase: 12
+    replacement_key: legacy.form.add_candidate
+  - literal: Initial Status
+    file: components/add-candidate-modal.tsx
+    reason: Existing ATS candidate form field.
+    expires_after_phase: 12
+    replacement_key: legacy.field.candidate.initial_status
+  - literal: Active Employee
+    file: app/(app)/candidates/candidates-client.tsx
+    reason: Existing ATS candidate final status used before HRMS employee core is introduced.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.active_employee
+  - literal: Active Employee
+    file: components/candidate-detail-panel.tsx
+    reason: Existing ATS candidate final status used before HRMS employee core is introduced.
+    expires_after_phase: 12
+    replacement_key: legacy.workflow.candidate.active_employee
+  - literal: EPF Employee (12%)
+    file: components/candidate-detail-panel.tsx
+    reason: Existing CTC calculator label, not new HRMS payroll metadata.
+    expires_after_phase: 12
+    replacement_key: legacy.ctc.epf_employee
+  - literal: ESIC Employee (0.75%)
+    file: components/candidate-detail-panel.tsx
+    reason: Existing CTC calculator label, not new HRMS payroll metadata.
+    expires_after_phase: 12
+    replacement_key: legacy.ctc.esic_employee
+  - literal: Staffingo Employee ID
+    file: components/candidate-detail-panel.tsx
+    reason: Existing ATS joining field, not new HRMS employee core metadata.
+    expires_after_phase: 12
+    replacement_key: legacy.field.candidate.staffingo_employee_id
+  - literal: Employee
+    file: lib/types.ts
+    reason: Governed HRMS role label; registry key is role.employee and generated richer labels are not available yet.
+    expires_after_phase: 3
+    replacement_key: role.employee
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/[id]/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/[id]/documents/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core
+  - literal: "@/lib/hrms/employee-core"
+    file: app/api/hrms/employees/from-candidate/[candidateId]/route.ts
+    reason: Module import path, not business metadata.
+    expires_after_phase: 3
+    replacement_key: code.module.employee_core

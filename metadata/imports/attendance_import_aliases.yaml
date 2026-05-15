@@ -1,0 +1,27 @@
+items:
+  - key: import_alias.attendance.check_in.employee_code
+    label: Attendance Check In Employee Code Alias
+    domain: attendance
+    kind: import_alias
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: attendance, artifact: Phase 4 Attendance Import, field_or_state: employee_code }
+    introduced_in_phase: 4
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/attendance/check-ins]
+    ui_surfaces: [route.time.attendance]
+    tests: [tests/metadata/registry-contract.test.ts]
+    aliases: [employee_code, emp_code, employee_id]
+  - key: import_alias.attendance.roster.employee_code
+    label: Attendance Roster Employee Code Alias
+    domain: attendance
+    kind: import_alias
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: shifts, artifact: Phase 4 Roster Import, field_or_state: employee_code }
+    introduced_in_phase: 4
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/shifts]
+    ui_surfaces: [route.time.shifts]
+    tests: [tests/metadata/registry-contract.test.ts]
+    aliases: [employee_code, emp_code, employee_id]

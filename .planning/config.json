@@ -1,0 +1,22 @@
+{
+  "mode": "yolo",
+  "granularity": "fine",
+  "parallelization": true,
+  "commit_docs": true,
+  "model_profile": "inherit",
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "auto_advance": false,
+    "_auto_chain_active": false
+  },
+  "recovery": {
+    "source": "HRMS_SUPERCHARGED_BUILD_PLAN.md",
+    "reason": "Reconstructed after missing .planning directory",
+    "verified_through_phase": 3,
+    "next_phase": 4,
+    "last_updated": "2026-05-13"
+  }
+}

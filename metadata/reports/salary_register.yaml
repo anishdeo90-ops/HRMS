@@ -1,0 +1,19 @@
+items:
+  - key: report.payroll.salary_register
+    label: Salary Register
+    domain: payroll
+    kind: report
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Register }
+    introduced_in_phase: 1
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/reports/payroll/salary-register]
+    ui_surfaces: ["app/(dashboard)/reports/payroll/salary-register/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    source_tables: [salary_slips, employees]
+    filters: [payroll_period, department]
+    columns: [employee, gross_pay, deductions, net_pay]
+    permission: permission.metadata.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/salary_register.json

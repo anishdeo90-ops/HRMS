@@ -1,0 +1,104 @@
+items:
+  - key: form.employee.profile
+    label: Employee Profile
+    domain: employee_core
+    kind: form
+    owner: hr
+    source_ref: { system: frappe_hrms, module: employee, artifact: Employee form }
+    introduced_in_phase: 1
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/employees]
+    ui_surfaces: ["app/(dashboard)/employees/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    fields:
+      - key: employee_code
+        type: text
+        storage_mapping: employees.employee_code
+        validation: [required, unique]
+        privacy_class: internal
+        test_id: employee-code
+      - key: employee_name
+        type: text
+        storage_mapping: employees.name
+        validation: [required]
+        privacy_class: personal
+        test_id: employee-name
+      - key: profile_id
+        type: profile_reference
+        storage_mapping: employees.profile_id
+        validation: [optional]
+        privacy_class: personal
+        test_id: employee-profile
+      - key: joined_candidate_id
+        type: candidate_reference
+        storage_mapping: employees.joined_candidate_id
+        validation: [optional, joined_candidate]
+        privacy_class: personal
+        test_id: employee-joined-candidate
+      - key: company_id
+        type: organization_reference
+        storage_mapping: employees.company_id
+        validation: [required]
+        privacy_class: internal
+        test_id: employee-company
+      - key: branch_id
+        type: organization_reference
+        storage_mapping: employees.branch_id
+        validation: [optional]
+        privacy_class: internal
+        test_id: employee-branch
+      - key: department_id
+        type: organization_reference
+        storage_mapping: employees.department_id
+        validation: [optional]
+        privacy_class: internal
+        test_id: employee-department
+      - key: grade_id
+        type: organization_reference
+        storage_mapping: employees.grade_id
+        validation: [optional]
+        privacy_class: internal
+        test_id: employee-grade
+      - key: employment_type_id
+        type: organization_reference
+        storage_mapping: employees.employment_type_id
+        validation: [optional]
+        privacy_class: internal
+        test_id: employee-employment-type
+      - key: reporting_manager_id
+        type: employee_reference
+        storage_mapping: employees.reporting_manager_id
+        validation: [optional]
+        privacy_class: internal
+        test_id: employee-reporting-manager
+      - key: employment_status
+        type: workflow_state
+        storage_mapping: employees.employment_status
+        validation: [required, workflow.employee.status]
+        privacy_class: internal
+        test_id: employee-employment-status
+      - key: joining_date
+        type: date
+        storage_mapping: employees.joining_date
+        validation: [required]
+        privacy_class: internal
+        test_id: employee-joining-date
+      - key: work_email
+        type: email
+        storage_mapping: employees.work_email
+        validation: [optional]
+        privacy_class: personal
+        test_id: employee-work-email
+      - key: mobile
+        type: phone
+        storage_mapping: employees.mobile
+        validation: [optional]
+        privacy_class: personal
+        test_id: employee-mobile
+      - key: document_visibility
+        type: select
+        storage_mapping: employee_documents.visibility
+        validation: [required]
+        privacy_class: confidential
+        test_id: employee-document-visibility

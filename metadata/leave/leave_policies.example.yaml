@@ -1,0 +1,49 @@
+items:
+  - key: leave_policy.standard
+    label: Standard Leave Policy
+    domain: leave
+    kind: leave_policy
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Policy, field_or_state: standard_policy }
+    introduced_in_phase: 5
+    db_table: leave_policies
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: leave_policy_detail.standard_earned_leave
+    label: Standard Earned Leave Detail
+    domain: leave
+    kind: leave_policy_detail
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Policy, field_or_state: earned_leave_detail }
+    introduced_in_phase: 5
+    db_table: leave_policy_details
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: leave_policy_detail.standard_sick_leave
+    label: Standard Sick Leave Detail
+    domain: leave
+    kind: leave_policy_detail
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Policy, field_or_state: sick_leave_detail }
+    introduced_in_phase: 5
+    db_table: leave_policy_details
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: leave_policy_detail.standard_casual_leave
+    label: Standard Casual Leave Detail
+    domain: leave
+    kind: leave_policy_detail
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Policy, field_or_state: casual_leave_detail }
+    introduced_in_phase: 5
+    db_table: leave_policy_details
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]

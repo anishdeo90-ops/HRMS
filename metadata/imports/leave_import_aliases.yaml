@@ -1,0 +1,53 @@
+items:
+  - key: import_alias.leave.allocation.employee_code
+    label: Leave Allocation Employee Code Alias
+    domain: leave
+    kind: import_alias
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Imports, field_or_state: allocation_employee_code }
+    introduced_in_phase: 5
+    db_table: import_aliases
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts]
+    aliases: [employee_code, emp_code, employee_id]
+  - key: import_alias.leave.allocation.leave_type
+    label: Leave Allocation Leave Type Alias
+    domain: leave
+    kind: import_alias
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Imports, field_or_state: allocation_leave_type }
+    introduced_in_phase: 5
+    db_table: import_aliases
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts]
+    aliases: [leave_type, leave_type_key, type]
+  - key: import_alias.leave.holiday_list.date
+    label: Holiday Date Alias
+    domain: leave
+    kind: import_alias
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Imports, field_or_state: holiday_date }
+    introduced_in_phase: 5
+    db_table: import_aliases
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts]
+    aliases: [date, holiday_date]
+  - key: import_alias.leave.block_list.date
+    label: Leave Block Date Alias
+    domain: leave
+    kind: import_alias
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: leave, artifact: Phase 5 Leave Imports, field_or_state: block_date }
+    introduced_in_phase: 5
+    db_table: import_aliases
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/leave/setup]
+    ui_surfaces: [route.time.leave]
+    tests: [tests/metadata/registry-contract.test.ts]
+    aliases: [date, block_date]
