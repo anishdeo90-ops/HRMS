@@ -1,0 +1,356 @@
+items:
+  - key: form.lifecycle.onboarding_template
+    label: Onboarding Template
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding Template, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: employee_onboarding_templates.name
+        validation: [required, unique]
+        privacy_class: work
+        test_id: onboarding-template-name
+      - key: status
+        type: select
+        storage_mapping: employee_onboarding_templates.status
+        validation: [required]
+        options: [draft, active, archived]
+        privacy_class: work
+        test_id: onboarding-template-status
+  - key: form.lifecycle.onboarding
+    label: Employee Onboarding
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_onboardings.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: onboarding-employee
+      - key: due_date
+        type: date
+        storage_mapping: employee_onboardings.due_date
+        validation: [required]
+        privacy_class: work
+        test_id: onboarding-due-date
+  - key: form.lifecycle.boarding_activity
+    label: Boarding Activity
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Boarding Activity, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding, app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.onboarding, route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: title
+        type: text
+        storage_mapping: employee_boarding_activities.title
+        validation: [required]
+        privacy_class: work
+        test_id: boarding-activity-title
+      - key: status
+        type: select
+        storage_mapping: employee_boarding_activities.status
+        validation: [required]
+        options: [pending, in_progress, completed, skipped, cancelled]
+        privacy_class: work
+        test_id: boarding-activity-status
+  - key: form.lifecycle.separation_template
+    label: Separation Template
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation Template, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: employee_separation_templates.name
+        validation: [required, unique]
+        privacy_class: work
+        test_id: separation-template-name
+      - key: status
+        type: select
+        storage_mapping: employee_separation_templates.status
+        validation: [required]
+        options: [draft, active, archived]
+        privacy_class: work
+        test_id: separation-template-status
+  - key: form.lifecycle.separation
+    label: Employee Separation
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_separations.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: separation-employee
+      - key: last_working_date
+        type: date
+        storage_mapping: employee_separations.last_working_date
+        validation: [required]
+        privacy_class: confidential
+        test_id: separation-last-working-date
+  - key: form.lifecycle.promotion
+    label: Employee Promotion
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotion, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: [route.lifecycle.promotions]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_promotions.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: promotion-employee
+      - key: effective_date
+        type: date
+        storage_mapping: employee_promotions.effective_date
+        validation: [required]
+        privacy_class: work
+        test_id: promotion-effective-date
+  - key: form.lifecycle.transfer
+    label: Employee Transfer
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Transfer, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: [route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_transfers.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: transfer-employee
+      - key: effective_date
+        type: date
+        storage_mapping: employee_transfers.effective_date
+        validation: [required]
+        privacy_class: work
+        test_id: transfer-effective-date
+  - key: form.lifecycle.grievance_type
+    label: Grievance Type
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievance Type, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: code
+        type: text
+        storage_mapping: grievance_types.code
+        validation: [required, unique]
+        privacy_class: work
+        test_id: grievance-type-code
+      - key: severity
+        type: select
+        storage_mapping: grievance_types.severity
+        validation: [required]
+        options: [low, medium, high, critical]
+        privacy_class: confidential
+        test_id: grievance-type-severity
+  - key: form.lifecycle.grievance
+    label: Employee Grievance
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievance, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_grievances.employee_id
+        validation: [required]
+        privacy_class: confidential
+        test_id: grievance-employee
+      - key: title
+        type: text
+        storage_mapping: employee_grievances.title
+        validation: [required]
+        privacy_class: confidential
+        test_id: grievance-title
+  - key: form.lifecycle.exit_interview
+    label: Exit Interview
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Exit Interview, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: separation_id
+        type: separation_reference
+        storage_mapping: exit_interviews.separation_id
+        validation: [required]
+        privacy_class: confidential
+        test_id: exit-interview-separation
+      - key: overall_rating
+        type: integer
+        storage_mapping: exit_interviews.overall_rating
+        validation: [optional, range_1_5]
+        privacy_class: confidential
+        test_id: exit-interview-rating
+  - key: form.lifecycle.training_program
+    label: Training Program
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training Program, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/training/programs]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: training_programs.name
+        validation: [required, unique]
+        privacy_class: work
+        test_id: training-program-name
+      - key: status
+        type: select
+        storage_mapping: training_programs.status
+        validation: [required]
+        options: [draft, active, archived]
+        privacy_class: work
+        test_id: training-program-status
+  - key: form.lifecycle.training_event
+    label: Training Event
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training Event, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/training/programs]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: program_id
+        type: training_program_reference
+        storage_mapping: training_events.program_id
+        validation: [required]
+        privacy_class: work
+        test_id: training-event-program
+      - key: start_date
+        type: date
+        storage_mapping: training_events.start_date
+        validation: [required]
+        privacy_class: work
+        test_id: training-event-start
+  - key: form.lifecycle.training_feedback
+    label: Training Feedback
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training Feedback, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/training/programs]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: event_id
+        type: training_event_reference
+        storage_mapping: training_feedback.event_id
+        validation: [required]
+        privacy_class: work
+        test_id: training-feedback-event
+      - key: rating
+        type: integer
+        storage_mapping: training_feedback.rating
+        validation: [required, range_1_5]
+        privacy_class: confidential
+        test_id: training-feedback-rating
+  - key: form.lifecycle.daily_work_summary
+    label: Daily Work Summary
+    domain: lifecycle
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Daily Work Summary, field_or_state: form }
+    introduced_in_phase: 7
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/lifecycle/daily-summaries]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    fields:
+      - key: work_date
+        type: date
+        storage_mapping: daily_work_summaries.work_date
+        validation: [required]
+        privacy_class: work
+        test_id: daily-work-summary-date
+      - key: summary
+        type: textarea
+        storage_mapping: daily_work_summaries.summary
+        validation: [required]
+        privacy_class: work
+        test_id: daily-work-summary-text

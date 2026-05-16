@@ -13,10 +13,10 @@ export type ExpenseLineItem = {
   notes?: string;
 };
 
-const CLAIM_STATUSES = new Set<ExpenseClaimStatus>(["draft", "submitted", "approved", "rejected", "cancelled", "paid"]);
-const ADVANCE_STATUSES = new Set<AdvanceStatus>(["draft", "submitted", "approved", "rejected", "cancelled", "settled"]);
-const TRAVEL_STATUSES = new Set<TravelRequestStatus>(["draft", "submitted", "approved", "rejected", "cancelled", "completed"]);
-const VEHICLE_STATUSES = new Set<VehicleExpenseStatus>(["draft", "submitted", "approved", "rejected", "cancelled"]);
+const CALLER_WRITABLE_CLAIM_STATUSES = new Set<ExpenseClaimStatus>(["draft", "submitted"]);
+const CALLER_WRITABLE_ADVANCE_STATUSES = new Set<AdvanceStatus>(["draft", "submitted"]);
+const CALLER_WRITABLE_TRAVEL_STATUSES = new Set<TravelRequestStatus>(["draft", "submitted"]);
+const CALLER_WRITABLE_VEHICLE_STATUSES = new Set<VehicleExpenseStatus>(["draft", "submitted"]);
 
 const READ_ONLY_FIELDS = [
   "id",
@@ -101,7 +101,7 @@ export function stripExpenseReadOnlyFields(input: ExpensePayload) {
 
 export function normalizeExpenseClaimPayload(input: ExpensePayload) {
   const payload = pickCleanFields(stripExpenseReadOnlyFields(input), CLAIM_FIELDS);
-  payload.status = normalizeStatus(payload.status, CLAIM_STATUSES, "draft");
+  payload.status = normalizeStatus(payload.status, CALLER_WRITABLE_CLAIM_STATUSES, "draft");
   return payload;
 }
 
@@ -138,7 +138,7 @@ export function buildExpenseAttachmentPath(employeeId: string, claimId: string, 
 export function normalizeAdvancePayload(input: ExpensePayload) {
   const payload = pickCleanFields(stripExpenseReadOnlyFields(input), ADVANCE_FIELDS);
   withPositiveNumber(payload, "requested_amount");
-  payload.status = normalizeStatus(payload.status, ADVANCE_STATUSES, "draft");
+  payload.status = normalizeStatus(payload.status, CALLER_WRITABLE_ADVANCE_STATUSES, "draft");
   return payload;
 }
 
@@ -163,7 +163,7 @@ export function normalizeTravelItinerary(input: unknown) {
 export function normalizeTravelRequestPayload(input: ExpensePayload) {
   const payload = pickCleanFields(stripExpenseReadOnlyFields(input), TRAVEL_FIELDS);
   withPositiveNumber(payload, "estimated_amount");
-  payload.status = normalizeStatus(payload.status, TRAVEL_STATUSES, "draft");
+  payload.status = normalizeStatus(payload.status, CALLER_WRITABLE_TRAVEL_STATUSES, "draft");
   if ("itinerary" in input) payload.itinerary = normalizeTravelItinerary(input.itinerary);
   return payload;
 }
@@ -172,13 +172,13 @@ export function normalizeVehicleLogPayload(input: ExpensePayload) {
   const payload = pickCleanFields(stripExpenseReadOnlyFields(input), VEHICLE_LOG_FIELDS);
   withPositiveNumber(payload, "distance_km");
   withPositiveNumber(payload, "amount");
-  payload.status = normalizeStatus(payload.status, VEHICLE_STATUSES, "draft");
+  payload.status = normalizeStatus(payload.status, CALLER_WRITABLE_VEHICLE_STATUSES, "draft");
   return payload;
 }
 
 export function normalizeVehicleServicePayload(input: ExpensePayload) {
   const payload = pickCleanFields(stripExpenseReadOnlyFields(input), VEHICLE_SERVICE_FIELDS);
   withPositiveNumber(payload, "amount");
-  payload.status = normalizeStatus(payload.status, VEHICLE_STATUSES, "draft");
+  payload.status = normalizeStatus(payload.status, CALLER_WRITABLE_VEHICLE_STATUSES, "draft");
   return payload;
 }

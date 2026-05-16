@@ -39,18 +39,24 @@ export default function TravelRequestsPage() {
   const [requests, setRequests] = useState<TravelRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState("");
+  const [error, setError] = useState("");
   const [status, setStatus] = useState("submitted");
   const [comment, setComment] = useState("");
   const [form, setForm] = useState({ destination: "", purpose: "", start_date: "", end_date: "", estimated_amount: "", notes: "" });
   const [itinerary, setItinerary] = useState<ItineraryRow[]>([{ ...emptyItinerary }]);
 
-  async function load() {
+  async function load(nextStatus = status) {
     setLoading(true);
+    setError("");
     const params = new URLSearchParams();
-    if (status !== "all") params.set("status", status);
+    if (nextStatus !== "all") params.set("status", nextStatus);
     const res = await fetch(`/api/hrms/travel/requests?${params.toString()}`);
     if (res.ok) setRequests(await readList<TravelRow>(res));
-    else toast.error("Could not load travel requests");
+    else {
+      const message = (await res.json().catch(() => ({}))).error ?? "Could not load travel requests";
+      setError(message);
+      toast.error(message);
+    }
     setLoading(false);
   }
 
@@ -89,7 +95,9 @@ export default function TravelRequestsPage() {
     });
     setSaving("");
     if (!res.ok) {
-      toast.error((await res.json().catch(() => ({}))).error ?? "Travel request failed");
+      const message = (await res.json().catch(() => ({}))).error ?? "Travel request failed";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success("Travel request submitted");
@@ -103,11 +111,13 @@ export default function TravelRequestsPage() {
     const res = await fetch(`/api/hrms/travel/requests/${row.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, approver_comment: comment.trim() || null }),
+      body: JSON.stringify({ action, decision_notes: comment.trim() || null }),
     });
     setSaving("");
     if (!res.ok) {
-      toast.error((await res.json().catch(() => ({}))).error ?? "Decision failed");
+      const message = (await res.json().catch(() => ({}))).error ?? "Decision failed";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success(action === "completed" ? "Marked completed" : `${action} saved`);
@@ -126,6 +136,10 @@ export default function TravelRequestsPage() {
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[390px_minmax(0,1fr)]">
         <div className="rounded-lg border border-gray-200 bg-white p-4">
@@ -176,7 +190,14 @@ export default function TravelRequestsPage() {
               <h2 className="text-sm font-bold text-gray-900">Approval status</h2>
               <p className="text-xs text-gray-500">{requests.length} travel requests loaded</p>
             </div>
-            <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-fit rounded border border-gray-300 px-3 py-2 text-sm">
+            <select
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                void load(event.target.value);
+              }}
+              className="w-fit rounded border border-gray-300 px-3 py-2 text-sm"
+            >
               <option value="submitted">Submitted</option>
               <option value="approved">Approved</option>
               <option value="completed">Completed</option>

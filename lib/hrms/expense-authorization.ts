@@ -5,6 +5,7 @@ export type ExpensePermissionKey = (typeof EXPENSE_PERMISSION_KEYS)[keyof typeof
 
 export type ExpenseProfile = {
   id?: string | null;
+  employee_id?: string | null;
   role?: Role | string | null;
   is_active?: boolean | null;
   permissions?: readonly string[] | null;
@@ -18,6 +19,7 @@ export type ExpenseAccessTarget = {
   employee_id?: string | null;
   profile_id?: string | null;
   department_id?: string | null;
+  reporting_manager_id?: string | null;
   reporting_manager_profile_id?: string | null;
 };
 
@@ -56,7 +58,10 @@ function isSelf(profile: ExpenseProfile | null | undefined, target: ExpenseAcces
 }
 
 function isReportingManager(profile: ExpenseProfile | null | undefined, target: ExpenseAccessTarget | null | undefined) {
-  return Boolean(profile?.id && target?.reporting_manager_profile_id && profile.id === target.reporting_manager_profile_id);
+  return Boolean(
+    (profile?.id && target?.reporting_manager_profile_id && profile.id === target.reporting_manager_profile_id)
+    || (profile?.employee_id && target?.reporting_manager_id && profile.employee_id === target.reporting_manager_id),
+  );
 }
 
 function scopedPermissionFor(recordScope: ExpenseRecordScope) {

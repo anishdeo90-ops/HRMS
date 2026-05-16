@@ -1,0 +1,38 @@
+items:
+  - key: form.employee_advance.request
+    label: Employee Advance
+    domain: expenses
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: request_form }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/expenses/advances]
+    ui_surfaces: ["app/(app)/expenses/advances/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_advances.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: employee-advance-employee
+      - key: purpose
+        type: textarea
+        storage_mapping: employee_advances.purpose
+        validation: [required]
+        privacy_class: confidential
+        test_id: employee-advance-purpose
+      - key: requested_amount
+        type: currency
+        storage_mapping: employee_advances.requested_amount
+        validation: [required, positive]
+        privacy_class: financial
+        test_id: employee-advance-requested-amount
+      - key: required_by
+        type: date
+        storage_mapping: employee_advances.required_by
+        validation: [required]
+        privacy_class: financial
+        test_id: employee-advance-required-by

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Check, FileUp, Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -267,6 +268,7 @@ export default function PeopleEmployeesPage() {
                   <td className="px-4 py-3"><span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">{row.employment_status}</span></td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
+                      <Link href={`/people/employees/${row.id}`} className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50">Detail</Link>
                       <button onClick={() => { setEditing(row); setAdding(false); }} className="p-1.5 text-gray-400 hover:text-brand-600" title="Edit"><Pencil size={15} /></button>
                       <button onClick={() => void loadDocs(row)} className="p-1.5 text-gray-400 hover:text-brand-600" title="Documents"><FileUp size={15} /></button>
                     </div>

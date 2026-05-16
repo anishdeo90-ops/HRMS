@@ -12,6 +12,13 @@ async function currentProfile(supabase: Awaited<ReturnType<typeof createClient>>
   return { user, profile: profile as HrmsProfile | null };
 }
 
+function dateAfterDays(date: string | null | undefined, days: number) {
+  const start = date ? new Date(`${date}T00:00:00.000Z`) : new Date();
+  if (Number.isNaN(start.getTime())) start.setTime(Date.now());
+  start.setUTCDate(start.getUTCDate() + days);
+  return start.toISOString().slice(0, 10);
+}
+
 export async function POST(req: NextRequest, { params }: Params) {
   const { candidateId } = await params;
   const supabase = await createClient();
@@ -55,5 +62,38 @@ export async function POST(req: NextRequest, { params }: Params) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data });
+
+  const { data: defaultTemplate, error: templateError } = await supabase
+    .from("employee_onboarding_templates")
+    .select("id")
+    .eq("is_default", true)
+    .eq("is_active", true)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (templateError) return NextResponse.json({ error: templateError.message }, { status: 500 });
+
+  let onboarding = null;
+  if (defaultTemplate?.id) {
+    const startDate = data.joining_date ?? new Date().toISOString().slice(0, 10);
+    const { data: onboardingData, error: onboardingError } = await supabase
+      .from("employee_onboardings")
+      .insert({
+        employee_id: data.id,
+        joined_candidate_id: candidateId,
+        template_id: defaultTemplate.id,
+        status: "active",
+        start_date: startDate,
+        due_date: dateAfterDays(startDate, 30),
+        created_by: user.id,
+        updated_by: user.id,
+      })
+      .select()
+      .single();
+    if (onboardingError) return NextResponse.json({ error: onboardingError.message }, { status: 500 });
+    onboarding = onboardingData;
+  }
+
+  return NextResponse.json({ data: { ...data, employee_id: data.id, onboarding }, employee_id: data.id, onboarding });
 }

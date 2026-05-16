@@ -32,6 +32,7 @@ describe("expense authorization", () => {
   it("allows reporting managers with team permission to view and approve direct reports", () => {
     const manager = {
       id: "manager-profile",
+      employee_id: "manager-employee",
       role: "hod",
       is_active: true,
       permissions: [EXPENSE_PERMISSION_KEYS.viewTeam, EXPENSE_PERMISSION_KEYS.approve],
@@ -39,6 +40,7 @@ describe("expense authorization", () => {
 
     assert.equal(canViewExpenseRecord(manager, target), true);
     assert.equal(canApproveExpenseRecord(manager, target, "expense_claim"), true);
+    assert.equal(canViewExpenseRecord(manager, { ...target, reporting_manager_profile_id: null, reporting_manager_id: "manager-employee" }), true);
   });
 
   it("allows department approvers only inside their scoped department and record family", () => {

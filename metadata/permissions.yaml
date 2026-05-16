@@ -8,7 +8,7 @@ items:
     introduced_in_phase: 1
     db_table: permissions
     ts_export: PERMISSION_KEYS
-    api_routes: [app/api/metadata]
+    api_routes: []
     ui_surfaces: [route.metadata.governance]
     tests: [tests/metadata/registry-contract.test.ts]
   - key: permission.metadata.view
@@ -20,7 +20,7 @@ items:
     introduced_in_phase: 1
     db_table: permissions
     ts_export: PERMISSION_KEYS
-    api_routes: [app/api/metadata]
+    api_routes: []
     ui_surfaces: [route.metadata.governance]
     tests: [tests/metadata/registry-contract.test.ts]
   - key: permission.employee.view
@@ -383,3 +383,1071 @@ items:
     api_routes: [app/api/hrms/leave/balances, app/api/hrms/leave/ledger]
     ui_surfaces: [route.time.leave]
     tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-sql.test.ts]
+  - key: permission.expenses.view_self
+    label: View Own Expenses
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: self_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/expenses/claims]
+    ui_surfaces: [route.finance.expense_claims]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.expenses.view_team
+    label: View Team Expenses
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: expenses, artifact: Phase 4 Expenses, field_or_state: team_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/expenses/claims]
+    ui_surfaces: [route.finance.expense_claims]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.expenses.manage
+    label: Manage Expenses
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/expenses/claims, "app/api/hrms/expenses/claims/[id]"]
+    ui_surfaces: [route.finance.expense_claims]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.expenses.approve
+    label: Approve Expenses
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: approve }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/expenses/claims/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.expense_claim_types.manage
+    label: Manage Expense Claim Types
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim Type, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/expenses/claims]
+    ui_surfaces: [route.finance.expenses]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.employee_advances.view_self
+    label: View Own Employee Advances
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: self_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/expenses/advances]
+    ui_surfaces: [route.finance.advances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.employee_advances.manage
+    label: Manage Employee Advances
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/expenses/advances, "app/api/hrms/expenses/advances/[id]"]
+    ui_surfaces: [route.finance.advances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.employee_advances.approve
+    label: Approve Employee Advances
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: approve }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/expenses/advances/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.travel_requests.view_self
+    label: View Own Travel Requests
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: self_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/travel/requests]
+    ui_surfaces: [route.finance.travel]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.travel_requests.manage
+    label: Manage Travel Requests
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/travel/requests, "app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: [route.finance.travel]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.travel_requests.approve
+    label: Approve Travel Requests
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: approve }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.vehicles.view_self
+    label: View Own Vehicle Logs
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Logs, field_or_state: self_view }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/vehicles/logs, app/api/hrms/vehicles/services]
+    ui_surfaces: [route.finance.vehicles]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.vehicles.manage
+    label: Manage Vehicles
+    domain: expenses
+    kind: permission
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Logs, field_or_state: manage }
+    introduced_in_phase: 4
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/vehicles/logs, app/api/hrms/vehicles/services]
+    ui_surfaces: [route.finance.vehicles]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+  - key: permission.payroll.view
+    label: View Payroll
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: payroll, artifact: Phase 5 Payroll, field_or_state: view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.payroll.manage
+    label: Manage Payroll
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Entry, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_components.manage
+    label: Manage Salary Components
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Component, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/salary-components]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_structures.manage
+    label: Manage Salary Structures
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/salary-structures]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_structures.assign
+    label: Assign Salary Structures
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure Assignment, field_or_state: assign }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/salary-structure-assignments]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.payroll_periods.manage
+    label: Manage Payroll Periods
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Period, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.payroll_entries.manage
+    label: Manage Payroll Entries
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Entry, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/runs, "app/api/hrms/payroll/runs/[id]"]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_slips.view_self
+    label: View Own Salary Slips
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: self_view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/salary-slips]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_slips.manage
+    label: Manage Salary Slips
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/salary-slips, "app/api/hrms/payroll/salary-slips"]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_slips.submit
+    label: Submit Salary Slips
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: submit }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/payroll/salary-slips"]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.salary_slips.cancel
+    label: Cancel Salary Slips
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: cancel }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: ["app/api/hrms/payroll/salary-slips"]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.tax_declarations.view_self
+    label: View Own Tax Declarations
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Tax Exemption Declaration, field_or_state: self_view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.tax_declarations.manage
+    label: Manage Tax Declarations
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Tax Exemption Declaration, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.benefits.view_self
+    label: View Own Benefits
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Benefit Application, field_or_state: self_view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.benefits.manage
+    label: Manage Benefits
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Benefit Claim, field_or_state: manage }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.payroll_reports.view
+    label: View Payroll Reports
+    domain: payroll
+    kind: permission
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Register, field_or_state: report_view }
+    introduced_in_phase: 5
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.payroll.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+  - key: permission.performance.view_self
+    label: View Own Performance
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance Management, field_or_state: self_view }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/goals, app/api/hrms/performance/appraisals, app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.goals, route.performance.appraisals, route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.view_team
+    label: View Team Performance
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance Management, field_or_state: team_view }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/goals, app/api/hrms/performance/appraisals, app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.goals, route.performance.appraisals, route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.manage
+    label: Manage Performance
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance Management, field_or_state: manage }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/goals, app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.goals.manage
+    label: Manage Performance Goals
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Goals, field_or_state: manage }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.goals.update
+    label: Update Own Performance Goals
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Goals, field_or_state: employee_update }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.kras.manage
+    label: Manage KRAs
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 KRAs, field_or_state: manage }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.cycles.manage
+    label: Manage Appraisal Cycles
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal Cycles, field_or_state: manage }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.appraisals.submit
+    label: Submit Own Appraisal
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisals, field_or_state: self_submit }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.appraisals.review
+    label: Review Appraisals
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisals, field_or_state: manager_review }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.feedback.submit
+    label: Submit Performance Feedback
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Feedback, field_or_state: submit }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.feedback.manage
+    label: Manage Performance Feedback
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Feedback, field_or_state: manage }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.performance.reports.view
+    label: View Performance Reports
+    domain: performance
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance Reports, field_or_state: report_view }
+    introduced_in_phase: 6
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.performance.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+  - key: permission.lifecycle.view_self
+    label: View Own Lifecycle Records
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Employee Lifecycle, field_or_state: self_view }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.lifecycle.view_team
+    label: View Team Lifecycle Records
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Employee Lifecycle, field_or_state: team_view }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.lifecycle.manage
+    label: Manage Lifecycle
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Employee Lifecycle, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.onboarding.templates.manage
+    label: Manage Onboarding Templates
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding Templates, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.onboarding.manage
+    label: Manage Onboarding
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.onboarding.activities.update
+    label: Update Onboarding Activities
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Boarding Activities, field_or_state: update }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.separation.templates.manage
+    label: Manage Separation Templates
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation Templates, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.separation.request
+    label: Request Separation
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: request }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.separation.approve
+    label: Approve Separation
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: approve }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.promotions.manage
+    label: Manage Promotions
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotions, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: [route.lifecycle.promotions]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.promotions.approve
+    label: Approve Promotions
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotions, field_or_state: approve }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: [route.lifecycle.promotions]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.transfers.manage
+    label: Manage Transfers
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Transfers, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: [route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.transfers.approve
+    label: Approve Transfers
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Transfers, field_or_state: approve }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: [route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.grievances.view_self
+    label: View Own Grievances
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievances, field_or_state: self_view }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.grievances.manage
+    label: Manage Grievances
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievances, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.grievances.resolve
+    label: Resolve Grievances
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievances, field_or_state: resolve }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.training.manage
+    label: Manage Training
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training, field_or_state: manage }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/training/programs, app/api/hrms/training/events, app/api/hrms/training/feedback]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.training.feedback.submit
+    label: Submit Training Feedback
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training Feedback, field_or_state: submit }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/training/programs, app/api/hrms/training/events, app/api/hrms/training/feedback]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.daily_work_summaries.submit
+    label: Submit Daily Work Summaries
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Daily Work Summary, field_or_state: submit }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/daily-summaries]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.daily_work_summaries.view_team
+    label: View Team Daily Work Summaries
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Daily Work Summary, field_or_state: team_view }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/lifecycle/daily-summaries]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.lifecycle.reports.view
+    label: View Lifecycle Reports
+    domain: lifecycle
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle Reports, field_or_state: report_view }
+    introduced_in_phase: 7
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+  - key: permission.self_service.view
+    label: View Employee Self Service
+    domain: self_service
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Self Service Portal, field_or_state: overview }
+    introduced_in_phase: 8
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/self-service/summary]
+    ui_surfaces: [route.self_service.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+  - key: permission.self_service.profile.view
+    label: View Own Self Service Profile
+    domain: self_service
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Self Service Profile, field_or_state: self_view }
+    introduced_in_phase: 8
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/self-service/summary]
+    ui_surfaces: [route.self_service.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+  - key: permission.self_service.notifications.view
+    label: View Own Notifications
+    domain: self_service
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Notifications, field_or_state: self_view }
+    introduced_in_phase: 8
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/self-service/notifications]
+    ui_surfaces: [route.self_service.notifications]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+  - key: permission.self_service.notifications.acknowledge
+    label: Acknowledge Own Notifications
+    domain: self_service
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Notifications, field_or_state: acknowledge }
+    introduced_in_phase: 8
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/self-service/notifications]
+    ui_surfaces: [route.self_service.notifications]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+  - key: permission.self_service.notifications.manage
+    label: Manage Employee Notifications
+    domain: self_service
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Notifications, field_or_state: manage }
+    introduced_in_phase: 8
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/self-service/notifications]
+    ui_surfaces: [route.self_service.notifications]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+  - key: permission.reports.view
+    label: View HRMS Reports
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Reports, field_or_state: view }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.reports.export
+    label: Export HRMS Reports
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Reports, field_or_state: export }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.dashboards.view
+    label: View HRMS Dashboards
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: dashboards, artifact: Phase 9 Dashboards, field_or_state: view }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/dashboards]
+    ui_surfaces: [route.reports.dashboards]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.notification_rules.view
+    label: View Notification Rules
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: notifications, artifact: Phase 9 Notification Rules, field_or_state: view }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/automation/notifications]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.notification_rules.manage
+    label: Manage Notification Rules
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: notifications, artifact: Phase 9 Notification Rules, field_or_state: manage }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/automation/notifications]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.automation_rules.view
+    label: View Automation Rules
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Rules, field_or_state: view }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/automation]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.automation_rules.manage
+    label: Manage Automation Rules
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Rules, field_or_state: manage }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/automation]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.automation_executions.view
+    label: View Automation Executions
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Executions, field_or_state: view }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/automation/runs]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.automation_executions.run
+    label: Run Automation Executions
+    domain: reports
+    kind: permission
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Executions, field_or_state: run }
+    introduced_in_phase: 9
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/automation/runs]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+  - key: permission.recruitment.view
+    label: View Recruitment
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Recruitment Unification, field_or_state: view }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.manage
+    label: Manage Recruitment
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Recruitment Unification, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.job_openings.manage
+    label: Manage Job Openings
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Openings, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.job_requisitions.request
+    label: Request Job Requisitions
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Requisitions, field_or_state: request }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.job_requisitions.approve
+    label: Approve Job Requisitions
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Requisitions, field_or_state: approve }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.applicants.view
+    label: View Job Applicants
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Applicants, field_or_state: view }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.applicants.manage
+    label: Manage Job Applicants
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Applicants, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.interviews.manage
+    label: Manage Recruitment Interviews
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Interviews, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/interviews]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.interviews.feedback.submit
+    label: Submit Interview Feedback
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Interview Feedback, field_or_state: submit }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/interviews]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.offers.manage
+    label: Manage Job Offers
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Offers, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/offers]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.appointment_letters.manage
+    label: Manage Appointment Letters
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letters, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.handoffs.manage
+    label: Manage Candidate Employee Handoffs
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Onboarding Handoff, field_or_state: manage }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/recruitment/handoffs]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+  - key: permission.recruitment.reports.view
+    label: View Recruitment Reports
+    domain: recruitment
+    kind: permission
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Recruitment Reports, field_or_state: view }
+    introduced_in_phase: 10
+    db_table: permissions
+    ts_export: PERMISSION_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]

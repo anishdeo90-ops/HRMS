@@ -1,0 +1,183 @@
+items:
+  - key: form.performance.goal
+    label: Performance Goal
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Goals, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: performance_goals.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: performance-goal-employee
+      - key: title
+        type: text
+        storage_mapping: performance_goals.title
+        validation: [required]
+        privacy_class: work
+        test_id: performance-goal-title
+      - key: weight
+        type: number
+        storage_mapping: performance_goals.weight
+        validation: [required, range_0_100]
+        privacy_class: work
+        test_id: performance-goal-weight
+  - key: form.performance.kra
+    label: Key Result Area
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 KRAs, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: goal_id
+        type: performance_goal_reference
+        storage_mapping: performance_kras.goal_id
+        validation: [optional]
+        privacy_class: work
+        test_id: performance-kra-goal
+      - key: title
+        type: text
+        storage_mapping: performance_kras.title
+        validation: [required]
+        privacy_class: work
+        test_id: performance-kra-title
+  - key: form.performance.appraisal_template
+    label: Appraisal Template
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal Template, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: appraisal_templates.name
+        validation: [required, unique]
+        privacy_class: work
+        test_id: appraisal-template-name
+      - key: scoring_scale
+        type: integer
+        storage_mapping: appraisal_templates.scoring_scale
+        validation: [required, range_1_5]
+        privacy_class: work
+        test_id: appraisal-template-scale
+  - key: form.performance.appraisal_cycle
+    label: Appraisal Cycle
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal Cycle, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: appraisal_cycles.name
+        validation: [required]
+        privacy_class: work
+        test_id: appraisal-cycle-name
+      - key: start_date
+        type: date
+        storage_mapping: appraisal_cycles.start_date
+        validation: [required]
+        privacy_class: work
+        test_id: appraisal-cycle-start
+  - key: form.performance.appraisal
+    label: Employee Appraisal
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: appraisals.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: appraisal-employee
+      - key: final_score
+        type: number
+        storage_mapping: appraisals.final_score
+        validation: [optional, range_0_5]
+        privacy_class: work
+        test_id: appraisal-final-score
+  - key: form.performance.feedback
+    label: Performance Feedback
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Feedback, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_performance_feedback.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: performance-feedback-employee
+      - key: feedback_type
+        type: select
+        storage_mapping: employee_performance_feedback.feedback_type
+        validation: [required]
+        options: [self, manager, peer, hr]
+        privacy_class: work
+        test_id: performance-feedback-type
+  - key: form.performance.feedback_criteria
+    label: Feedback Criteria
+    domain: performance
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Feedback Criteria, field_or_state: form }
+    introduced_in_phase: 6
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: employee_feedback_criteria.name
+        validation: [required, unique]
+        privacy_class: work
+        test_id: feedback-criteria-name
+      - key: max_rating
+        type: integer
+        storage_mapping: employee_feedback_criteria.max_rating
+        validation: [required, range_1_5]
+        privacy_class: work
+        test_id: feedback-criteria-max-rating

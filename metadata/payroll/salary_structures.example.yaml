@@ -5,9 +5,9 @@ items:
     kind: salary_structure
     owner: finance
     source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure example }
-    introduced_in_phase: 1
-    db_table: metadata_registry
+    introduced_in_phase: 5
+    db_table: salary_structures
     ts_export: METADATA_KEYS
-    api_routes: [app/api/payroll/salary-structures]
-    ui_surfaces: ["app/(dashboard)/payroll/salary-structures/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: [app/api/hrms/payroll/salary-structures]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]

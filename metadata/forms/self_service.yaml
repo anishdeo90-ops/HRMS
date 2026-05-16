@@ -1,0 +1,40 @@
+items:
+  - key: form.self_service.notification
+    label: Employee Notification
+    domain: self_service
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Notifications, field_or_state: form }
+    introduced_in_phase: 8
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/self-service/notifications]
+    ui_surfaces: [route.self_service.notifications]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: employee_notifications.employee_id
+        validation: [required]
+        privacy_class: confidential
+        test_id: self-service-notification-employee
+      - key: title
+        type: text
+        storage_mapping: employee_notifications.title
+        validation: [required, max_160]
+        privacy_class: work
+        test_id: self-service-notification-title
+      - key: category
+        type: select
+        storage_mapping: employee_notifications.category
+        validation: [required]
+        options: [profile, attendance, leave, expenses, payroll, performance, lifecycle, system]
+        privacy_class: work
+        test_id: self-service-notification-category
+      - key: status
+        type: select
+        storage_mapping: employee_notifications.status
+        validation: [required]
+        options: [unread, read, archived]
+        privacy_class: work
+        test_id: self-service-notification-status

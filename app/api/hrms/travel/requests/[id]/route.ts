@@ -8,7 +8,7 @@ type Params = { params: Promise<{ id: string }> };
 
 const TRAVEL_SELECT = [
   "*",
-  "employee:employees(id, profile_id, department_id, reporting_manager:employees!employees_reporting_manager_id_fkey(profile_id))",
+  "employee:employees!travel_requests_employee_id_fkey(id, profile_id, department_id, reporting_manager_id)",
   "itinerary:travel_itineraries(*)",
 ].join(",");
 
@@ -17,7 +17,7 @@ function targetFromRecord(record: any) {
     employee_id: record.employee_id,
     profile_id: record.employee?.profile_id,
     department_id: record.employee?.department_id,
-    reporting_manager_profile_id: record.employee?.reporting_manager?.profile_id,
+    reporting_manager_id: record.employee?.reporting_manager_id,
   };
 }
 

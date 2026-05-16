@@ -3,28 +3,96 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Users, Settings, LogOut,
-  Briefcase, FileText, Activity, ChevronLeft, ChevronRight, ClipboardList, Building2, UserRoundCog,
-  Clock3, CalendarDays, CheckSquare,
-  WalletCards, ReceiptText, Landmark, Plane, CarFront,
+  Activity,
+  BadgeDollarSign,
+  BarChart3,
+  Bell,
+  Briefcase,
+  Building2,
+  CalendarDays,
+  CarFront,
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Clock3,
+  FileText,
+  GitBranch,
+  Landmark,
+  LayoutDashboard,
+  LogOut,
+  Plane,
+  ReceiptText,
+  Settings,
+  Target,
+  UserRound,
+  UserRoundCog,
+  Users,
+  WalletCards,
+  Workflow,
+  type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { HireRabbitsLogo } from "@/components/hirerabbits-logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
-import { getVisibleFinanceRoutes, getVisiblePeopleRoutes, getVisibleTimeRoutes } from "@/lib/hrms/route-access";
+import { NavSection, SECTION_LABELS, canViewSettings, getNavForRole, getSectionsForRole } from "@/lib/nav/config";
+import type { NavIconName, NavItem } from "@/lib/nav/config";
 
-const NAV = [
-  { href: "/dashboard",   icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/my-activity", icon: Activity,         label: "My Activity",  roles: ["recruiter", "hr_manager", "admin"] },
-  { href: "/candidates",  icon: Users,            label: "Candidates" },
-  { href: "/jobs",        icon: Briefcase,        label: "Jobs" },
-  { href: "/hod-portal",  icon: ClipboardList,    label: "HOD Portal",        roles: ["admin", "hr_manager", "hod"] },
-  { href: "/jds",         icon: FileText,         label: "JDs & Forms",       roles: ["admin", "hr_manager"] },
-];
+const NAV_ICONS: Record<NavIconName, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  activity: Activity,
+  users: Users,
+  briefcase: Briefcase,
+  clipboard: ClipboardList,
+  fileText: FileText,
+  building: Building2,
+  userCog: UserRoundCog,
+  clock: Clock3,
+  calendar: CalendarDays,
+  checkSquare: CheckSquare,
+  wallet: WalletCards,
+  receipt: ReceiptText,
+  landmark: Landmark,
+  plane: Plane,
+  car: CarFront,
+  badgeDollar: BadgeDollarSign,
+  target: Target,
+  gitBranch: GitBranch,
+  userRound: UserRound,
+  barChart: BarChart3,
+  bell: Bell,
+  workflow: Workflow,
+};
 
-interface SidebarProps { profile: Profile }
+interface SidebarProps {
+  profile: Profile;
+}
+
+function isActivePath(pathname: string, href: string) {
+  return href === "/expenses" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+}
+
+function NavLink({ item, collapsed, active }: { item: NavItem; collapsed: boolean; active: boolean }) {
+  const Icon = NAV_ICONS[item.icon];
+
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+        active
+          ? "bg-brand-500 text-white"
+          : "text-gray-400 hover:text-white hover:bg-gray-800"
+      )}
+      title={collapsed ? item.label : undefined}
+    >
+      <Icon size={18} className="flex-shrink-0" />
+      {!collapsed && item.label}
+    </Link>
+  );
+}
 
 export default function Sidebar({ profile }: SidebarProps) {
   const pathname = usePathname();
@@ -38,13 +106,8 @@ export default function Sidebar({ profile }: SidebarProps) {
     router.refresh();
   }
 
-  const visibleNav = NAV.filter((item) => {
-    if (!item.roles) return true;
-    return item.roles.includes(profile.role);
-  });
-  const peopleRoutes = getVisiblePeopleRoutes(profile);
-  const timeRoutes = getVisibleTimeRoutes(profile);
-  const financeRoutes = getVisibleFinanceRoutes(profile);
+  const navItems = getNavForRole(profile.role);
+  const sections = getSectionsForRole(profile.role);
 
   return (
     <aside className={cn(
@@ -67,126 +130,47 @@ export default function Sidebar({ profile }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 py-4 space-y-0.5 px-2">
-        {visibleNav.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+        {sections.map((section) => {
+          const sectionItems = navItems.filter((item) => item.section === section);
+
+          if (section === NavSection.NONE || section === NavSection.RECRUITING) {
+            return (
+              <Fragment key={section}>
+                {sectionItems.map((item) => (
+                  <NavLink key={item.href} item={item} collapsed={collapsed} active={isActivePath(pathname, item.href)} />
+                ))}
+              </Fragment>
+            );
+          }
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active
-                  ? "bg-brand-500 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
-              )}
-              title={collapsed ? item.label : undefined}
-            >
-              <item.icon size={18} className="flex-shrink-0" />
-              {!collapsed && item.label}
-            </Link>
+            <div key={section} className="pt-3 mt-3 border-t border-gray-800">
+              {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">{SECTION_LABELS[section]}</p>}
+              {sectionItems.map((item) => (
+                <NavLink key={item.href} item={item} collapsed={collapsed} active={isActivePath(pathname, item.href)} />
+              ))}
+            </div>
           );
         })}
-        {peopleRoutes.length > 0 && (
-          <div className="pt-3 mt-3 border-t border-gray-800">
-            {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">People</p>}
-            {peopleRoutes.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + "/");
-              const Icon = item.href.endsWith("/organization") ? Building2 : UserRoundCog;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    active
-                      ? "bg-brand-500 text-white"
-                      : "text-gray-400 hover:text-white hover:bg-gray-800"
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon size={18} className="flex-shrink-0" />
-                  {!collapsed && item.label}
-                </Link>
-              );
-            })}
-          </div>
-        )}
-        {timeRoutes.length > 0 && (
-          <div className="pt-3 mt-3 border-t border-gray-800">
-            {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Time</p>}
-            {timeRoutes.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + "/");
-              const Icon = item.href.endsWith("/shifts") ? CalendarDays : item.href.endsWith("/approvals") ? CheckSquare : Clock3;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    active
-                      ? "bg-brand-500 text-white"
-                      : "text-gray-400 hover:text-white hover:bg-gray-800"
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon size={18} className="flex-shrink-0" />
-                  {!collapsed && item.label}
-                </Link>
-              );
-            })}
-          </div>
-        )}
-        {financeRoutes.length > 0 && (
-          <div className="pt-3 mt-3 border-t border-gray-800">
-            {!collapsed && <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Finance</p>}
-            {financeRoutes.map((item) => {
-              const active = item.href === "/expenses" ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/");
-              const Icon = item.href.endsWith("/claims")
-                ? ReceiptText
-                : item.href.endsWith("/advances")
-                  ? Landmark
-                  : item.href === "/travel"
-                    ? Plane
-                    : item.href === "/vehicles"
-                      ? CarFront
-                      : WalletCards;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    active
-                      ? "bg-brand-500 text-white"
-                      : "text-gray-400 hover:text-white hover:bg-gray-800"
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon size={18} className="flex-shrink-0" />
-                  {!collapsed && item.label}
-                </Link>
-              );
-            })}
-          </div>
-        )}
       </nav>
 
       {/* Bottom: Settings gear + user + logout */}
       <div className="border-t border-gray-700 p-3 space-y-1">
-        {/* Settings — gear icon, industry-standard placement */}
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-            pathname.startsWith("/settings")
-              ? "bg-brand-500 text-white"
-              : "text-gray-400 hover:text-white hover:bg-gray-800"
-          )}
-          title={collapsed ? "Settings" : undefined}
-        >
-          <Settings size={18} className="flex-shrink-0" />
-          {!collapsed && "Settings"}
-        </Link>
+        {canViewSettings(profile.role) && (
+          <Link
+            href="/settings"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              pathname.startsWith("/settings")
+                ? "bg-brand-500 text-white"
+                : "text-gray-400 hover:text-white hover:bg-gray-800"
+            )}
+            title={collapsed ? "Settings" : undefined}
+          >
+            <Settings size={18} className="flex-shrink-0" />
+            {!collapsed && "Settings"}
+          </Link>
+        )}
 
         {!collapsed && (
           <div className="px-3 py-2">

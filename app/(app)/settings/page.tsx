@@ -8,6 +8,7 @@ import {
   Eye, EyeOff, Copy, RefreshCw, ChevronRight,
   type LucideIcon,
 } from "lucide-react";
+import { ROLES } from "@/lib/types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface UserRow {
@@ -462,10 +463,9 @@ export default function SettingsPage() {
                     <Field label="Email Address"><input type="email" value={newUser.email} onChange={e => setNewUser(p=>({...p,email:e.target.value}))} className={inp} /></Field>
                     <Field label="Role">
                       <select value={newUser.role} onChange={e => setNewUser(p=>({...p,role:e.target.value}))} className={inp}>
-                        <option value="recruiter">Recruiter</option>
-                        <option value="hr_manager">HR Manager</option>
-                        <option value="hod">HOD / Interviewer</option>
-                        <option value="admin">Admin</option>
+                        {ROLES.filter((role) => role.value !== "candidate").map((role) => (
+                          <option key={role.value} value={role.value}>{role.label}</option>
+                        ))}
                       </select>
                     </Field>
                     <Field label="Department (optional)"><input value={newUser.department} onChange={e => setNewUser(p=>({...p,department:e.target.value}))} className={inp} /></Field>
@@ -482,10 +482,9 @@ export default function SettingsPage() {
                     <Field label="Full Name"><input defaultValue={editingUser.name} id="eu-name" className={inp} /></Field>
                     <Field label="Role">
                       <select defaultValue={editingUser.role} id="eu-role" className={inp}>
-                        <option value="recruiter">Recruiter</option>
-                        <option value="hr_manager">HR Manager</option>
-                        <option value="hod">HOD / Interviewer</option>
-                        <option value="admin">Admin</option>
+                        {ROLES.filter((role) => role.value !== "candidate").map((role) => (
+                          <option key={role.value} value={role.value}>{role.label}</option>
+                        ))}
                       </select>
                     </Field>
                     <div className="flex gap-2 pt-2">

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { ROLES } from "@/lib/types";
+
+const VALID_PROFILE_ROLES = new Set(ROLES.filter((role) => role.value !== "candidate").map((role) => role.value));
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -33,6 +36,9 @@ export async function POST(req: NextRequest) {
   }
 
   const { email, password, name, role, department } = await req.json();
+  if (!VALID_PROFILE_ROLES.has(role)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  }
 
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email,
@@ -65,6 +71,9 @@ export async function PATCH(req: NextRequest) {
   }
 
   const { id, name, role, department, is_active } = await req.json();
+  if (role !== undefined && !VALID_PROFILE_ROLES.has(role)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  }
   const { error } = await supabase
     .from("profiles")
     .update({ name, role, department, is_active, updated_at: new Date().toISOString() })

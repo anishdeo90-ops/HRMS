@@ -77,8 +77,17 @@ describe("expense helper utilities", () => {
       employee_id: "employee-1",
       requested_amount: 2500.75,
       purpose: "Travel advance",
-      status: "approved",
+      status: "draft",
     });
+  });
+
+  it("blocks caller-controlled decision statuses from normalized payloads", () => {
+    assert.equal(normalizeExpenseClaimPayload({ status: "paid" }).status, "draft");
+    assert.equal(normalizeExpenseClaimPayload({ status: "submitted" }).status, "submitted");
+    assert.equal(normalizeAdvancePayload({ status: "settled" }).status, "draft");
+    assert.equal(normalizeTravelRequestPayload({ status: "completed" }).status, "draft");
+    assert.equal(normalizeVehicleLogPayload({ status: "approved" }).status, "draft");
+    assert.equal(normalizeVehicleServicePayload({ status: "rejected" }).status, "draft");
   });
 
   it("validates travel dates and normalizes itinerary rows", () => {

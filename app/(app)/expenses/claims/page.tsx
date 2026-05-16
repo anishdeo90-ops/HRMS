@@ -6,7 +6,19 @@ import { Check, Paperclip, Plus, RefreshCw, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { getVisibleFinanceRoutes } from "@/lib/hrms/route-access";
 
-type ClaimRow = { id: string; title?: string | null; claim_number?: string | null; status?: string | null; total_amount?: number | null; expense_date?: string | null; description?: string | null; employee?: PersonRef | null };
+type ClaimRow = {
+  id: string;
+  title?: string | null;
+  claim_number?: string | null;
+  purpose?: string | null;
+  status?: string | null;
+  total_amount?: number | null;
+  claim_date?: string | null;
+  expense_date?: string | null;
+  notes?: string | null;
+  description?: string | null;
+  employee?: PersonRef | null;
+};
 type PersonRef = { name?: string | null; employee_code?: string | null };
 type LineItem = { expense_type_key: string; description: string; spent_on: string; amount: string; merchant_name: string };
 
@@ -42,19 +54,25 @@ export default function ExpenseClaimsPage() {
   const [claims, setClaims] = useState<ClaimRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState("");
+  const [error, setError] = useState("");
   const [status, setStatus] = useState("submitted");
   const [form, setForm] = useState({ title: "", claim_type_key: "general", expense_date: today(), amount: "", currency: "INR", description: "" });
   const [lines, setLines] = useState<LineItem[]>([{ ...emptyLine, spent_on: today() }]);
   const [comment, setComment] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
 
-  async function load() {
+  async function load(nextStatus = status) {
     setLoading(true);
+    setError("");
     const params = new URLSearchParams();
-    if (status !== "all") params.set("status", status);
+    if (nextStatus !== "all") params.set("status", nextStatus);
     const res = await fetch(`/api/hrms/expenses/claims?${params.toString()}`);
     if (res.ok) setClaims(await readList<ClaimRow>(res));
-    else toast.error("Could not load expense claims");
+    else {
+      const message = (await res.json().catch(() => ({}))).error ?? "Could not load expense claims";
+      setError(message);
+      toast.error(message);
+    }
     setLoading(false);
   }
 
@@ -85,15 +103,25 @@ export default function ExpenseClaimsPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
-        amount: Number(form.amount || total || 0),
+        claim_type_key: form.claim_type_key,
+        purpose: form.title,
+        claim_date: form.expense_date,
         status: "submitted",
-        line_items: lines.map((row) => ({ ...row, amount: Number(row.amount || 0) })),
+        notes: form.description,
+        items: lines.map((row) => ({
+          expense_type_key: row.expense_type_key,
+          description: row.description,
+          spent_on: row.spent_on,
+          amount: Number(row.amount || 0),
+          notes: row.merchant_name,
+        })),
       }),
     });
     setSaving("");
     if (!res.ok) {
-      toast.error((await res.json().catch(() => ({}))).error ?? "Claim submission failed");
+      const message = (await res.json().catch(() => ({}))).error ?? "Claim submission failed";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success("Expense claim submitted");
@@ -110,8 +138,14 @@ export default function ExpenseClaimsPage() {
     body.set("file", attachment);
     const res = await fetch(`/api/hrms/expenses/claims/${claimId}/attachments`, { method: "POST", body });
     setSaving("");
-    if (!res.ok) toast.error("Attachment upload failed");
-    else toast.success("Attachment uploaded");
+    if (!res.ok) {
+      const message = (await res.json().catch(() => ({}))).error ?? "Attachment upload failed";
+      setError(message);
+      toast.error(message);
+    } else {
+      setError("");
+      toast.success("Attachment uploaded");
+    }
   }
 
   async function decide(row: ClaimRow, action: "approve" | "reject" | "cancel" | "paid") {
@@ -119,11 +153,13 @@ export default function ExpenseClaimsPage() {
     const res = await fetch(`/api/hrms/expenses/claims/${row.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, approver_comment: comment.trim() || null }),
+      body: JSON.stringify({ action, decision_notes: comment.trim() || null }),
     });
     setSaving("");
     if (!res.ok) {
-      toast.error((await res.json().catch(() => ({}))).error ?? "Decision failed");
+      const message = (await res.json().catch(() => ({}))).error ?? "Decision failed";
+      setError(message);
+      toast.error(message);
       return;
     }
     toast.success(action === "paid" ? "Marked paid" : `${action} saved`);
@@ -142,6 +178,10 @@ export default function ExpenseClaimsPage() {
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
         <div className="rounded-lg border border-gray-200 bg-white p-4">
@@ -191,7 +231,14 @@ export default function ExpenseClaimsPage() {
               <h2 className="text-sm font-bold text-gray-900">Claims</h2>
               <p className="text-xs text-gray-500">{claims.length} claims loaded</p>
             </div>
-            <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-fit rounded border border-gray-300 px-3 py-2 text-sm">
+            <select
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                void load(event.target.value);
+              }}
+              className="w-fit rounded border border-gray-300 px-3 py-2 text-sm"
+            >
               <option value="submitted">Submitted</option>
               <option value="approved">Approved</option>
               <option value="paid">Paid</option>
@@ -207,12 +254,12 @@ export default function ExpenseClaimsPage() {
               <div key={row.id} className="grid gap-3 px-4 py-3 xl:grid-cols-[minmax(0,1fr)_330px]">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium text-gray-900">{row.title ?? row.claim_number ?? "Expense claim"}</h3>
+                    <h3 className="font-medium text-gray-900">{row.title ?? row.purpose ?? row.claim_number ?? "Expense claim"}</h3>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(row.status)}`}>{row.status ?? "draft"}</span>
-                    <span className="text-xs text-gray-400">{row.expense_date ?? "-"}</span>
+                    <span className="text-xs text-gray-400">{row.claim_date ?? row.expense_date ?? "-"}</span>
                   </div>
                   <p className="mt-1 text-sm text-gray-600">{personLabel(row.employee)} - {money(row.total_amount)}</p>
-                  <p className="mt-1 line-clamp-2 text-sm text-gray-500">{row.description ?? "No description provided."}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-gray-500">{row.notes ?? row.description ?? "No description provided."}</p>
                 </div>
                 <div className="space-y-2">
                   <textarea value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Decision comment" className="h-16 w-full resize-none rounded border border-gray-300 px-3 py-2 text-sm" />

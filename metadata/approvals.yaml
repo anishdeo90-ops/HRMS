@@ -5,17 +5,102 @@ items:
     kind: approval_rule
     owner: finance
     source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: Department Head Approval }
-    introduced_in_phase: 1
-    db_table: approval_rules
+    introduced_in_phase: 4
+    db_table: expense_claims
     ts_export: METADATA_KEYS
-    api_routes: [app/api/expenses/claims]
-    ui_surfaces: ["app/(dashboard)/expenses/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: ["app/api/hrms/expenses/claims/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
     approver_resolver: department_head
     fallback: hr_manager
     delegation: allowed
     timeout_escalation: finance_manager_after_48h
     audit_events: [submitted, approved, rejected, escalated]
+  - key: approval_rule.expense.finance_final
+    label: Expense Finance Final Approval
+    domain: expenses
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: Finance Approval }
+    introduced_in_phase: 4
+    db_table: expense_claims
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/expenses/claims/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    approver_resolver: finance_manager
+    fallback: admin
+    delegation: allowed
+    timeout_escalation: admin_after_48h
+    audit_events: [approved, paid, rejected, escalated]
+  - key: approval_rule.advance.department_head
+    label: Advance Department Head Approval
+    domain: expenses
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: Department Head Approval }
+    introduced_in_phase: 4
+    db_table: employee_advances
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/expenses/advances/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    approver_resolver: department_head
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: finance_manager_after_48h
+    audit_events: [submitted, approved, rejected, escalated]
+  - key: approval_rule.advance.finance_final
+    label: Advance Finance Final Approval
+    domain: expenses
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: Finance Approval }
+    introduced_in_phase: 4
+    db_table: employee_advances
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/expenses/advances/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    approver_resolver: finance_manager
+    fallback: admin
+    delegation: allowed
+    timeout_escalation: admin_after_48h
+    audit_events: [approved, settled, rejected, escalated]
+  - key: approval_rule.travel.department_head
+    label: Travel Department Head Approval
+    domain: expenses
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: Department Head Approval }
+    introduced_in_phase: 4
+    db_table: travel_requests
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    approver_resolver: department_head
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: finance_manager_after_48h
+    audit_events: [submitted, approved, rejected, escalated]
+  - key: approval_rule.travel.finance_final
+    label: Travel Finance Final Approval
+    domain: expenses
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: Finance Approval }
+    introduced_in_phase: 4
+    db_table: travel_requests
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    approver_resolver: finance_manager
+    fallback: admin
+    delegation: allowed
+    timeout_escalation: admin_after_48h
+    audit_events: [approved, completed, rejected, escalated]
   - key: approval_rule.employee_core.department_approver
     label: Department Approver Assignment
     domain: employee_core
@@ -118,3 +203,343 @@ items:
     delegation: allowed
     timeout_escalation: hr_manager_after_48h
     audit_events: [submitted, approved, rejected, cancelled]
+  - key: approval_rule.payroll.salary_slip_submit
+    label: Salary Slip Payroll Approval
+    domain: payroll
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: submit }
+    introduced_in_phase: 5
+    db_table: salary_slips
+    ts_export: METADATA_KEYS
+    api_routes: ["app/api/hrms/payroll/salary-slips"]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    approver_resolver: payroll_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_24h
+    audit_events: [calculated, approved, paid, cancelled]
+  - key: approval_rule.payroll.benefit_claim
+    label: Benefit Claim Payroll Approval
+    domain: payroll
+    kind: approval_rule
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Benefit Claim, field_or_state: approve }
+    introduced_in_phase: 5
+    db_table: employee_benefit_claims
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    approver_resolver: payroll_manager
+    fallback: hr_manager
+    delegation: restricted
+    timeout_escalation: payroll_manager_after_48h
+    audit_events: [submitted, approved, rejected, paid]
+  - key: approval_rule.performance.goal_manager
+    label: Performance Goal Manager Approval
+    domain: performance
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Goals, field_or_state: manager_approval }
+    introduced_in_phase: 6
+    db_table: performance_goals
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    approver_resolver: reporting_manager
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [submitted, approved, rejected, closed]
+  - key: approval_rule.performance.appraisal_manager_review
+    label: Appraisal Manager Review
+    domain: performance
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal, field_or_state: manager_review }
+    introduced_in_phase: 6
+    db_table: appraisals
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    approver_resolver: reporting_manager
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [self_submitted, manager_reviewed, rejected]
+  - key: approval_rule.performance.hr_final
+    label: Performance HR Final Approval
+    domain: performance
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal, field_or_state: hr_final }
+    introduced_in_phase: 6
+    db_table: appraisals
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [manager_reviewed, approved, rejected, closed]
+  - key: approval_rule.lifecycle.onboarding_hr
+    label: Onboarding HR Review
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding, field_or_state: hr_review }
+    introduced_in_phase: 7
+    db_table: employee_onboardings
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [active, completed, cancelled]
+  - key: approval_rule.lifecycle.separation_manager_review
+    label: Separation Manager Review
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: manager_review }
+    introduced_in_phase: 7
+    db_table: employee_separations
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: reporting_manager
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [submitted, approved, rejected]
+  - key: approval_rule.lifecycle.separation_hr_final
+    label: Separation HR Final Approval
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: hr_final }
+    introduced_in_phase: 7
+    db_table: employee_separations
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [approved, exit_pending, exited, cancelled]
+  - key: approval_rule.lifecycle.promotion_manager
+    label: Promotion Manager Approval
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotion, field_or_state: manager_approval }
+    introduced_in_phase: 7
+    db_table: employee_promotions
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: [route.lifecycle.promotions]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: reporting_manager
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [submitted, approved, rejected]
+  - key: approval_rule.lifecycle.promotion_hr_final
+    label: Promotion HR Final Approval
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotion, field_or_state: hr_final }
+    introduced_in_phase: 7
+    db_table: employee_promotions
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: [route.lifecycle.promotions]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [approved, applied, cancelled]
+  - key: approval_rule.lifecycle.transfer_manager
+    label: Transfer Manager Approval
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Transfer, field_or_state: manager_approval }
+    introduced_in_phase: 7
+    db_table: employee_transfers
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: [route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: reporting_manager
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [submitted, approved, rejected]
+  - key: approval_rule.lifecycle.transfer_hr_final
+    label: Transfer HR Final Approval
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Transfer, field_or_state: hr_final }
+    introduced_in_phase: 7
+    db_table: employee_transfers
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: [route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [approved, applied, cancelled]
+  - key: approval_rule.lifecycle.grievance_assignment
+    label: Grievance Assignment
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievance, field_or_state: assignment }
+    introduced_in_phase: 7
+    db_table: employee_grievances
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [submitted, assigned, under_review]
+  - key: approval_rule.lifecycle.grievance_resolution
+    label: Grievance Resolution
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievance, field_or_state: resolution }
+    introduced_in_phase: 7
+    db_table: employee_grievances
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: grievance_resolver
+    fallback: hr_manager
+    delegation: restricted
+    timeout_escalation: hr_manager_after_48h
+    audit_events: [under_review, resolved, rejected]
+  - key: approval_rule.lifecycle.training_feedback_review
+    label: Training Feedback Review
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training Feedback, field_or_state: review }
+    introduced_in_phase: 7
+    db_table: training_feedback
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/training/feedback]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: training_owner
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [submitted, reviewed]
+  - key: approval_rule.lifecycle.daily_work_summary_manager_review
+    label: Daily Work Summary Manager Review
+    domain: lifecycle
+    kind: approval_rule
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Daily Work Summary, field_or_state: manager_review }
+    introduced_in_phase: 7
+    db_table: daily_work_summaries
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/lifecycle/daily-summaries]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    approver_resolver: reporting_manager
+    fallback: hr_manager
+    delegation: allowed
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [submitted, reviewed, archived]
+  - key: approval_rule.recruitment.job_requisition_hod
+    label: Job Requisition HOD Approval
+    domain: recruitment
+    kind: approval_rule
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Requisition, field_or_state: hod_approval }
+    introduced_in_phase: 10
+    db_table: hiring_requests
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    approver_resolver: hod
+    fallback: hr_manager
+    delegation: restricted
+    timeout_escalation: hr_manager_after_72h
+    audit_events: [requested, approved, rejected, converted]
+  - key: approval_rule.recruitment.offer_hr_final
+    label: Job Offer HR Final Approval
+    domain: recruitment
+    kind: approval_rule
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Offer, field_or_state: hr_final }
+    introduced_in_phase: 10
+    db_table: candidate_offers
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/recruitment/offers]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [ctc_confirmed, offer_sent, offer_confirmed, withdrawn]
+  - key: approval_rule.recruitment.appointment_letter_hr
+    label: Appointment Letter HR Approval
+    domain: recruitment
+    kind: approval_rule
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letter, field_or_state: hr_approval }
+    introduced_in_phase: 10
+    db_table: recruitment_appointment_letters
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [generated, sent, accepted, declined, cancelled]
+  - key: approval_rule.recruitment.onboarding_handoff_hr
+    label: Onboarding Handoff HR Approval
+    domain: recruitment
+    kind: approval_rule
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Onboarding Handoff, field_or_state: hr_approval }
+    introduced_in_phase: 10
+    db_table: recruitment_onboarding_handoffs
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/recruitment/handoffs]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    approver_resolver: hr_manager
+    fallback: admin
+    delegation: restricted
+    timeout_escalation: admin_after_72h
+    audit_events: [ready_for_onboarding, employee_created, onboarding_started, cancelled]

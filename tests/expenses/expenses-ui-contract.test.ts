@@ -17,7 +17,7 @@ describe("Finance route access and UI contract", () => {
   it("uses governed finance route keys for every finance route", () => {
     assert.equal(FINANCE_ROUTE_ACCESS.overview.key, "route.finance.expenses");
     assert.equal(FINANCE_ROUTE_ACCESS.claims.key, "route.finance.expense_claims");
-    assert.equal(FINANCE_ROUTE_ACCESS.advances.key, "route.finance.employee_advances");
+    assert.equal(FINANCE_ROUTE_ACCESS.advances.key, "route.finance.advances");
     assert.equal(FINANCE_ROUTE_ACCESS.travel.key, "route.finance.travel");
     assert.equal(FINANCE_ROUTE_ACCESS.vehicles.key, "route.finance.vehicles");
   });
@@ -34,7 +34,7 @@ describe("Finance route access and UI contract", () => {
     assert.deepEqual(getVisibleFinanceRoutes({ role: "employee" }).map((route) => route.key), [
       "route.finance.expenses",
       "route.finance.expense_claims",
-      "route.finance.employee_advances",
+      "route.finance.advances",
       "route.finance.travel",
       "route.finance.vehicles",
     ]);
@@ -42,7 +42,7 @@ describe("Finance route access and UI contract", () => {
     assert.deepEqual(getVisibleFinanceRoutes({ role: "expense_approver" }).map((route) => route.key), [
       "route.finance.expenses",
       "route.finance.expense_claims",
-      "route.finance.employee_advances",
+      "route.finance.advances",
       "route.finance.travel",
     ]);
 
@@ -50,7 +50,7 @@ describe("Finance route access and UI contract", () => {
       assert.deepEqual(getVisibleFinanceRoutes({ role }).map((route) => route.key), [
         "route.finance.expenses",
         "route.finance.expense_claims",
-        "route.finance.employee_advances",
+        "route.finance.advances",
         "route.finance.travel",
         "route.finance.vehicles",
       ]);
@@ -59,12 +59,15 @@ describe("Finance route access and UI contract", () => {
 
   it("adds a Finance sidebar group while preserving existing navigation hooks", () => {
     const sidebar = source("components/sidebar.tsx");
+    const navConfig = source("lib/nav/config.ts");
+    const routeAccess = source("lib/hrms/route-access.ts");
 
-    for (const token of ["getVisiblePeopleRoutes", "getVisibleTimeRoutes", "getVisibleFinanceRoutes", ">Finance<"]) {
-      assert.match(sidebar, new RegExp(token));
+    for (const token of ["getNavForRole\\(profile\\.role\\)", "getSectionsForRole\\(profile\\.role\\)", ">Finance<"]) {
+      const target = token === ">Finance<" ? navConfig : sidebar;
+      assert.match(target, token === ">Finance<" ? /label: "Finance"/ : new RegExp(token));
     }
     for (const href of ["/expenses", "/expenses/claims", "/expenses/advances", "/travel", "/vehicles"]) {
-      assert.match(sidebar, new RegExp(href.replaceAll("/", "\\/")), `${href} should be linked from Finance navigation`);
+      assert.match(routeAccess, new RegExp(href.replaceAll("/", "\\/")), `${href} should be available through Finance routes`);
     }
   });
 

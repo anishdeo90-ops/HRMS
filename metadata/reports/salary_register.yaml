@@ -5,15 +5,51 @@ items:
     kind: report
     owner: finance
     source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Register }
-    introduced_in_phase: 1
+    introduced_in_phase: 5
     db_table: report_definitions
     ts_export: REPORT_KEYS
-    api_routes: [app/api/reports/payroll/salary-register]
-    ui_surfaces: ["app/(dashboard)/reports/payroll/salary-register/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.payroll.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
     source_tables: [salary_slips, employees]
     filters: [payroll_period, department]
     columns: [employee, gross_pay, deductions, net_pay]
-    permission: permission.metadata.view
+    permission: permission.payroll_reports.view
     export_behavior: csv
     fixture: tests/fixtures/reports/salary_register.json
+  - key: report.payroll.run_summary
+    label: Payroll Run Summary
+    domain: payroll
+    kind: report
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Entry, field_or_state: summary_report }
+    introduced_in_phase: 5
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    source_tables: [payroll_periods, payroll_entries, salary_slips]
+    filters: [payroll_period, status]
+    columns: [period, employee_count, gross_pay, deductions, net_pay, status]
+    permission: permission.payroll_reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/payroll_run_summary.json
+  - key: report.payroll.tax_declarations
+    label: Payroll Tax Declarations
+    domain: payroll
+    kind: report
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Tax Exemption Declaration, field_or_state: report }
+    introduced_in_phase: 5
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    source_tables: [employee_tax_exemption_declarations, employees]
+    filters: [fiscal_year, status]
+    columns: [employee, fiscal_year, declared_amount, approved_amount, status]
+    permission: permission.payroll_reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/payroll_tax_declarations.json

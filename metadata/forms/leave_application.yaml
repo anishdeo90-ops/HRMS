@@ -9,7 +9,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/applications]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-api-contract.test.ts]
     fields:
       - key: employee_id
@@ -64,7 +64,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: label
@@ -89,7 +89,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: name
@@ -120,7 +120,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: name
@@ -145,7 +145,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: leave_type_key
@@ -170,7 +170,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: employee_id
@@ -195,7 +195,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: name
@@ -220,7 +220,7 @@ items:
     db_table: form_schemas
     ts_export: FORM_KEYS
     api_routes: [app/api/hrms/leave/setup]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: name

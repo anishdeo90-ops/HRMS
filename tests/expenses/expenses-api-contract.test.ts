@@ -39,6 +39,37 @@ describe("expense API route source contract", () => {
     }
   });
 
+  it("avoids fragile recursive employees embeds for reporting manager checks", () => {
+    for (const route of routes) {
+      const source = readRoute(route);
+      assert.doesNotMatch(source, /reporting_manager:employees!employees_reporting_manager_id_fkey/, `${route} should avoid PostgREST self-relationship schema-cache dependency`);
+    }
+
+    const accessSource = readFileSync(join(repoRoot, "lib/hrms/employee-access.ts"), "utf8");
+    assert.doesNotMatch(accessSource, /reporting_manager:employees!employees_reporting_manager_id_fkey/, "employee access helper should avoid PostgREST recursive employees embeds");
+    assert.match(accessSource, /employee_id: approverEmployee\?\.id \?\? null/, "current profile should carry employee_id for direct manager comparisons");
+  });
+
+  it("uses explicit employee foreign keys for finance embeds", () => {
+    const expectedEmbeds = new Map([
+      ["app/api/hrms/expenses/claims/route.ts", /employee:employees!expense_claims_employee_id_fkey/],
+      ["app/api/hrms/expenses/claims/[id]/route.ts", /employee:employees!expense_claims_employee_id_fkey/],
+      ["app/api/hrms/expenses/claims/[id]/attachments/route.ts", /employee:employees!expense_claims_employee_id_fkey/],
+      ["app/api/hrms/expenses/advances/route.ts", /employee:employees!employee_advances_employee_id_fkey/],
+      ["app/api/hrms/expenses/advances/[id]/route.ts", /employee:employees!employee_advances_employee_id_fkey/],
+      ["app/api/hrms/travel/requests/route.ts", /employee:employees!travel_requests_employee_id_fkey/],
+      ["app/api/hrms/travel/requests/[id]/route.ts", /employee:employees!travel_requests_employee_id_fkey/],
+      ["app/api/hrms/vehicles/logs/route.ts", /employee:employees!vehicle_logs_employee_id_fkey/],
+      ["app/api/hrms/vehicles/services/route.ts", /employee:employees!vehicle_services_employee_id_fkey/],
+    ]);
+
+    for (const [route, pattern] of expectedEmbeds) {
+      const source = readRoute(route);
+      assert.match(source, pattern, `${route} should qualify the employees embed by FK name`);
+      assert.doesNotMatch(source, /employee:employees\(/, `${route} should not rely on ambiguous employees embeds`);
+    }
+  });
+
   it("uses normalization helpers on create and update routes", () => {
     const expected = new Map([
       ["app/api/hrms/expenses/claims/route.ts", /normalizeExpenseClaimPayload|normalizeExpenseLineItems/],

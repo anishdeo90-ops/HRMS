@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ROLES } from "@/lib/types";
+
+const VALID_PROFILE_ROLES = new Set(ROLES.filter((role) => role.value !== "candidate").map((role) => role.value));
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,6 +14,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (profile?.role !== "admin") return NextResponse.json({ error: "Admin only" }, { status: 403 });
 
   const body = await req.json();
+  if ("role" in body && !VALID_PROFILE_ROLES.has(body.role)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  }
   const allowed = ["name", "role", "department", "is_active", "is_external_recruiter"];
   const updates: Record<string, unknown> = {};
   allowed.forEach(k => { if (k in body) updates[k] = body[k]; });

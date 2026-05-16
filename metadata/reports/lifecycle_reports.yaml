@@ -1,0 +1,109 @@
+items:
+  - key: report.lifecycle.onboarding_progress
+    label: Onboarding Progress
+    domain: lifecycle
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding, field_or_state: report }
+    introduced_in_phase: 7
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.overview, route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    source_tables: [employee_onboardings, employee_boarding_activities, employees]
+    filters: [department, status, due_date]
+    columns: [employee, status, due_date, completed_activities, pending_activities]
+    permission: permission.lifecycle.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/lifecycle_onboarding_progress.json
+  - key: report.lifecycle.separation_pipeline
+    label: Separation Pipeline
+    domain: lifecycle
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: report }
+    introduced_in_phase: 7
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.overview, route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    source_tables: [employee_separations, exit_interviews, employees]
+    filters: [department, status, separation_type]
+    columns: [employee, separation_type, status, last_working_date, exit_interview_status]
+    permission: permission.lifecycle.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/lifecycle_separation_pipeline.json
+  - key: report.lifecycle.promotion_transfer_summary
+    label: Promotion And Transfer Summary
+    domain: lifecycle
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotion Transfer, field_or_state: report }
+    introduced_in_phase: 7
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.promotions, route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    source_tables: [employee_promotions, employee_transfers, employees]
+    filters: [department, status, effective_date]
+    columns: [employee, change_type, old_value, new_value, status, effective_date]
+    permission: permission.lifecycle.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/lifecycle_promotion_transfer_summary.json
+  - key: report.lifecycle.grievance_summary
+    label: Grievance Summary
+    domain: lifecycle
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievance, field_or_state: report }
+    introduced_in_phase: 7
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    source_tables: [employee_grievances, grievance_types, employees]
+    filters: [status, priority, severity]
+    columns: [employee, grievance_type, priority, status, assigned_to]
+    permission: permission.lifecycle.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/lifecycle_grievance_summary.json
+  - key: report.lifecycle.training_participation
+    label: Training Participation
+    domain: lifecycle
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training, field_or_state: report }
+    introduced_in_phase: 7
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    source_tables: [training_programs, training_events, training_feedback, employees]
+    filters: [program, status, start_date]
+    columns: [program, event, employee, status, rating]
+    permission: permission.lifecycle.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/lifecycle_training_participation.json
+  - key: report.lifecycle.daily_work_summary
+    label: Daily Work Summary
+    domain: lifecycle
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Daily Work Summary, field_or_state: report }
+    introduced_in_phase: 7
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    source_tables: [daily_work_summaries, employees]
+    filters: [employee, department, work_date, status]
+    columns: [employee, work_date, status, reviewer]
+    permission: permission.lifecycle.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/lifecycle_daily_work_summary.json

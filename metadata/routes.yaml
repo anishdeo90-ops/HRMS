@@ -9,7 +9,7 @@ items:
     db_table: app_routes
     ts_export: ROUTE_KEYS
     api_routes: []
-    ui_surfaces: ["app/(dashboard)/metadata/governance/page.tsx"]
+    ui_surfaces: []
     tests: [tests/metadata/registry-contract.test.ts]
     roles: [role.admin, role.hr_manager]
     permissions: [permission.metadata.view]
@@ -99,8 +99,8 @@ items:
     db_table: app_routes
     ts_export: ROUTE_KEYS
     api_routes: [app/api/hrms/leave/setup, app/api/hrms/leave/balances, app/api/hrms/leave/applications, app/api/hrms/leave/ledger, app/api/hrms/leave/compensatory, app/api/hrms/leave/encashments]
-    ui_surfaces: ["app/(app)/time/leave/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts, tests/leave/leave-ui-contract.test.ts]
+    ui_surfaces: []
+    tests: [tests/metadata/registry-contract.test.ts]
     roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod, role.leave_approver]
     permissions: [permission.leave.view_self]
     sidebar:
@@ -125,3 +125,524 @@ items:
       show: true
       section: time
       order: 230
+  - key: route.finance.expenses
+    label: Expenses
+    domain: expenses
+    kind: route
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: expenses, artifact: Phase 4 Finance navigation, field_or_state: overview }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/expenses/claims, app/api/hrms/expenses/advances]
+    ui_surfaces: ["app/(app)/expenses/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.finance_manager, role.expense_approver]
+    permissions: [permission.expenses.view_self, permission.employee_advances.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 300
+  - key: route.finance.expense_claims
+    label: Expense Claims
+    domain: expenses
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: route }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/expenses/claims, "app/api/hrms/expenses/claims/[id]", "app/api/hrms/expenses/claims/[id]/attachments"]
+    ui_surfaces: ["app/(app)/expenses/claims/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.finance_manager, role.expense_approver, role.employee, role.hod]
+    permissions: [permission.expenses.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 310
+  - key: route.finance.advances
+    label: Advances
+    domain: expenses
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: route }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/expenses/advances, "app/api/hrms/expenses/advances/[id]"]
+    ui_surfaces: ["app/(app)/expenses/advances/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.finance_manager, role.expense_approver, role.employee, role.hod]
+    permissions: [permission.employee_advances.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 320
+  - key: route.finance.travel
+    label: Travel
+    domain: expenses
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: route }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/travel/requests, "app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: ["app/(app)/travel/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.finance_manager, role.expense_approver, role.employee, role.hod]
+    permissions: [permission.travel_requests.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 330
+  - key: route.finance.vehicles
+    label: Vehicles
+    domain: expenses
+    kind: route
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Logs, field_or_state: route }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/vehicles/logs, app/api/hrms/vehicles/services]
+    ui_surfaces: ["app/(app)/vehicles/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.finance_manager, role.employee]
+    permissions: [permission.vehicles.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 340
+  - key: route.finance.approvals
+    label: Finance Approvals
+    domain: expenses
+    kind: route
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: expenses, artifact: Phase 4 Finance navigation, field_or_state: approvals }
+    introduced_in_phase: 4
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: ["app/api/hrms/expenses/claims/[id]", "app/api/hrms/expenses/advances/[id]", "app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: ["app/(app)/expenses/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-ui-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.finance_manager, role.expense_approver, role.hod]
+    permissions: [permission.expenses.approve, permission.employee_advances.approve, permission.travel_requests.approve]
+    sidebar:
+      show: true
+      section: finance
+      order: 350
+  - key: route.payroll.overview
+    label: Payroll
+    domain: payroll
+    kind: route
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: payroll, artifact: Phase 5 Payroll navigation, field_or_state: overview }
+    introduced_in_phase: 5
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: ["app/(app)/payroll/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.payroll_manager]
+    permissions: [permission.payroll.view]
+    sidebar:
+      show: true
+      section: finance
+      order: 360
+  - key: route.payroll.salary_structures
+    label: Salary Structures
+    domain: payroll
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure, field_or_state: route }
+    introduced_in_phase: 5
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/payroll/salary-components, app/api/hrms/payroll/salary-structures]
+    ui_surfaces: ["app/(app)/payroll/salary-structures/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.payroll_manager]
+    permissions: [permission.salary_structures.manage]
+    sidebar:
+      show: true
+      section: finance
+      order: 370
+  - key: route.payroll.runs
+    label: Payroll Runs
+    domain: payroll
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Entry, field_or_state: route }
+    introduced_in_phase: 5
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/payroll/runs, "app/api/hrms/payroll/runs/[id]"]
+    ui_surfaces: ["app/(app)/payroll/runs/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.payroll_manager]
+    permissions: [permission.payroll_entries.manage]
+    sidebar:
+      show: true
+      section: finance
+      order: 380
+  - key: route.payroll.salary_slips
+    label: Salary Slips
+    domain: payroll
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: route }
+    introduced_in_phase: 5
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/payroll/salary-slips, "app/api/hrms/payroll/salary-slips"]
+    ui_surfaces: ["app/(app)/payroll/salary-slips/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.payroll_manager, role.employee]
+    permissions: [permission.salary_slips.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 390
+  - key: route.payroll.tax_benefits
+    label: Tax and Benefits
+    domain: payroll
+    kind: route
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Tax and Benefits, field_or_state: route }
+    introduced_in_phase: 5
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: ["app/(app)/payroll/tax-benefits/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.payroll_manager, role.employee]
+    permissions: [permission.tax_declarations.view_self, permission.benefits.view_self]
+    sidebar:
+      show: true
+      section: finance
+      order: 400
+  - key: route.performance.overview
+    label: Performance
+    domain: performance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance navigation, field_or_state: overview }
+    introduced_in_phase: 6
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/performance/goals, app/api/hrms/performance/appraisals]
+    ui_surfaces: ["app/(app)/performance/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.performance.view_self, permission.performance.view_team]
+    sidebar:
+      show: true
+      section: performance
+      order: 500
+      enabled: false
+  - key: route.performance.goals
+    label: Goals
+    domain: performance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance navigation, field_or_state: goals }
+    introduced_in_phase: 6
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: ["app/(app)/performance/goals/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.performance.view_self, permission.performance.goals.update]
+    sidebar:
+      show: true
+      section: performance
+      order: 510
+      enabled: false
+  - key: route.performance.appraisals
+    label: Appraisals
+    domain: performance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance navigation, field_or_state: appraisals }
+    introduced_in_phase: 6
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: ["app/(app)/performance/appraisals/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.performance.view_self, permission.performance.appraisals.submit, permission.performance.appraisals.review]
+    sidebar:
+      show: true
+      section: performance
+      order: 520
+      enabled: false
+  - key: route.performance.feedback
+    label: Feedback
+    domain: performance
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Performance navigation, field_or_state: feedback }
+    introduced_in_phase: 6
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/performance/feedback]
+    ui_surfaces: ["app/(app)/performance/feedback/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.performance.feedback.submit, permission.performance.feedback.manage]
+    sidebar:
+      show: true
+      section: performance
+      order: 530
+      enabled: false
+  - key: route.lifecycle.overview
+    label: Lifecycle
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: overview }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/lifecycle]
+    ui_surfaces: ["app/(app)/lifecycle/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.lifecycle.view_self, permission.lifecycle.view_team]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 600
+      enabled: false
+  - key: route.lifecycle.onboarding
+    label: Onboarding
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: onboarding }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: ["app/(app)/lifecycle/onboarding/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.lifecycle.view_self, permission.onboarding.manage]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 610
+      enabled: false
+  - key: route.lifecycle.separation
+    label: Separation
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: separation }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: ["app/(app)/lifecycle/separation/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.separation.request, permission.separation.approve]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 620
+      enabled: false
+  - key: route.lifecycle.promotions
+    label: Promotions
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: promotions }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: ["app/(app)/lifecycle/promotions/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.promotions.manage, permission.promotions.approve]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 630
+      enabled: false
+  - key: route.lifecycle.transfers
+    label: Transfers
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: transfers }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: ["app/(app)/lifecycle/transfers/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.transfers.manage, permission.transfers.approve]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 640
+      enabled: false
+  - key: route.lifecycle.grievances
+    label: Grievances
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: grievances }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: ["app/(app)/grievances/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.grievances.view_self, permission.grievances.manage, permission.grievances.resolve]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 650
+      enabled: false
+  - key: route.lifecycle.training
+    label: Training
+    domain: lifecycle
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Lifecycle navigation, field_or_state: training }
+    introduced_in_phase: 7
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/training/programs, app/api/hrms/training/events, app/api/hrms/training/feedback]
+    ui_surfaces: ["app/(app)/training/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.employee, role.hod]
+    permissions: [permission.training.manage, permission.training.feedback.submit]
+    sidebar:
+      show: true
+      section: lifecycle
+      order: 660
+      enabled: false
+  - key: route.self_service.overview
+    label: Self Service
+    domain: self_service
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Self Service navigation, field_or_state: overview }
+    introduced_in_phase: 8
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/self-service/summary]
+    ui_surfaces: ["app/(app)/self-service/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-ui-contract.test.ts]
+    roles: [role.employee]
+    permissions: [permission.self_service.view, permission.self_service.profile.view]
+    sidebar:
+      show: true
+      section: self_service
+      order: 100
+      enabled: true
+  - key: route.self_service.notifications
+    label: Notifications
+    domain: self_service
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Self Service navigation, field_or_state: notifications }
+    introduced_in_phase: 8
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/self-service/notifications]
+    ui_surfaces: ["app/(app)/self-service/notifications/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-ui-contract.test.ts]
+    roles: [role.employee]
+    permissions: [permission.self_service.notifications.view, permission.self_service.notifications.acknowledge]
+    sidebar:
+      show: true
+      section: self_service
+      order: 110
+      enabled: true
+  - key: route.reports.overview
+    label: Reports
+    domain: reports
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Reports navigation, field_or_state: overview }
+    introduced_in_phase: 9
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/reports, app/api/hrms/automation]
+    ui_surfaces: ["app/(app)/reports/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.finance_manager, role.payroll_manager]
+    permissions: [permission.reports.view]
+    sidebar:
+      show: true
+      section: reports
+      order: 700
+      enabled: false
+  - key: route.reports.dashboards
+    label: Dashboards
+    domain: reports
+    kind: route
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: dashboards, artifact: Phase 9 Dashboards navigation, field_or_state: overview }
+    introduced_in_phase: 9
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/dashboards]
+    ui_surfaces: ["app/(app)/reports/dashboards/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.finance_manager, role.payroll_manager]
+    permissions: [permission.dashboards.view]
+    sidebar:
+      show: true
+      section: reports
+      order: 710
+      enabled: false
+  - key: route.recruitment.overview
+    label: Recruitment
+    domain: recruitment
+    kind: route
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Recruitment navigation, field_or_state: overview }
+    introduced_in_phase: 10
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/recruitment]
+    ui_surfaces: ["app/(app)/recruitment/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.recruiter, role.hod, role.interviewer]
+    permissions: [permission.recruitment.view]
+    sidebar:
+      show: true
+      section: recruiting
+      order: 120
+      enabled: false
+  - key: route.recruitment.appointments
+    label: Appointment Letters
+    domain: recruitment
+    kind: route
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letters navigation, field_or_state: appointments }
+    introduced_in_phase: 10
+    db_table: app_routes
+    ts_export: ROUTE_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments, app/api/hrms/recruitment/handoffs]
+    ui_surfaces: ["app/(app)/recruitment/appointments/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    roles: [role.admin, role.hr_manager, role.hr_user, role.recruiter]
+    permissions: [permission.recruitment.appointment_letters.manage]
+    sidebar:
+      show: true
+      section: recruiting
+      order: 130
+      enabled: false

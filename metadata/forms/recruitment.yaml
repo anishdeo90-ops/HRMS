@@ -1,0 +1,280 @@
+items:
+  - key: form.recruitment.job_opening
+    label: Job Opening
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Opening, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: title
+        type: text
+        storage_mapping: jobs.title
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-job-opening-title
+      - key: status
+        type: select
+        storage_mapping: jobs.status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-job-opening-status
+      - key: headcount
+        type: number
+        storage_mapping: jobs.headcount
+        validation: [required, positive]
+        privacy_class: work
+        test_id: recruitment-job-opening-headcount
+  - key: form.recruitment.job_applicant
+    label: Job Applicant
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Applicant, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: candidates.name
+        validation: [required]
+        privacy_class: personal
+        test_id: recruitment-applicant-name
+      - key: mobile
+        type: phone
+        storage_mapping: candidates.mobile
+        validation: [optional]
+        privacy_class: personal
+        test_id: recruitment-applicant-mobile
+      - key: job_id
+        type: job_opening_reference
+        storage_mapping: candidates.job_id
+        validation: [optional]
+        privacy_class: work
+        test_id: recruitment-applicant-job-opening
+  - key: form.recruitment.interview_feedback
+    label: Interview Feedback
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Interview Feedback, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/interviews]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: status
+        type: select
+        storage_mapping: interviews.status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-interview-status
+      - key: outcome
+        type: select
+        storage_mapping: interviews.outcome
+        validation: [optional]
+        privacy_class: work
+        test_id: recruitment-interview-outcome
+      - key: notes
+        type: textarea
+        storage_mapping: interviews.notes
+        validation: [optional]
+        privacy_class: confidential
+        test_id: recruitment-interview-notes
+  - key: form.recruitment.job_offer
+    label: Job Offer
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Offer, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/offers]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: annual_ctc
+        type: currency
+        storage_mapping: candidate_offers.annual_ctc
+        validation: [optional, non_negative]
+        privacy_class: compensation
+        test_id: recruitment-offer-annual-ctc
+      - key: joining_date
+        type: date
+        storage_mapping: candidate_offers.joining_date
+        validation: [optional]
+        privacy_class: work
+        test_id: recruitment-offer-joining-date
+      - key: status
+        type: select
+        storage_mapping: candidate_offers.status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-offer-status
+  - key: form.recruitment.job_requisition
+    label: Job Requisition
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Requisition, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: title
+        type: text
+        storage_mapping: hiring_requests.title
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-requisition-title
+      - key: headcount
+        type: number
+        storage_mapping: hiring_requests.headcount
+        validation: [required, positive]
+        privacy_class: work
+        test_id: recruitment-requisition-headcount
+      - key: status
+        type: select
+        storage_mapping: hiring_requests.status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-requisition-status
+  - key: form.recruitment.status_mapping
+    label: Recruitment Status Mapping
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Status Mapping, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: entity_type
+        type: select
+        storage_mapping: recruitment_status_mappings.entity_type
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-status-mapping-entity
+      - key: ats_status
+        type: text
+        storage_mapping: recruitment_status_mappings.ats_status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-status-mapping-ats-status
+      - key: hrms_status
+        type: text
+        storage_mapping: recruitment_status_mappings.hrms_status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-status-mapping-hrms-status
+  - key: form.recruitment.appointment_letter_template
+    label: Appointment Letter Template
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letter Template, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments/templates]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: template_key
+        type: text
+        storage_mapping: recruitment_appointment_letter_templates.template_key
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-appointment-template-key
+      - key: title
+        type: text
+        storage_mapping: recruitment_appointment_letter_templates.title
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-appointment-template-title
+      - key: body_template
+        type: rich_text
+        storage_mapping: recruitment_appointment_letter_templates.body_template
+        validation: [required]
+        privacy_class: confidential
+        test_id: recruitment-appointment-template-body
+  - key: form.recruitment.appointment_letter
+    label: Appointment Letter
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letter, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: candidate_id
+        type: candidate_reference
+        storage_mapping: recruitment_appointment_letters.candidate_id
+        validation: [required]
+        privacy_class: personal
+        test_id: recruitment-appointment-letter-candidate
+      - key: status
+        type: select
+        storage_mapping: recruitment_appointment_letters.status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-appointment-letter-status
+      - key: effective_joining_date
+        type: date
+        storage_mapping: recruitment_appointment_letters.effective_joining_date
+        validation: [optional]
+        privacy_class: work
+        test_id: recruitment-appointment-letter-joining-date
+  - key: form.recruitment.onboarding_handoff
+    label: Onboarding Handoff
+    domain: recruitment
+    kind: form
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Onboarding Handoff, field_or_state: form }
+    introduced_in_phase: 10
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/recruitment/handoffs]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    fields:
+      - key: candidate_id
+        type: candidate_reference
+        storage_mapping: recruitment_onboarding_handoffs.candidate_id
+        validation: [required]
+        privacy_class: personal
+        test_id: recruitment-handoff-candidate
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: recruitment_onboarding_handoffs.employee_id
+        validation: [optional]
+        privacy_class: personal
+        test_id: recruitment-handoff-employee
+      - key: status
+        type: select
+        storage_mapping: recruitment_onboarding_handoffs.status
+        validation: [required]
+        privacy_class: work
+        test_id: recruitment-handoff-status

@@ -9,5 +9,5 @@ items:
     db_table: metadata_registry
     ts_export: METADATA_KEYS
     api_routes: [app/api/jobs]
-    ui_surfaces: ["app/(dashboard)/jobs/page.tsx"]
+    ui_surfaces: ["app/(app)/jobs/page.tsx"]
     tests: [tests/metadata/registry-contract.test.ts]

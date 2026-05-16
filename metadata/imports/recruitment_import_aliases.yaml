@@ -1,0 +1,109 @@
+items:
+  - key: import_alias.job.opening_title
+    label: Job Opening Title Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Import, field_or_state: opening_title }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/jobs, app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.job.requisition_code
+    label: Job Requisition Code Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Import, field_or_state: requisition_code }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hiring-requests, app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.job.department
+    label: Job Department Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Import, field_or_state: department }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/jobs, app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.job.hiring_manager
+    label: Hiring Manager Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Import, field_or_state: hiring_manager }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/jobs, app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.candidate.applicant_name
+    label: Applicant Name Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Candidate Import, field_or_state: applicant_name }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/import, app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.candidate.email
+    label: Applicant Email Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Candidate Import, field_or_state: email }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/import, app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.candidate.source
+    label: Applicant Source Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Candidate Import, field_or_state: source }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/import, app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.candidate.job_opening
+    label: Applicant Job Opening Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Candidate Import, field_or_state: job_opening }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/import, app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: import_alias.recruitment.appointment_letter.candidate_id
+    label: Appointment Letter Candidate Alias
+    domain: recruitment
+    kind: import_alias
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letter Import, field_or_state: candidate_id }
+    introduced_in_phase: 10
+    db_table: metadata_registry
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts]

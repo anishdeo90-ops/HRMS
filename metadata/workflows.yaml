@@ -176,3 +176,923 @@ items:
         permission: permission.overtime.manage
     terminal_states: [approved, rejected, cancelled]
     permissions: [permission.overtime.manage, permission.overtime.approve]
+  - key: workflow.expense_claim.status
+    label: Expense Claim Status
+    domain: expenses
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/expenses/claims, "app/api/hrms/expenses/claims/[id]"]
+    ui_surfaces: [route.finance.expense_claims, route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled, paid]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.expenses.manage
+      - from: submitted
+        to: approved
+        permission: permission.expenses.approve
+      - from: submitted
+        to: rejected
+        permission: permission.expenses.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.expenses.manage
+      - from: approved
+        to: paid
+        permission: permission.expenses.manage
+      - from: draft
+        to: cancelled
+        permission: permission.expenses.manage
+    terminal_states: [rejected, cancelled, paid]
+    permissions: [permission.expenses.manage, permission.expenses.approve]
+  - key: workflow.employee_advance.status
+    label: Employee Advance Status
+    domain: expenses
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/expenses/advances, "app/api/hrms/expenses/advances/[id]"]
+    ui_surfaces: [route.finance.advances, route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled, settled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.employee_advances.manage
+      - from: submitted
+        to: approved
+        permission: permission.employee_advances.approve
+      - from: submitted
+        to: rejected
+        permission: permission.employee_advances.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.employee_advances.manage
+      - from: approved
+        to: settled
+        permission: permission.employee_advances.manage
+      - from: draft
+        to: cancelled
+        permission: permission.employee_advances.manage
+    terminal_states: [rejected, cancelled, settled]
+    permissions: [permission.employee_advances.manage, permission.employee_advances.approve]
+  - key: workflow.travel_request.status
+    label: Travel Request Status
+    domain: expenses
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/travel/requests, "app/api/hrms/travel/requests/[id]"]
+    ui_surfaces: [route.finance.travel, route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled, completed]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.travel_requests.manage
+      - from: submitted
+        to: approved
+        permission: permission.travel_requests.approve
+      - from: submitted
+        to: rejected
+        permission: permission.travel_requests.approve
+      - from: submitted
+        to: cancelled
+        permission: permission.travel_requests.manage
+      - from: approved
+        to: completed
+        permission: permission.travel_requests.manage
+      - from: draft
+        to: cancelled
+        permission: permission.travel_requests.manage
+    terminal_states: [rejected, cancelled, completed]
+    permissions: [permission.travel_requests.manage, permission.travel_requests.approve]
+  - key: workflow.vehicle_service.status
+    label: Vehicle Service Status
+    domain: expenses
+    kind: workflow
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Service, field_or_state: status }
+    introduced_in_phase: 4
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/vehicles/services]
+    ui_surfaces: [route.finance.vehicles]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.vehicles.manage
+      - from: submitted
+        to: approved
+        permission: permission.vehicles.manage
+      - from: submitted
+        to: rejected
+        permission: permission.vehicles.manage
+      - from: submitted
+        to: cancelled
+        permission: permission.vehicles.manage
+      - from: draft
+        to: cancelled
+        permission: permission.vehicles.manage
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.vehicles.manage]
+  - key: workflow.payroll.period_status
+    label: Payroll Period Status
+    domain: payroll
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Period, field_or_state: status }
+    introduced_in_phase: 5
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    states: [draft, open, processing, submitted, locked, cancelled]
+    transitions:
+      - from: draft
+        to: open
+        permission: permission.payroll_periods.manage
+      - from: open
+        to: processing
+        permission: permission.payroll_entries.manage
+      - from: processing
+        to: submitted
+        permission: permission.salary_slips.submit
+      - from: submitted
+        to: locked
+        permission: permission.payroll.manage
+      - from: open
+        to: cancelled
+        permission: permission.payroll.manage
+    terminal_states: [locked, cancelled]
+    permissions: [permission.payroll_periods.manage, permission.payroll_entries.manage, permission.payroll.manage]
+  - key: workflow.payroll.entry_status
+    label: Payroll Entry Status
+    domain: payroll
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Entry, field_or_state: status }
+    introduced_in_phase: 5
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/payroll/runs, "app/api/hrms/payroll/runs/[id]"]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    states: [draft, calculated, approved, paid, cancelled]
+    transitions:
+      - from: draft
+        to: calculated
+        permission: permission.payroll_entries.manage
+      - from: calculated
+        to: approved
+        permission: permission.payroll.manage
+      - from: approved
+        to: paid
+        permission: permission.payroll.manage
+      - from: draft
+        to: cancelled
+        permission: permission.payroll.manage
+    terminal_states: [paid, cancelled]
+    permissions: [permission.payroll_entries.manage, permission.payroll.manage]
+  - key: workflow.payroll.salary_slip_status
+    label: Salary Slip Status
+    domain: payroll
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: status }
+    introduced_in_phase: 5
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/payroll/salary-slips, "app/api/hrms/payroll/salary-slips"]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    states: [draft, calculated, approved, paid, cancelled]
+    transitions:
+      - from: draft
+        to: calculated
+        permission: permission.salary_slips.manage
+      - from: calculated
+        to: approved
+        permission: permission.salary_slips.submit
+      - from: approved
+        to: paid
+        permission: permission.salary_slips.manage
+      - from: draft
+        to: cancelled
+        permission: permission.salary_slips.cancel
+    terminal_states: [paid, cancelled]
+    permissions: [permission.salary_slips.manage, permission.salary_slips.submit, permission.salary_slips.cancel]
+  - key: workflow.payroll.tax_declaration_status
+    label: Tax Declaration Status
+    domain: payroll
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Tax Exemption Declaration, field_or_state: status }
+    introduced_in_phase: 5
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    states: [draft, submitted, approved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.tax_declarations.view_self
+      - from: submitted
+        to: approved
+        permission: permission.tax_declarations.manage
+      - from: submitted
+        to: rejected
+        permission: permission.tax_declarations.manage
+    terminal_states: [approved, rejected, cancelled]
+    permissions: [permission.tax_declarations.view_self, permission.tax_declarations.manage]
+  - key: workflow.payroll.benefit_claim_status
+    label: Benefit Claim Status
+    domain: payroll
+    kind: workflow
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Benefit Claim, field_or_state: status }
+    introduced_in_phase: 5
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    states: [draft, submitted, approved, rejected, paid, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.benefits.view_self
+      - from: submitted
+        to: approved
+        permission: permission.benefits.manage
+      - from: submitted
+        to: rejected
+        permission: permission.benefits.manage
+      - from: approved
+        to: paid
+        permission: permission.benefits.manage
+    terminal_states: [rejected, paid, cancelled]
+    permissions: [permission.benefits.view_self, permission.benefits.manage]
+  - key: workflow.performance.goal_status
+    label: Performance Goal Status
+    domain: performance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Goals, field_or_state: status }
+    introduced_in_phase: 6
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/performance/goals]
+    ui_surfaces: [route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    states: [draft, active, submitted, approved, closed, cancelled]
+    transitions:
+      - from: draft
+        to: active
+        permission: permission.performance.goals.manage
+      - from: active
+        to: submitted
+        permission: permission.performance.goals.update
+      - from: submitted
+        to: approved
+        permission: permission.performance.appraisals.review
+      - from: approved
+        to: closed
+        permission: permission.performance.manage
+      - from: draft
+        to: cancelled
+        permission: permission.performance.goals.manage
+    terminal_states: [closed, cancelled]
+    permissions: [permission.performance.goals.manage, permission.performance.goals.update, permission.performance.appraisals.review]
+  - key: workflow.performance.appraisal_cycle_status
+    label: Appraisal Cycle Status
+    domain: performance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal Cycle, field_or_state: status }
+    introduced_in_phase: 6
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    states: [draft, active, review_open, closed, cancelled]
+    transitions:
+      - from: draft
+        to: active
+        permission: permission.performance.cycles.manage
+      - from: active
+        to: review_open
+        permission: permission.performance.cycles.manage
+      - from: review_open
+        to: closed
+        permission: permission.performance.manage
+      - from: draft
+        to: cancelled
+        permission: permission.performance.cycles.manage
+    terminal_states: [closed, cancelled]
+    permissions: [permission.performance.cycles.manage, permission.performance.manage]
+  - key: workflow.performance.appraisal_status
+    label: Appraisal Status
+    domain: performance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal, field_or_state: status }
+    introduced_in_phase: 6
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/performance/appraisals]
+    ui_surfaces: [route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    states: [draft, self_submitted, manager_reviewed, approved, rejected, closed, cancelled]
+    transitions:
+      - from: draft
+        to: self_submitted
+        permission: permission.performance.appraisals.submit
+      - from: self_submitted
+        to: manager_reviewed
+        permission: permission.performance.appraisals.review
+      - from: manager_reviewed
+        to: approved
+        permission: permission.performance.manage
+      - from: manager_reviewed
+        to: rejected
+        permission: permission.performance.manage
+      - from: approved
+        to: closed
+        permission: permission.performance.manage
+      - from: draft
+        to: cancelled
+        permission: permission.performance.manage
+    terminal_states: [rejected, closed, cancelled]
+    permissions: [permission.performance.appraisals.submit, permission.performance.appraisals.review, permission.performance.manage]
+  - key: workflow.performance.feedback_status
+    label: Performance Feedback Status
+    domain: performance
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Feedback, field_or_state: status }
+    introduced_in_phase: 6
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/performance/feedback]
+    ui_surfaces: [route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    states: [draft, submitted, reviewed, archived, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.performance.feedback.submit
+      - from: submitted
+        to: reviewed
+        permission: permission.performance.feedback.manage
+      - from: reviewed
+        to: archived
+        permission: permission.performance.manage
+      - from: draft
+        to: cancelled
+        permission: permission.performance.feedback.submit
+    terminal_states: [archived, cancelled]
+    permissions: [permission.performance.feedback.submit, permission.performance.feedback.manage, permission.performance.manage]
+  - key: workflow.lifecycle.onboarding_status
+    label: Onboarding Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Onboarding, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding]
+    ui_surfaces: [route.lifecycle.onboarding]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, active, completed, cancelled]
+    transitions:
+      - from: draft
+        to: active
+        permission: permission.onboarding.manage
+      - from: active
+        to: completed
+        permission: permission.onboarding.manage
+      - from: draft
+        to: cancelled
+        permission: permission.onboarding.manage
+    terminal_states: [completed, cancelled]
+    permissions: [permission.onboarding.manage]
+  - key: workflow.lifecycle.boarding_activity_status
+    label: Boarding Activity Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Boarding Activity, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/lifecycle/onboarding, app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.onboarding, route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [pending, in_progress, completed, skipped, cancelled]
+    transitions:
+      - from: pending
+        to: in_progress
+        permission: permission.onboarding.activities.update
+      - from: in_progress
+        to: completed
+        permission: permission.onboarding.activities.update
+      - from: pending
+        to: skipped
+        permission: permission.onboarding.activities.update
+    terminal_states: [completed, skipped, cancelled]
+    permissions: [permission.onboarding.activities.update, permission.onboarding.manage]
+  - key: workflow.lifecycle.separation_status
+    label: Separation Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Separation, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/lifecycle/separation]
+    ui_surfaces: [route.lifecycle.separation]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, submitted, approved, rejected, exit_pending, exited, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.separation.request
+      - from: submitted
+        to: approved
+        permission: permission.separation.approve
+      - from: submitted
+        to: rejected
+        permission: permission.separation.approve
+      - from: approved
+        to: exit_pending
+        permission: permission.separation.approve
+      - from: exit_pending
+        to: exited
+        permission: permission.lifecycle.manage
+    terminal_states: [rejected, exited, cancelled]
+    permissions: [permission.separation.request, permission.separation.approve, permission.lifecycle.manage]
+  - key: workflow.lifecycle.promotion_status
+    label: Promotion Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Promotion, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/lifecycle/promotions]
+    ui_surfaces: [route.lifecycle.promotions]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, submitted, approved, rejected, applied, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.promotions.manage
+      - from: submitted
+        to: approved
+        permission: permission.promotions.approve
+      - from: approved
+        to: applied
+        permission: permission.lifecycle.manage
+    terminal_states: [rejected, applied, cancelled]
+    permissions: [permission.promotions.manage, permission.promotions.approve, permission.lifecycle.manage]
+  - key: workflow.lifecycle.transfer_status
+    label: Transfer Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Transfer, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/lifecycle/transfers]
+    ui_surfaces: [route.lifecycle.transfers]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, submitted, approved, rejected, applied, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.transfers.manage
+      - from: submitted
+        to: approved
+        permission: permission.transfers.approve
+      - from: approved
+        to: applied
+        permission: permission.lifecycle.manage
+    terminal_states: [rejected, applied, cancelled]
+    permissions: [permission.transfers.manage, permission.transfers.approve, permission.lifecycle.manage]
+  - key: workflow.lifecycle.grievance_status
+    label: Grievance Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Grievance, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/grievances]
+    ui_surfaces: [route.lifecycle.grievances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, submitted, assigned, under_review, resolved, rejected, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.grievances.view_self
+      - from: submitted
+        to: assigned
+        permission: permission.grievances.manage
+      - from: assigned
+        to: under_review
+        permission: permission.grievances.resolve
+      - from: under_review
+        to: resolved
+        permission: permission.grievances.resolve
+    terminal_states: [resolved, rejected, cancelled]
+    permissions: [permission.grievances.view_self, permission.grievances.manage, permission.grievances.resolve]
+  - key: workflow.lifecycle.training_event_status
+    label: Training Event Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Training Event, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/training/events]
+    ui_surfaces: [route.lifecycle.training]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, scheduled, in_progress, completed, cancelled]
+    transitions:
+      - from: draft
+        to: scheduled
+        permission: permission.training.manage
+      - from: scheduled
+        to: in_progress
+        permission: permission.training.manage
+      - from: in_progress
+        to: completed
+        permission: permission.training.manage
+    terminal_states: [completed, cancelled]
+    permissions: [permission.training.manage]
+  - key: workflow.lifecycle.daily_work_summary_status
+    label: Daily Work Summary Status
+    domain: lifecycle
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: lifecycle, artifact: Phase 7 Daily Work Summary, field_or_state: status }
+    introduced_in_phase: 7
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/lifecycle/daily-summaries]
+    ui_surfaces: [route.lifecycle.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/lifecycle/lifecycle-sql.test.ts]
+    states: [draft, submitted, reviewed, archived, cancelled]
+    transitions:
+      - from: draft
+        to: submitted
+        permission: permission.daily_work_summaries.submit
+      - from: submitted
+        to: reviewed
+        permission: permission.daily_work_summaries.view_team
+      - from: reviewed
+        to: archived
+        permission: permission.lifecycle.manage
+    terminal_states: [archived, cancelled]
+    permissions: [permission.daily_work_summaries.submit, permission.daily_work_summaries.view_team, permission.lifecycle.manage]
+  - key: workflow.self_service.notification_status
+    label: Notification Status
+    domain: self_service
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: self_service, artifact: Phase 8 Notifications, field_or_state: status }
+    introduced_in_phase: 8
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/self-service/notifications]
+    ui_surfaces: [route.self_service.notifications]
+    tests: [tests/metadata/registry-contract.test.ts, tests/self-service/self-service-sql.test.ts]
+    states: [unread, read, archived]
+    transitions:
+      - from: unread
+        to: read
+        permission: permission.self_service.notifications.acknowledge
+      - from: read
+        to: archived
+        permission: permission.self_service.notifications.acknowledge
+      - from: archived
+        to: unread
+        permission: permission.self_service.notifications.manage
+    terminal_states: [archived]
+    permissions: [permission.self_service.notifications.acknowledge, permission.self_service.notifications.manage]
+  - key: workflow.reports.report_run_status
+    label: Report Run Status
+    domain: reports
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Report Runs, field_or_state: status }
+    introduced_in_phase: 9
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    states: [queued, running, completed, failed, cancelled]
+    transitions:
+      - from: queued
+        to: running
+        permission: permission.reports.view
+      - from: running
+        to: completed
+        permission: permission.reports.view
+      - from: running
+        to: failed
+        permission: permission.reports.view
+      - from: queued
+        to: cancelled
+        permission: permission.reports.view
+    terminal_states: [completed, failed, cancelled]
+    permissions: [permission.reports.view, permission.reports.export]
+  - key: workflow.reports.notification_rule_status
+    label: Notification Rule Status
+    domain: reports
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: notifications, artifact: Phase 9 Notification Rules, field_or_state: status }
+    introduced_in_phase: 9
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/automation/notifications]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    states: [draft, active, paused, archived]
+    transitions:
+      - from: draft
+        to: active
+        permission: permission.notification_rules.manage
+      - from: active
+        to: paused
+        permission: permission.notification_rules.manage
+      - from: paused
+        to: active
+        permission: permission.notification_rules.manage
+      - from: paused
+        to: archived
+        permission: permission.notification_rules.manage
+    terminal_states: [archived]
+    permissions: [permission.notification_rules.view, permission.notification_rules.manage]
+  - key: workflow.reports.automation_rule_status
+    label: Automation Rule Status
+    domain: reports
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Rules, field_or_state: status }
+    introduced_in_phase: 9
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/automation]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    states: [draft, active, paused, archived]
+    transitions:
+      - from: draft
+        to: active
+        permission: permission.automation_rules.manage
+      - from: active
+        to: paused
+        permission: permission.automation_rules.manage
+      - from: paused
+        to: active
+        permission: permission.automation_rules.manage
+      - from: paused
+        to: archived
+        permission: permission.automation_rules.manage
+    terminal_states: [archived]
+    permissions: [permission.automation_rules.view, permission.automation_rules.manage]
+  - key: workflow.reports.automation_execution_status
+    label: Automation Execution Status
+    domain: reports
+    kind: workflow
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Executions, field_or_state: status }
+    introduced_in_phase: 9
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/automation/runs]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    states: [queued, running, succeeded, failed, skipped, cancelled]
+    transitions:
+      - from: queued
+        to: running
+        permission: permission.automation_executions.run
+      - from: running
+        to: succeeded
+        permission: permission.automation_executions.run
+      - from: running
+        to: failed
+        permission: permission.automation_executions.run
+      - from: queued
+        to: skipped
+        permission: permission.automation_executions.run
+      - from: queued
+        to: cancelled
+        permission: permission.automation_rules.manage
+    terminal_states: [succeeded, failed, skipped, cancelled]
+    permissions: [permission.automation_executions.view, permission.automation_executions.run]
+  - key: workflow.recruitment.job_opening_status
+    label: Job Opening Status
+    domain: recruitment
+    kind: workflow
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Openings, field_or_state: status }
+    introduced_in_phase: 10
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/recruitment/jobs]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    states: [draft, open, on_hold, filled, cancelled]
+    transitions:
+      - from: draft
+        to: open
+        permission: permission.recruitment.job_openings.manage
+      - from: open
+        to: on_hold
+        permission: permission.recruitment.job_openings.manage
+      - from: on_hold
+        to: open
+        permission: permission.recruitment.job_openings.manage
+      - from: open
+        to: filled
+        permission: permission.recruitment.job_openings.manage
+      - from: draft
+        to: cancelled
+        permission: permission.recruitment.job_openings.manage
+    terminal_states: [filled, cancelled]
+    permissions: [permission.recruitment.view, permission.recruitment.job_openings.manage]
+  - key: workflow.recruitment.applicant_status
+    label: Job Applicant Status
+    domain: recruitment
+    kind: workflow
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Applicants, field_or_state: status }
+    introduced_in_phase: 10
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/recruitment/applicants]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    states: [sourced, shortlisted, interviewed, offered, joined, rejected, withdrawn, on_hold]
+    transitions:
+      - from: sourced
+        to: shortlisted
+        permission: permission.recruitment.applicants.manage
+      - from: shortlisted
+        to: interviewed
+        permission: permission.recruitment.interviews.manage
+      - from: interviewed
+        to: offered
+        permission: permission.recruitment.offers.manage
+      - from: offered
+        to: joined
+        permission: permission.recruitment.handoffs.manage
+      - from: sourced
+        to: rejected
+        permission: permission.recruitment.applicants.manage
+    terminal_states: [joined, rejected, withdrawn]
+    permissions: [permission.recruitment.applicants.view, permission.recruitment.applicants.manage]
+  - key: workflow.recruitment.interview_status
+    label: Recruitment Interview Status
+    domain: recruitment
+    kind: workflow
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Interviews, field_or_state: status }
+    introduced_in_phase: 10
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/recruitment/interviews]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    states: [scheduled, completed, feedback_submitted, cancelled, no_show]
+    transitions:
+      - from: scheduled
+        to: completed
+        permission: permission.recruitment.interviews.manage
+      - from: completed
+        to: feedback_submitted
+        permission: permission.recruitment.interviews.feedback.submit
+      - from: scheduled
+        to: cancelled
+        permission: permission.recruitment.interviews.manage
+    terminal_states: [feedback_submitted, cancelled, no_show]
+    permissions: [permission.recruitment.interviews.manage, permission.recruitment.interviews.feedback.submit]
+  - key: workflow.recruitment.offer_status
+    label: Job Offer Status
+    domain: recruitment
+    kind: workflow
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Job Offers, field_or_state: status }
+    introduced_in_phase: 10
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/recruitment/offers]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    states: [draft, ctc_sent, ctc_confirmed, offer_sent, offer_confirmed, joined, withdrawn]
+    transitions:
+      - from: draft
+        to: ctc_sent
+        permission: permission.recruitment.offers.manage
+      - from: ctc_sent
+        to: ctc_confirmed
+        permission: permission.recruitment.offers.manage
+      - from: ctc_confirmed
+        to: offer_sent
+        permission: permission.recruitment.offers.manage
+      - from: offer_sent
+        to: offer_confirmed
+        permission: permission.recruitment.offers.manage
+      - from: offer_confirmed
+        to: joined
+        permission: permission.recruitment.handoffs.manage
+    terminal_states: [joined, withdrawn]
+    permissions: [permission.recruitment.offers.manage]
+  - key: workflow.recruitment.appointment_letter_status
+    label: Appointment Letter Status
+    domain: recruitment
+    kind: workflow
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letters, field_or_state: status }
+    introduced_in_phase: 10
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/recruitment/appointments]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    states: [draft, generated, sent, accepted, declined, cancelled]
+    transitions:
+      - from: draft
+        to: generated
+        permission: permission.recruitment.appointment_letters.manage
+      - from: generated
+        to: sent
+        permission: permission.recruitment.appointment_letters.manage
+      - from: sent
+        to: accepted
+        permission: permission.recruitment.appointment_letters.manage
+      - from: sent
+        to: declined
+        permission: permission.recruitment.appointment_letters.manage
+      - from: draft
+        to: cancelled
+        permission: permission.recruitment.appointment_letters.manage
+    terminal_states: [accepted, declined, cancelled]
+    permissions: [permission.recruitment.appointment_letters.manage]
+  - key: workflow.recruitment.handoff_status
+    label: Recruitment Handoff Status
+    domain: recruitment
+    kind: workflow
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Onboarding Handoff, field_or_state: status }
+    introduced_in_phase: 10
+    db_table: workflow_states
+    ts_export: WORKFLOW_KEYS
+    api_routes: [app/api/hrms/recruitment/handoffs]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    states: [draft, ready_for_onboarding, employee_created, onboarding_started, cancelled]
+    transitions:
+      - from: draft
+        to: ready_for_onboarding
+        permission: permission.recruitment.handoffs.manage
+      - from: ready_for_onboarding
+        to: employee_created
+        permission: permission.recruitment.handoffs.manage
+      - from: employee_created
+        to: onboarding_started
+        permission: permission.onboarding.manage
+      - from: draft
+        to: cancelled
+        permission: permission.recruitment.handoffs.manage
+    terminal_states: [onboarding_started, cancelled]
+    permissions: [permission.recruitment.handoffs.manage, permission.onboarding.manage]

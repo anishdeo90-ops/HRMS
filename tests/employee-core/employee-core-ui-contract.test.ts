@@ -31,10 +31,13 @@ describe("People route access", () => {
     assert.equal(PEOPLE_ROUTE_ACCESS.organization.key, "route.people.organization");
 
     const sidebar = source("components/sidebar.tsx");
+    const navConfig = source("lib/nav/config.ts");
     for (const href of ["/dashboard", "/my-activity", "/candidates", "/jobs", "/hod-portal", "/jds", "/settings"]) {
-      assert.match(sidebar, new RegExp(href.replace("/", "\\/")), `${href} should remain in sidebar`);
+      const target = href === "/settings" ? sidebar : navConfig;
+      assert.match(target, new RegExp(href.replaceAll("/", "\\/")), `${href} should remain in navigation`);
     }
-    assert.match(sidebar, /getVisiblePeopleRoutes/);
+    assert.match(sidebar, /getNavForRole\(profile\.role\)/);
+    assert.match(sidebar, /getSectionsForRole\(profile\.role\)/);
   });
 
   it("adds the planned People pages without starting later HRMS modules", () => {

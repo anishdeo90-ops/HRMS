@@ -1,0 +1,73 @@
+items:
+  - key: report.expenses.unpaid_claims
+    label: Unpaid Expense Claims
+    domain: expenses
+    kind: report
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: unpaid_claims_report }
+    introduced_in_phase: 4
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/expenses/claims]
+    ui_surfaces: [route.finance.expense_claims]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    source_tables: [expense_claims, expense_claim_items, employees]
+    filters: [employee, department, claim_type, status, posting_date]
+    columns: [employee, claim_number, posting_date, amount, status, approver]
+    permission: permission.expenses.manage
+    export_behavior: csv
+    fixture: tests/fixtures/reports/expenses_unpaid_claims.json
+  - key: report.expenses.advance_summary
+    label: Employee Advance Summary
+    domain: expenses
+    kind: report
+    owner: finance
+    source_ref: { system: frappe_hrms, module: employee_advance, artifact: Employee Advance, field_or_state: summary_report }
+    introduced_in_phase: 4
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/expenses/advances]
+    ui_surfaces: [route.finance.advances]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    source_tables: [employee_advances, employees]
+    filters: [employee, department, status, required_by]
+    columns: [employee, requested_amount, approved_amount, outstanding_amount, status]
+    permission: permission.employee_advances.manage
+    export_behavior: csv
+    fixture: tests/fixtures/reports/expenses_advance_summary.json
+  - key: report.expenses.travel_summary
+    label: Travel Summary
+    domain: expenses
+    kind: report
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Travel Request, field_or_state: summary_report }
+    introduced_in_phase: 4
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/travel/requests]
+    ui_surfaces: [route.finance.travel]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    source_tables: [travel_requests, travel_itineraries, employees]
+    filters: [employee, department, status, from_date, to_date]
+    columns: [employee, destination, from_date, to_date, estimated_amount, status]
+    permission: permission.travel_requests.manage
+    export_behavior: csv
+    fixture: tests/fixtures/reports/expenses_travel_summary.json
+  - key: report.expenses.vehicle_costs
+    label: Vehicle Costs
+    domain: expenses
+    kind: report
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Service, field_or_state: costs_report }
+    introduced_in_phase: 4
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/vehicles/logs, app/api/hrms/vehicles/services]
+    ui_surfaces: [route.finance.vehicles]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    source_tables: [vehicle_logs, vehicle_services, employees]
+    filters: [vehicle_number, employee, service_date, log_date]
+    columns: [vehicle_number, employee, distance, service_amount, cost_per_distance]
+    permission: permission.vehicles.manage
+    export_behavior: csv
+    fixture: tests/fixtures/reports/expenses_vehicle_costs.json

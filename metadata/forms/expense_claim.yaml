@@ -4,17 +4,47 @@ items:
     domain: expenses
     kind: form
     owner: finance
-    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim form }
-    introduced_in_phase: 1
+    source_ref: { system: frappe_hrms, module: expense, artifact: Expense Claim, field_or_state: request_form }
+    introduced_in_phase: 4
     db_table: form_schemas
     ts_export: FORM_KEYS
-    api_routes: [app/api/expenses/claims]
-    ui_surfaces: ["app/(dashboard)/expenses/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: [app/api/hrms/expenses/claims]
+    ui_surfaces: ["app/(app)/expenses/claims/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
     fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: expense_claims.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: expense-claim-employee
+      - key: claim_type_id
+        type: expense_claim_type_reference
+        storage_mapping: expense_claim_items.claim_type_id
+        validation: [required]
+        privacy_class: financial
+        test_id: expense-claim-type
+      - key: posting_date
+        type: date
+        storage_mapping: expense_claims.posting_date
+        validation: [required]
+        privacy_class: financial
+        test_id: expense-claim-posting-date
       - key: claim_amount
         type: currency
         storage_mapping: expense_claims.amount
         validation: [required, positive]
         privacy_class: financial
         test_id: claim-amount
+      - key: description
+        type: textarea
+        storage_mapping: expense_claims.description
+        validation: [optional]
+        privacy_class: confidential
+        test_id: expense-claim-description
+      - key: attachment_path
+        type: file
+        storage_mapping: expense_claims.attachment_path
+        validation: [optional]
+        privacy_class: confidential
+        test_id: expense-claim-attachment

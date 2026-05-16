@@ -1,0 +1,55 @@
+items:
+  - key: report.recruitment.pipeline
+    label: Recruitment Pipeline
+    domain: recruitment
+    kind: report
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Recruitment Pipeline, field_or_state: report }
+    introduced_in_phase: 10
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.recruitment.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    source_tables: [jobs, candidates, interviews, candidate_offers]
+    filters: [job_opening, recruiter, source, status, date_range]
+    columns: [job_opening, applicant_count, interview_count, offer_count, joined_count, conversion_rate]
+    permission: permission.recruitment.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/recruitment/recruitment_pipeline.json
+  - key: report.recruitment.appointment_letters
+    label: Appointment Letters
+    domain: recruitment
+    kind: report
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Appointment Letters, field_or_state: report }
+    introduced_in_phase: 10
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    source_tables: [recruitment_appointment_letters, candidate_offers, candidates]
+    filters: [status, template, date_range]
+    columns: [candidate, job_opening, status, generated_at, sent_at, accepted_at]
+    permission: permission.recruitment.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/recruitment/appointment_letters.json
+  - key: report.recruitment.handoff_readiness
+    label: Handoff Readiness
+    domain: recruitment
+    kind: report
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: recruitment, artifact: Phase 10 Candidate Handoff, field_or_state: report }
+    introduced_in_phase: 10
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.recruitment.appointments]
+    tests: [tests/metadata/registry-contract.test.ts, tests/recruitment/recruitment-sql.test.ts]
+    source_tables: [recruitment_onboarding_handoffs, recruitment_appointment_letters, candidates, employees]
+    filters: [status, department, date_range]
+    columns: [candidate, employee, handoff_status, appointment_status, onboarding_status]
+    permission: permission.recruitment.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/recruitment/handoff_readiness.json

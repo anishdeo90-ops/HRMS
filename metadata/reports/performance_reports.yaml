@@ -1,0 +1,55 @@
+items:
+  - key: report.performance.goal_progress
+    label: Performance Goal Progress
+    domain: performance
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Goals, field_or_state: report }
+    introduced_in_phase: 6
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.performance.overview, route.performance.goals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    source_tables: [performance_goals, performance_kras, employees]
+    filters: [cycle, department, status]
+    columns: [employee, goal, weight, progress_percent, status]
+    permission: permission.performance.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/performance_goal_progress.json
+  - key: report.performance.appraisal_summary
+    label: Appraisal Summary
+    domain: performance
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Appraisal, field_or_state: report }
+    introduced_in_phase: 6
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.performance.overview, route.performance.appraisals]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    source_tables: [appraisal_cycles, appraisals, appraisal_goals, employees]
+    filters: [cycle, department, status]
+    columns: [employee, cycle, final_score, status, reviewer]
+    permission: permission.performance.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/performance_appraisal_summary.json
+  - key: report.performance.feedback_summary
+    label: Feedback Summary
+    domain: performance
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: performance, artifact: Phase 6 Feedback, field_or_state: report }
+    introduced_in_phase: 6
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.performance.overview, route.performance.feedback]
+    tests: [tests/metadata/registry-contract.test.ts, tests/performance/performance-sql.test.ts]
+    source_tables: [employee_performance_feedback, employee_feedback_ratings, employee_feedback_criteria, employees]
+    filters: [cycle, feedback_type, status]
+    columns: [employee, provider, feedback_type, average_rating, status]
+    permission: permission.performance.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/performance_feedback_summary.json

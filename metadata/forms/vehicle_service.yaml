@@ -1,0 +1,38 @@
+items:
+  - key: form.vehicle_service.entry
+    label: Vehicle Service
+    domain: expenses
+    kind: form
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Service, field_or_state: service_entry }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/vehicles/services]
+    ui_surfaces: ["app/(app)/vehicles/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    fields:
+      - key: vehicle_number
+        type: text
+        storage_mapping: vehicle_services.vehicle_number
+        validation: [required]
+        privacy_class: internal
+        test_id: vehicle-service-number
+      - key: service_date
+        type: date
+        storage_mapping: vehicle_services.service_date
+        validation: [required]
+        privacy_class: internal
+        test_id: vehicle-service-date
+      - key: service_type
+        type: select
+        storage_mapping: vehicle_services.service_type
+        validation: [required]
+        privacy_class: internal
+        test_id: vehicle-service-type
+      - key: service_amount
+        type: currency
+        storage_mapping: vehicle_services.service_amount
+        validation: [required, positive]
+        privacy_class: financial
+        test_id: vehicle-service-amount

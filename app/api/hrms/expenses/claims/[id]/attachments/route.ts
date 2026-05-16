@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canApproveExpenseRecord, canManageExpenses, canViewExpenseRecord } from "@/lib/hrms/expense-authorization";
+import { canApproveExpenseRecord, canCreateExpenseRecord, canManageExpenses, canViewExpenseRecord } from "@/lib/hrms/expense-authorization";
 import { currentHrmsProfile } from "@/lib/hrms/employee-access";
 import { buildExpenseAttachmentPath } from "@/lib/hrms/expenses";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
@@ -8,7 +8,7 @@ type Params = { params: Promise<{ id: string }> };
 
 const CLAIM_SELECT = [
   "id, employee_id",
-  "employee:employees(id, profile_id, department_id, reporting_manager:employees!employees_reporting_manager_id_fkey(profile_id))",
+  "employee:employees!expense_claims_employee_id_fkey(id, profile_id, department_id, reporting_manager_id)",
 ].join(",");
 
 function targetFromRecord(record: any) {
@@ -16,7 +16,7 @@ function targetFromRecord(record: any) {
     employee_id: record.employee_id,
     profile_id: record.employee?.profile_id,
     department_id: record.employee?.department_id,
-    reporting_manager_profile_id: record.employee?.reporting_manager?.profile_id,
+    reporting_manager_id: record.employee?.reporting_manager_id,
   };
 }
 
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (claimError) return NextResponse.json({ error: claimError.message }, { status: 500 });
   const claimRecord = claim as any;
   const target = targetFromRecord(claimRecord);
-  if (!canViewExpenseRecord(profile, target) && !canApproveExpenseRecord(profile, target, "expense_claim") && !canManageExpenses(profile)) {
+  if (!canCreateExpenseRecord(profile, target)) {
     return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
   }
 

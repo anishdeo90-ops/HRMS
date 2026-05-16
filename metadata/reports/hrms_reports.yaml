@@ -1,0 +1,127 @@
+items:
+  - key: report.people.employee_information
+    label: Employee Information
+    domain: reports
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Employee Information, field_or_state: report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [employees, hr_companies, hr_branches, hr_departments, hr_grades]
+    filters: [company, branch, department, grade, employment_status]
+    columns: [employee_code, employee, department, designation, reporting_manager, employment_status]
+    permission: permission.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/people_employee_information.json
+  - key: report.people.employee_analytics
+    label: Employee Analytics
+    domain: reports
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Employee Analytics, field_or_state: report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview, route.reports.dashboards]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [employees, hr_departments, employee_promotions, employee_transfers]
+    filters: [company, department, employment_status, date_range]
+    columns: [headcount, active_employees, exits, joiners, transfers, promotions]
+    permission: permission.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/people_employee_analytics.json
+  - key: report.attendance.monthly_sheet
+    label: Monthly Attendance Sheet
+    domain: reports
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Monthly Attendance, field_or_state: report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [attendance_days, attendance_checkins, employees]
+    filters: [employee, department, month, status]
+    columns: [employee, present_days, absent_days, late_days, leave_days, overtime_hours]
+    permission: permission.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/attendance_monthly_sheet.json
+  - key: report.attendance.shift_attendance
+    label: Shift Attendance
+    domain: reports
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Shift Attendance, field_or_state: report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [shift_assignments, shift_rosters, attendance_days, employees]
+    filters: [shift, employee, department, date_range]
+    columns: [employee, shift, scheduled_days, attended_days, late_days, exceptions]
+    permission: permission.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/attendance_shift_attendance.json
+  - key: report.payroll.bank_remittance
+    label: Bank Remittance
+    domain: reports
+    kind: report
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Bank Remittance, field_or_state: report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [salary_slips, payroll_entries, employees]
+    filters: [payroll_period, bank, department]
+    columns: [employee, bank_name, account_number_masked, net_pay, payment_status]
+    permission: permission.payroll_reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/payroll_bank_remittance.json
+  - key: report.recruitment.analytics
+    label: Recruitment Analytics
+    domain: reports
+    kind: report
+    owner: talent
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Recruitment Analytics, field_or_state: report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview, route.reports.dashboards]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [candidates, jobs, interviews, offers]
+    filters: [job, recruiter, source, date_range]
+    columns: [job, candidate_count, interview_count, offer_count, hire_count, conversion_rate]
+    permission: permission.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/recruitment_analytics.json
+  - key: report.events.birthdays_anniversaries
+    label: Birthdays And Anniversaries
+    domain: reports
+    kind: report
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Events, field_or_state: birthdays_anniversaries_report }
+    introduced_in_phase: 9
+    db_table: report_definitions
+    ts_export: REPORT_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview, route.reports.dashboards]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    source_tables: [employees]
+    filters: [month, department, event_type]
+    columns: [employee, department, event_type, event_date]
+    permission: permission.reports.view
+    export_behavior: csv
+    fixture: tests/fixtures/reports/events_birthdays_anniversaries.json

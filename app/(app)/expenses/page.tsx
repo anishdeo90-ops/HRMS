@@ -7,8 +7,8 @@ import { ArrowRight, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { getVisibleFinanceRoutes } from "@/lib/hrms/route-access";
 
-type ClaimRow = { id: string; title?: string | null; claim_number?: string | null; status?: string | null; total_amount?: number | null; amount?: number | null; created_at?: string | null; employee?: PersonRef | null };
-type AdvanceRow = { id: string; purpose?: string | null; status?: string | null; amount?: number | null; required_by?: string | null; employee?: PersonRef | null };
+type ClaimRow = { id: string; title?: string | null; purpose?: string | null; claim_number?: string | null; status?: string | null; total_amount?: number | null; amount?: number | null; created_at?: string | null; employee?: PersonRef | null };
+type AdvanceRow = { id: string; purpose?: string | null; status?: string | null; amount?: number | null; requested_amount?: number | null; required_by?: string | null; employee?: PersonRef | null };
 type TravelRow = { id: string; destination?: string | null; purpose?: string | null; status?: string | null; estimated_amount?: number | null; start_date?: string | null; employee?: PersonRef | null };
 type PersonRef = { name?: string | null; employee_code?: string | null };
 
@@ -39,20 +39,24 @@ export default function ExpensesOverviewPage() {
   const [advances, setAdvances] = useState<AdvanceRow[]>([]);
   const [travel, setTravel] = useState<TravelRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [status, setStatus] = useState("submitted");
 
   async function load() {
     setLoading(true);
-    const params = new URLSearchParams();
-    if (status !== "all") params.set("status", status);
+    setError("");
     const [claimRes, advanceRes, travelRes] = await Promise.all([
-      fetch(`/api/hrms/expenses/claims?${params.toString()}`),
+      fetch("/api/hrms/expenses/claims"),
       fetch("/api/hrms/expenses/advances?status=submitted"),
       fetch("/api/hrms/travel/requests?status=submitted"),
     ]);
 
     if (claimRes.ok) setClaims(await readList<ClaimRow>(claimRes));
-    else toast.error("Could not load claims");
+    else {
+      const message = (await claimRes.json().catch(() => ({}))).error ?? "Could not load claims";
+      setError(message);
+      toast.error(message);
+    }
     if (advanceRes.ok) setAdvances(await readList<AdvanceRow>(advanceRes));
     else setAdvances([]);
     if (travelRes.ok) setTravel(await readList<TravelRow>(travelRes));
@@ -82,6 +86,37 @@ export default function ExpensesOverviewPage() {
     ];
   }, [advances.length, claims, travel.length]);
 
+  const filteredClaims = useMemo(() => (
+    status === "all" ? claims : claims.filter((row) => row.status === status)
+  ), [claims, status]);
+
+  const pendingApprovals = useMemo(() => [
+    ...claims.filter((row) => row.status === "submitted").map((row) => ({
+      id: `claim:${row.id}`,
+      kind: "Claim",
+      title: row.title ?? row.purpose ?? row.claim_number ?? "Expense claim",
+      person: personLabel(row.employee),
+      amount: money(row.total_amount ?? row.amount),
+      href: "/expenses/claims",
+    })),
+    ...advances.map((row) => ({
+      id: `advance:${row.id}`,
+      kind: "Advance",
+      title: row.purpose ?? "Employee advance",
+      person: personLabel(row.employee),
+      amount: money(row.requested_amount ?? row.amount),
+      href: "/expenses/advances",
+    })),
+    ...travel.map((row) => ({
+      id: `travel:${row.id}`,
+      kind: "Travel",
+      title: row.destination ?? row.purpose ?? "Travel request",
+      person: personLabel(row.employee),
+      amount: money(row.estimated_amount),
+      href: "/travel",
+    })),
+  ], [advances, claims, travel]);
+
   return (
     <div className="space-y-5 p-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -93,6 +128,10 @@ export default function ExpensesOverviewPage() {
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
 
       <div className="grid gap-3 md:grid-cols-4">
         {kpis.map((item) => (
@@ -108,7 +147,7 @@ export default function ExpensesOverviewPage() {
           <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-sm font-bold text-gray-900">Claim queue</h2>
-              <p className="text-xs text-gray-500">{claims.length} records in the selected status</p>
+              <p className="text-xs text-gray-500">{filteredClaims.length} records in the selected status</p>
             </div>
             <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-fit rounded border border-gray-300 px-3 py-2 text-sm">
               <option value="submitted">Submitted</option>
@@ -125,11 +164,11 @@ export default function ExpensesOverviewPage() {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
-                ) : claims.length === 0 ? (
+                ) : filteredClaims.length === 0 ? (
                   <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-400">No claims in this queue.</td></tr>
-                ) : claims.map((row) => (
+                ) : filteredClaims.map((row) => (
                   <tr key={row.id}>
-                    <td className="px-4 py-3 font-medium text-gray-900">{row.title ?? row.claim_number ?? "Expense claim"}</td>
+                    <td className="px-4 py-3 font-medium text-gray-900">{row.title ?? row.purpose ?? row.claim_number ?? "Expense claim"}</td>
                     <td className="px-4 py-3 text-gray-600">{personLabel(row.employee)}</td>
                     <td className="px-4 py-3 text-gray-900">{money(row.total_amount ?? row.amount)}</td>
                     <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(row.status)}`}>{row.status ?? "draft"}</span></td>
@@ -141,6 +180,30 @@ export default function ExpensesOverviewPage() {
         </div>
 
         <div className="space-y-3">
+          <div className="rounded-lg border border-gray-200 bg-white">
+            <div className="border-b border-gray-200 px-4 py-3">
+              <h2 className="text-sm font-bold text-gray-900">Pending approvals</h2>
+              <p className="text-xs text-gray-500">{pendingApprovals.length} submitted finance items</p>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {loading ? (
+                <div className="px-4 py-8 text-center text-sm text-gray-400">Loading...</div>
+              ) : pendingApprovals.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-gray-400">No pending approvals.</div>
+              ) : pendingApprovals.slice(0, 5).map((item) => (
+                <Link key={item.id} href={item.href} className="block px-4 py-3 hover:bg-gray-50">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-gray-900">{item.title}</p>
+                      <p className="text-xs text-gray-500">{item.kind} - {item.person}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-900">{item.amount}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
           {[
             { href: "/expenses/claims", label: "Expense claims", detail: "Create and review reimbursements" },
             { href: "/expenses/advances", label: "Employee advances", detail: "Track requests and settlements" },

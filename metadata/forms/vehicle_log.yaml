@@ -1,0 +1,38 @@
+items:
+  - key: form.vehicle_log.entry
+    label: Vehicle Log
+    domain: expenses
+    kind: form
+    owner: finance
+    source_ref: { system: hirerabbits_hrms, module: vehicles, artifact: Phase 4 Vehicle Logs, field_or_state: log_entry }
+    introduced_in_phase: 4
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/vehicles/logs]
+    ui_surfaces: ["app/(app)/vehicles/page.tsx"]
+    tests: [tests/metadata/registry-contract.test.ts, tests/expenses/expenses-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: vehicle_logs.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: vehicle-log-employee
+      - key: vehicle_number
+        type: text
+        storage_mapping: vehicle_logs.vehicle_number
+        validation: [required]
+        privacy_class: internal
+        test_id: vehicle-log-number
+      - key: log_date
+        type: date
+        storage_mapping: vehicle_logs.log_date
+        validation: [required]
+        privacy_class: internal
+        test_id: vehicle-log-date
+      - key: distance
+        type: number
+        storage_mapping: vehicle_logs.distance
+        validation: [required, positive]
+        privacy_class: internal
+        test_id: vehicle-log-distance

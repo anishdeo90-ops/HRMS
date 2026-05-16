@@ -92,8 +92,20 @@ items:
     introduced_in_phase: 1
     db_table: roles
     ts_export: ROLE_KEYS
-    api_routes: []
-    ui_surfaces: []
+    api_routes: [app/api/hrms/expenses/claims, "app/api/hrms/expenses/claims/[id]", app/api/hrms/travel/requests]
+    ui_surfaces: [route.finance.approvals]
+    tests: [tests/metadata/registry-contract.test.ts]
+  - key: role.finance_manager
+    label: Finance Manager
+    domain: expenses
+    kind: role
+    owner: finance
+    source_ref: { system: frappe_hrms, module: expense, artifact: Finance Manager }
+    introduced_in_phase: 4
+    db_table: roles
+    ts_export: ROLE_KEYS
+    api_routes: [app/api/hrms/expenses/claims, app/api/hrms/expenses/advances, app/api/hrms/travel/requests, app/api/hrms/vehicles/logs, app/api/hrms/vehicles/services]
+    ui_surfaces: [route.finance.expenses, route.finance.approvals]
     tests: [tests/metadata/registry-contract.test.ts]
   - key: role.interviewer
     label: Interviewer

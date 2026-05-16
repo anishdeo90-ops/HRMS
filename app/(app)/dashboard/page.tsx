@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, Briefcase, Calendar } from "lucide-react";
-import type { DatePeriod, DashboardStats, RecruiterPerformance } from "@/lib/types";
+import { Banknote, Calendar, CalendarCheck, ClipboardList, FileText, ReceiptText, TrendingUp, Users, WalletCards, Briefcase } from "lucide-react";
+import type { DatePeriod, DashboardStats, Profile, RecruiterPerformance, Role } from "@/lib/types";
 
 const FUNNEL_STAGES = [
   { key: "total",            label: "CVs Received",    color: "#FF2D87", status: "" },
@@ -19,6 +19,100 @@ const FUNNEL_STAGES = [
 
 type GroupBy = "overall" | "recruiter" | "site" | "month" | "designation" | "source";
 
+type ApiListResponse<T> = { data?: T[]; error?: string };
+type ApiObjectResponse<T> = { data?: T; error?: string };
+type EmployeeRow = { id?: string; is_active?: boolean | null; employment_status?: string | null };
+type AttendanceDay = { id?: string; status?: string | null; attendance_date?: string | null };
+type LeaveApplication = { id?: string; status?: string | null; days?: number | null };
+type ExpenseClaim = { id?: string; status?: string | null; total_amount?: number | null };
+type PayrollEntry = { id?: string; status?: string | null; gross_pay?: number | null; net_pay?: number | null; slip_status?: string | null };
+type SalarySlip = { id?: string; status?: string | null; net_pay?: number | null };
+type JobRow = { id?: string; status?: string | null; is_deleted?: boolean | null };
+type HrmsDashboardCard = { key?: string; label?: string; value?: number | string | null; report_key?: string | null };
+type SelfServiceSummary = { cards?: { key: string; label: string; value: number | string; href: string }[] };
+type HrmsSummary = {
+  employees: EmployeeRow[] | null;
+  attendance: AttendanceDay[] | null;
+  leave: LeaveApplication[] | null;
+  expenses: ExpenseClaim[] | null;
+  payroll: PayrollEntry[] | null;
+  salarySlips: SalarySlip[] | null;
+  jobs: JobRow[] | null;
+  dashboards: { cards?: HrmsDashboardCard[] } | null;
+  selfService: SelfServiceSummary | null;
+};
+
+const EMPTY_HRMS_SUMMARY: HrmsSummary = {
+  employees: null,
+  attendance: null,
+  leave: null,
+  expenses: null,
+  payroll: null,
+  salarySlips: null,
+  jobs: null,
+  dashboards: null,
+  selfService: null,
+};
+
+const HRMS_TONES: Record<string, string> = {
+  blue: "bg-blue-50 text-blue-700 border-blue-100",
+  emerald: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  amber: "bg-amber-50 text-amber-700 border-amber-100",
+  violet: "bg-violet-50 text-violet-700 border-violet-100",
+  rose: "bg-rose-50 text-rose-700 border-rose-100",
+  slate: "bg-slate-50 text-slate-700 border-slate-100",
+  indigo: "bg-indigo-50 text-indigo-700 border-indigo-100",
+};
+
+function dashboardContext(role: Role | undefined) {
+  if (role === "payroll_manager") return "Payroll Overview";
+  if (role === "recruiter") return "Recruiting Overview";
+  if (role === "employee") return "My Dashboard";
+  if (role === "hod") return "Team Overview";
+  return "HR Overview";
+}
+
+async function readList<T>(url: string): Promise<T[] | null> {
+  const res = await fetch(url);
+  const json = (await res.json().catch(() => ({}))) as ApiListResponse<T>;
+  return res.ok ? json.data ?? [] : null;
+}
+
+async function readObject<T>(url: string): Promise<T | null> {
+  const res = await fetch(url);
+  const json = (await res.json().catch(() => ({}))) as ApiObjectResponse<T>;
+  return res.ok ? json.data ?? null : null;
+}
+
+function normalizeStatus(value?: string | null) {
+  return String(value ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+function countStatus<T extends { status?: string | null }>(rows: T[] | null, statuses: string[]) {
+  if (!rows) return 0;
+  const allowed = new Set(statuses);
+  return rows.filter((row) => allowed.has(normalizeStatus(row.status))).length;
+}
+
+function sumNumber<T>(rows: T[] | null, read: (row: T) => number | null | undefined) {
+  return (rows ?? []).reduce((total, row) => total + Number(read(row) ?? 0), 0);
+}
+
+function formatNumber(value: number | string | null | undefined) {
+  if (typeof value === "number") return new Intl.NumberFormat().format(value);
+  if (value === null || value === undefined || value === "") return "0";
+  return String(value);
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat(undefined, { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
+}
+
+function isOpenJob(job: JobRow) {
+  const status = normalizeStatus(job.status);
+  return !job.is_deleted && (!status || ["open", "active", "published", "in_progress"].includes(status));
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [period, setPeriod]       = useState<DatePeriod>("all");
@@ -31,9 +125,58 @@ export default function DashboardPage() {
   const [groupBy, setGroupBy]     = useState<GroupBy>("recruiter");
   const [stats, setStats]         = useState<DashboardStats | null>(null);
   const [breakdown, setBreakdown] = useState<RecruiterPerformance[]>([]);
+  const [profile, setProfile]     = useState<Pick<Profile, "name" | "role"> | null>(null);
+  const [hrmsSummary, setHrmsSummary] = useState<HrmsSummary>(EMPTY_HRMS_SUMMARY);
+  const [hrmsLoading, setHrmsLoading] = useState(false);
   const [masters, setMasters]     = useState<{ sites: {id:string;name:string}[]; designations: {id:string;name:string}[]; sources: {id:string;name:string}[]; recruiters: {id:string;name:string}[] }>
     ({ sites: [], designations: [], sources: [], recruiters: [] });
   const [loading, setLoading]     = useState(true);
+
+  useEffect(() => {
+    fetch("/api/users/me")
+      .then(r => r.json())
+      .then(res => setProfile(res.data ? { name: res.data.name, role: res.data.role } : null))
+      .catch(() => setProfile(null));
+  }, []);
+
+  const fetchHrmsSummary = useCallback(async (role: Role | undefined) => {
+    setHrmsLoading(true);
+    try {
+      const isEmployee = role === "employee";
+      const [
+        employees,
+        attendance,
+        leave,
+        expenses,
+        payroll,
+        salarySlips,
+        jobs,
+        dashboards,
+        selfService,
+      ] = await Promise.all([
+        isEmployee ? Promise.resolve(null) : readList<EmployeeRow>("/api/hrms/employees"),
+        readList<AttendanceDay>("/api/hrms/attendance/days"),
+        readList<LeaveApplication>("/api/hrms/leave/applications"),
+        readList<ExpenseClaim>("/api/hrms/expenses/claims"),
+        isEmployee ? Promise.resolve(null) : readList<PayrollEntry>("/api/hrms/payroll/runs"),
+        readList<SalarySlip>("/api/hrms/payroll/salary-slips"),
+        readList<JobRow>("/api/jobs"),
+        readObject<{ cards?: HrmsDashboardCard[] }>("/api/hrms/dashboards"),
+        isEmployee ? readObject<SelfServiceSummary>("/api/hrms/self-service/summary") : Promise.resolve(null),
+      ]);
+
+      setHrmsSummary({ employees, attendance, leave, expenses, payroll, salarySlips, jobs, dashboards, selfService });
+    } catch (err) {
+      console.error("HRMS summary fetch failed:", err);
+      setHrmsSummary(EMPTY_HRMS_SUMMARY);
+    } finally {
+      setHrmsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (profile?.role) void fetchHrmsSummary(profile.role);
+  }, [fetchHrmsSummary, profile?.role]);
 
   // Load master dropdowns once
   useEffect(() => {
@@ -89,11 +232,81 @@ export default function DashboardPage() {
     pct:    stats?.total ? Math.round(((stats as unknown as Record<string, number>)[s.key] ?? 0) / stats.total * 100) : 0,
   }));
 
+  const hrmsCards = useMemo(() => {
+    const role = profile?.role;
+    const employeeMode = role === "employee";
+    const cards: {
+      key: string;
+      label: string;
+      value: number | string;
+      sub: string;
+      href: string | null;
+      icon: typeof Users;
+      tone: string;
+    }[] = [];
+
+    const selfServiceCards = new Map((hrmsSummary.selfService?.cards ?? []).map((card) => [card.key, card]));
+    const employeeCount = hrmsSummary.employees ? hrmsSummary.employees.filter((row) => row.is_active !== false && normalizeStatus(row.employment_status) !== "exited").length : null;
+    const attendanceCount = hrmsSummary.attendance?.length ?? Number(selfServiceCards.get("attendance")?.value ?? 0);
+    const presentDays = countStatus(hrmsSummary.attendance, ["present", "late", "on_duty"]);
+    const openLeave = countStatus(hrmsSummary.leave, ["draft", "submitted", "pending", "approved"]);
+    const openClaims = countStatus(hrmsSummary.expenses, ["draft", "submitted", "approved", "unpaid"]);
+    const claimAmount = sumNumber(hrmsSummary.expenses, (row) => row.total_amount);
+    const payrollCount = hrmsSummary.payroll?.length ?? null;
+    const payrollNet = sumNumber(hrmsSummary.payroll, (row) => row.net_pay);
+    const salarySlipCount = hrmsSummary.salarySlips?.length ?? Number(selfServiceCards.get("salary_slips")?.value ?? 0);
+    const salarySlipNet = sumNumber(hrmsSummary.salarySlips, (row) => row.net_pay);
+    const openJobs = hrmsSummary.jobs ? hrmsSummary.jobs.filter(isOpenJob).length : stats?.open_jobs ?? null;
+    const dashboardCards = hrmsSummary.dashboards?.cards ?? [];
+
+    if (employeeMode) {
+      cards.push(
+        { key: "attendance", label: "My Attendance", value: attendanceCount, sub: `${presentDays} present/on duty records`, href: "/time/attendance", icon: CalendarCheck, tone: "blue" },
+        { key: "leave", label: "My Leave", value: hrmsSummary.leave?.length ?? Number(selfServiceCards.get("leave")?.value ?? 0), sub: `${openLeave} open requests`, href: "/time/leave", icon: ClipboardList, tone: "emerald" },
+        { key: "expenses", label: "My Claims", value: hrmsSummary.expenses?.length ?? Number(selfServiceCards.get("expenses")?.value ?? 0), sub: `${openClaims} open claims`, href: "/expenses/claims", icon: WalletCards, tone: "amber" },
+        { key: "salary_slips", label: "My Salary Slips", value: salarySlipCount, sub: salarySlipNet ? `${formatMoney(salarySlipNet)} net visible` : "Published slips visible", href: "/payroll/salary-slips", icon: ReceiptText, tone: "violet" },
+      );
+    } else {
+      if (employeeCount !== null) {
+        cards.push({ key: "employees", label: "Active Employees", value: employeeCount, sub: `${hrmsSummary.employees?.length ?? 0} employee records`, href: "/people/employees", icon: Users, tone: "slate" });
+      }
+      if (hrmsSummary.attendance !== null) {
+        cards.push({ key: "attendance", label: "Attendance Days", value: attendanceCount, sub: `${presentDays} present/on duty records`, href: "/time/attendance", icon: CalendarCheck, tone: "blue" });
+      }
+      if (hrmsSummary.leave !== null) {
+        cards.push({ key: "leave", label: "Open Leave", value: openLeave, sub: `${hrmsSummary.leave.length} leave applications`, href: "/time/leave", icon: ClipboardList, tone: "emerald" });
+      }
+      if (hrmsSummary.expenses !== null) {
+        cards.push({ key: "expenses", label: "Expense Claims", value: openClaims, sub: `${formatMoney(claimAmount)} claimed`, href: "/expenses/claims", icon: WalletCards, tone: "amber" });
+      }
+      if (payrollCount !== null) {
+        cards.push({ key: "payroll", label: "Payroll Entries", value: payrollCount, sub: payrollNet ? `${formatMoney(payrollNet)} net pay` : "Payroll register visible", href: "/payroll/runs", icon: Banknote, tone: "violet" });
+      }
+      if (hrmsSummary.salarySlips !== null) {
+        cards.push({ key: "salary_slips", label: "Salary Slips", value: salarySlipCount, sub: salarySlipNet ? `${formatMoney(salarySlipNet)} net issued` : "Slip register visible", href: "/payroll/salary-slips", icon: ReceiptText, tone: "rose" });
+      }
+    }
+
+    if (openJobs !== null) {
+      cards.push({ key: "jobs", label: employeeMode ? "Open ATS Jobs" : "ATS Jobs", value: openJobs, sub: `${stats?.total ?? 0} active candidates`, href: "/jobs", icon: Briefcase, tone: "indigo" });
+    }
+    if (!employeeMode && dashboardCards.length > 0) {
+      cards.push({ key: "dashboards", label: "HRMS Report Cards", value: dashboardCards.length, sub: "Governed dashboard cards visible", href: "/reports/dashboards", icon: FileText, tone: "slate" });
+    }
+
+    return cards;
+  }, [hrmsSummary, profile?.role, stats]);
+
   return (
     <div className="p-6 space-y-6">
       {/* Header + Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-xs text-gray-500">
+            {dashboardContext(profile?.role)}
+          </p>
+        </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {/* Period dropdown */}
           <select
@@ -170,6 +383,44 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* HRMS Summary */}
+      {hrmsCards.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200">
+          <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="font-semibold text-gray-800 text-sm">HRMS Summary</h3>
+              <p className="text-xs text-gray-500">
+                {profile?.role === "employee" ? "Your attendance, leave, claims, payroll, and ATS context." : "Role-aware people, time, finance, payroll, and ATS totals from existing endpoints."}
+              </p>
+            </div>
+            <button
+              onClick={() => void fetchHrmsSummary(profile?.role)}
+              className="text-xs font-medium text-gray-600 hover:text-brand-600"
+            >
+              Refresh
+            </button>
+          </div>
+          <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+            {hrmsCards.map((card) => (
+              <div
+                key={card.key}
+                onClick={() => card.href && router.push(card.href)}
+                className={`rounded-lg border p-3 transition ${HRMS_TONES[card.tone] ?? HRMS_TONES.slate} ${card.href ? "cursor-pointer hover:shadow-sm" : ""}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium uppercase opacity-80">{card.label}</p>
+                    <p className="mt-1 text-2xl font-bold">{hrmsLoading ? "..." : formatNumber(card.value)}</p>
+                  </div>
+                  <card.icon size={18} className="shrink-0 opacity-80" />
+                </div>
+                <p className="mt-2 truncate text-xs opacity-75">{card.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-3 gap-4">

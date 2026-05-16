@@ -205,4 +205,407 @@ describe("metadata registry contract", () => {
       assert.ok(item.source_ref, `${key} should include source_ref`);
     }
   });
+
+  it("Phase 4 Expenses, Advances, and Travel metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "role.expense_approver",
+      "role.finance_manager",
+      "permission.expenses.view_self",
+      "permission.expenses.view_team",
+      "permission.expenses.manage",
+      "permission.expenses.approve",
+      "permission.expense_claim_types.manage",
+      "permission.employee_advances.view_self",
+      "permission.employee_advances.manage",
+      "permission.employee_advances.approve",
+      "permission.travel_requests.view_self",
+      "permission.travel_requests.manage",
+      "permission.travel_requests.approve",
+      "permission.vehicles.view_self",
+      "permission.vehicles.manage",
+      "route.finance.expenses",
+      "route.finance.expense_claims",
+      "route.finance.advances",
+      "route.finance.travel",
+      "route.finance.vehicles",
+      "route.finance.approvals",
+      "form.expense_claim.request",
+      "form.employee_advance.request",
+      "form.travel_request.request",
+      "form.vehicle_log.entry",
+      "form.vehicle_service.entry",
+      "workflow.expense_claim.status",
+      "workflow.employee_advance.status",
+      "workflow.travel_request.status",
+      "workflow.vehicle_service.status",
+      "approval_rule.expense.department_head",
+      "approval_rule.expense.finance_final",
+      "approval_rule.advance.department_head",
+      "approval_rule.advance.finance_final",
+      "approval_rule.travel.department_head",
+      "approval_rule.travel.finance_final",
+      "report.expenses.unpaid_claims",
+      "report.expenses.advance_summary",
+      "report.expenses.travel_summary",
+      "report.expenses.vehicle_costs",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 4 expenses`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 5 Payroll, Salary, Tax, and Benefits metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "role.payroll_manager",
+      "permission.payroll.view",
+      "permission.payroll.manage",
+      "permission.salary_components.manage",
+      "permission.salary_structures.manage",
+      "permission.salary_structures.assign",
+      "permission.payroll_periods.manage",
+      "permission.payroll_entries.manage",
+      "permission.salary_slips.view_self",
+      "permission.salary_slips.manage",
+      "permission.salary_slips.submit",
+      "permission.salary_slips.cancel",
+      "permission.tax_declarations.view_self",
+      "permission.tax_declarations.manage",
+      "permission.benefits.view_self",
+      "permission.benefits.manage",
+      "permission.payroll_reports.view",
+      "route.payroll.overview",
+      "route.payroll.salary_structures",
+      "route.payroll.runs",
+      "route.payroll.salary_slips",
+      "route.payroll.tax_benefits",
+      "form.payroll.salary_component",
+      "form.payroll.salary_structure",
+      "form.payroll.salary_structure_assignment",
+      "form.payroll.payroll_period",
+      "form.payroll.payroll_entry",
+      "form.payroll.salary_slip",
+      "form.payroll.additional_salary",
+      "form.payroll.salary_withholding",
+      "form.payroll.tax_exemption_declaration",
+      "form.payroll.benefit_application",
+      "form.payroll.benefit_claim",
+      "form.payroll.gratuity_rule",
+      "workflow.payroll.period_status",
+      "workflow.payroll.entry_status",
+      "workflow.payroll.salary_slip_status",
+      "workflow.payroll.tax_declaration_status",
+      "workflow.payroll.benefit_claim_status",
+      "approval_rule.payroll.salary_slip_submit",
+      "approval_rule.payroll.benefit_claim",
+      "report.payroll.salary_register",
+      "report.payroll.run_summary",
+      "report.payroll.tax_declarations",
+      "salary_component.basic",
+      "salary_component.hra",
+      "salary_component.pf_employee",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 5 payroll`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 6 Performance Management metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.performance.view_self",
+      "permission.performance.view_team",
+      "permission.performance.manage",
+      "permission.performance.goals.manage",
+      "permission.performance.goals.update",
+      "permission.performance.kras.manage",
+      "permission.performance.cycles.manage",
+      "permission.performance.appraisals.submit",
+      "permission.performance.appraisals.review",
+      "permission.performance.feedback.submit",
+      "permission.performance.feedback.manage",
+      "permission.performance.reports.view",
+      "route.performance.overview",
+      "route.performance.goals",
+      "route.performance.appraisals",
+      "route.performance.feedback",
+      "form.performance.goal",
+      "form.performance.kra",
+      "form.performance.appraisal_template",
+      "form.performance.appraisal_cycle",
+      "form.performance.appraisal",
+      "form.performance.feedback",
+      "form.performance.feedback_criteria",
+      "workflow.performance.goal_status",
+      "workflow.performance.appraisal_cycle_status",
+      "workflow.performance.appraisal_status",
+      "workflow.performance.feedback_status",
+      "approval_rule.performance.goal_manager",
+      "approval_rule.performance.appraisal_manager_review",
+      "approval_rule.performance.hr_final",
+      "report.performance.goal_progress",
+      "report.performance.appraisal_summary",
+      "report.performance.feedback_summary",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 6 performance`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 7 Employee Lifecycle metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.lifecycle.view_self",
+      "permission.lifecycle.view_team",
+      "permission.lifecycle.manage",
+      "permission.onboarding.templates.manage",
+      "permission.onboarding.manage",
+      "permission.onboarding.activities.update",
+      "permission.separation.templates.manage",
+      "permission.separation.request",
+      "permission.separation.approve",
+      "permission.promotions.manage",
+      "permission.promotions.approve",
+      "permission.transfers.manage",
+      "permission.transfers.approve",
+      "permission.grievances.view_self",
+      "permission.grievances.manage",
+      "permission.grievances.resolve",
+      "permission.training.manage",
+      "permission.training.feedback.submit",
+      "permission.daily_work_summaries.submit",
+      "permission.daily_work_summaries.view_team",
+      "permission.lifecycle.reports.view",
+      "route.lifecycle.overview",
+      "route.lifecycle.onboarding",
+      "route.lifecycle.separation",
+      "route.lifecycle.promotions",
+      "route.lifecycle.transfers",
+      "route.lifecycle.grievances",
+      "route.lifecycle.training",
+      "form.lifecycle.onboarding_template",
+      "form.lifecycle.onboarding",
+      "form.lifecycle.boarding_activity",
+      "form.lifecycle.separation_template",
+      "form.lifecycle.separation",
+      "form.lifecycle.promotion",
+      "form.lifecycle.transfer",
+      "form.lifecycle.grievance_type",
+      "form.lifecycle.grievance",
+      "form.lifecycle.exit_interview",
+      "form.lifecycle.training_program",
+      "form.lifecycle.training_event",
+      "form.lifecycle.training_feedback",
+      "form.lifecycle.daily_work_summary",
+      "workflow.lifecycle.onboarding_status",
+      "workflow.lifecycle.boarding_activity_status",
+      "workflow.lifecycle.separation_status",
+      "workflow.lifecycle.promotion_status",
+      "workflow.lifecycle.transfer_status",
+      "workflow.lifecycle.grievance_status",
+      "workflow.lifecycle.training_event_status",
+      "workflow.lifecycle.daily_work_summary_status",
+      "approval_rule.lifecycle.onboarding_hr",
+      "approval_rule.lifecycle.separation_manager_review",
+      "approval_rule.lifecycle.separation_hr_final",
+      "approval_rule.lifecycle.promotion_manager",
+      "approval_rule.lifecycle.promotion_hr_final",
+      "approval_rule.lifecycle.transfer_manager",
+      "approval_rule.lifecycle.transfer_hr_final",
+      "approval_rule.lifecycle.grievance_assignment",
+      "approval_rule.lifecycle.grievance_resolution",
+      "approval_rule.lifecycle.training_feedback_review",
+      "approval_rule.lifecycle.daily_work_summary_manager_review",
+      "report.lifecycle.onboarding_progress",
+      "report.lifecycle.separation_pipeline",
+      "report.lifecycle.promotion_transfer_summary",
+      "report.lifecycle.grievance_summary",
+      "report.lifecycle.training_participation",
+      "report.lifecycle.daily_work_summary",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 7 lifecycle`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 8 Employee Self-Service metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.self_service.view",
+      "permission.self_service.profile.view",
+      "permission.self_service.notifications.view",
+      "permission.self_service.notifications.acknowledge",
+      "permission.self_service.notifications.manage",
+      "route.self_service.overview",
+      "route.self_service.notifications",
+      "form.self_service.notification",
+      "workflow.self_service.notification_status",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 8 self-service`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 9 Reports, Dashboards, Notifications, and Automation metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.reports.view",
+      "permission.reports.export",
+      "permission.dashboards.view",
+      "permission.notification_rules.view",
+      "permission.notification_rules.manage",
+      "permission.automation_rules.view",
+      "permission.automation_rules.manage",
+      "permission.automation_executions.view",
+      "permission.automation_executions.run",
+      "route.reports.overview",
+      "route.reports.dashboards",
+      "form.reports.report_run",
+      "form.reports.dashboard_widget",
+      "form.reports.notification_rule",
+      "form.reports.automation_rule",
+      "workflow.reports.report_run_status",
+      "workflow.reports.notification_rule_status",
+      "workflow.reports.automation_rule_status",
+      "workflow.reports.automation_execution_status",
+      "report.people.employee_information",
+      "report.people.employee_analytics",
+      "report.attendance.monthly_sheet",
+      "report.attendance.shift_attendance",
+      "report.payroll.bank_remittance",
+      "report.recruitment.analytics",
+      "report.events.birthdays_anniversaries",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 9 reports`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
+
+  it("Phase 10 Recruitment Unification metadata keys are registered with source references", async () => {
+    const files = await fg("**/*.{yaml,yml}", {
+      cwd: metadataRoot,
+      absolute: true,
+      ignore: ["allowlists/**"],
+    });
+
+    const items = files.flatMap((file) => asArray(parse(readFileSync(file, "utf8"))));
+    const byKey = new Map(items.map((item) => [String(item.key), item]));
+    const expectedKeys = [
+      "permission.recruitment.view",
+      "permission.recruitment.manage",
+      "permission.recruitment.job_openings.manage",
+      "permission.recruitment.job_requisitions.request",
+      "permission.recruitment.job_requisitions.approve",
+      "permission.recruitment.applicants.view",
+      "permission.recruitment.applicants.manage",
+      "permission.recruitment.interviews.manage",
+      "permission.recruitment.interviews.feedback.submit",
+      "permission.recruitment.offers.manage",
+      "permission.recruitment.appointment_letters.manage",
+      "permission.recruitment.handoffs.manage",
+      "permission.recruitment.reports.view",
+      "route.recruitment.overview",
+      "route.recruitment.appointments",
+      "form.recruitment.job_opening",
+      "form.recruitment.job_applicant",
+      "form.recruitment.interview_feedback",
+      "form.recruitment.job_offer",
+      "form.recruitment.job_requisition",
+      "form.recruitment.status_mapping",
+      "form.recruitment.appointment_letter_template",
+      "form.recruitment.appointment_letter",
+      "form.recruitment.onboarding_handoff",
+      "workflow.recruitment.job_opening_status",
+      "workflow.recruitment.applicant_status",
+      "workflow.recruitment.interview_status",
+      "workflow.recruitment.offer_status",
+      "workflow.recruitment.appointment_letter_status",
+      "workflow.recruitment.handoff_status",
+      "approval_rule.recruitment.job_requisition_hod",
+      "approval_rule.recruitment.offer_hr_final",
+      "approval_rule.recruitment.appointment_letter_hr",
+      "approval_rule.recruitment.onboarding_handoff_hr",
+      "report.recruitment.pipeline",
+      "report.recruitment.appointment_letters",
+      "report.recruitment.handoff_readiness",
+      "import_alias.job.title",
+      "import_alias.candidate.mobile",
+      "import_alias.job.opening_title",
+      "import_alias.job.requisition_code",
+      "import_alias.job.department",
+      "import_alias.job.hiring_manager",
+      "import_alias.candidate.applicant_name",
+      "import_alias.candidate.email",
+      "import_alias.candidate.source",
+      "import_alias.candidate.job_opening",
+      "import_alias.recruitment.appointment_letter.candidate_id",
+    ];
+
+    for (const key of expectedKeys) {
+      const item = byKey.get(key);
+      assert.ok(item, `${key} should be registered for Phase 10 recruitment`);
+      assert.ok(item.source_ref, `${key} should include source_ref`);
+    }
+  });
 });

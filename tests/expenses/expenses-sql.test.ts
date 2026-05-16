@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const migrationPath = join(repoRoot, "supabase", "migrations", "20260512120000_expenses_advances_travel.sql");
+const integrityMigrationPath = join(repoRoot, "supabase", "migrations", "20260516060000_integrity_fixes.sql");
 const leaveMigrationPath = join(repoRoot, "supabase", "migrations", "20260511190000_leave_management.sql");
 
 function migrationSql() {
@@ -15,6 +16,15 @@ function migrationSql() {
 
 function normalizedSql() {
   return migrationSql().replace(/\s+/g, " ").toLowerCase();
+}
+
+function integrityMigrationSql() {
+  assert.equal(existsSync(integrityMigrationPath), true, "integrity repair migration should exist");
+  return readFileSync(integrityMigrationPath, "utf8");
+}
+
+function normalizedIntegritySql() {
+  return integrityMigrationSql().replace(/\s+/g, " ").toLowerCase();
 }
 
 const expenseTables = [
@@ -52,6 +62,7 @@ describe("Expenses, advances, travel, and vehicle SQL migration contract", () =>
   it("defines finance helper functions as security definer functions with fixed search_path", () => {
     const sql = normalizedSql();
     const helpers = [
+      "current_employee_id",
       "can_manage_expenses",
       "can_view_expense_record",
       "can_approve_expense_record",
@@ -129,5 +140,40 @@ describe("Expenses, advances, travel, and vehicle SQL migration contract", () =>
     for (const table of expenseTables) {
       assert.match(sql, new RegExp(`create trigger ${table}_updated_at before update on public\\.${table} for each row execute function public\\.touch_updated_at\\(\\)`), `${table} should use touch_updated_at`);
     }
+  });
+
+  it("adds additive expense claim to advance settlement schema in the integrity migration", () => {
+    const sql = normalizedIntegritySql();
+
+    assert.match(sql, /alter table public\.employee_advances add column if not exists settled_by uuid references public\.profiles\(id\) on delete set null/);
+    assert.match(sql, /add column if not exists settled_amount numeric\(12,2\)/);
+    assert.match(sql, /add column if not exists outstanding_amount numeric\(12,2\)/);
+    assert.match(sql, /alter column outstanding_amount set not null/);
+    assert.match(sql, /employee_advances_settlement_amounts_check/);
+    assert.match(sql, /employee_advances_id_employee_unique unique \(id, employee_id\)/);
+    assert.match(sql, /create or replace function public\.sync_employee_advance_settlement_totals\(\)/);
+    assert.match(sql, /create trigger employee_advances_settlement_totals/);
+
+    assert.match(sql, /alter table public\.expense_claims add column if not exists settlement_advance_id uuid/);
+    assert.match(sql, /add column if not exists settlement_amount numeric\(12,2\)/);
+    assert.match(sql, /add column if not exists settlement_note text/);
+    assert.match(sql, /expense_claims_settlement_amount_check/);
+    assert.match(sql, /expense_claims_settlement_advance_employee_fkey/);
+    assert.match(sql, /foreign key \(settlement_advance_id, employee_id\) references public\.employee_advances\(id, employee_id\)/);
+    assert.match(sql, /expense_claims_settlement_advance_idx/);
+    assert.match(sql, /employee_advances_outstanding_idx/);
+  });
+
+  it("documents intentional polymorphic or external id columns instead of adding unsafe foreign keys", () => {
+    const sql = normalizedIntegritySql();
+
+    assert.match(sql, /comment on column public\.communication_logs\.provider_message_id/);
+    assert.match(sql, /external provider message identifier/);
+    assert.match(sql, /comment on column public\.employee_notifications\.source_id/);
+    assert.match(sql, /polymorphic source row id/);
+    assert.match(sql, /comment on column public\.hrms_automation_notifications\.source_id/);
+    assert.match(sql, /comment on column public\.leave_ledger_entries\.source_id/);
+    assert.doesNotMatch(sql, /foreign key \(provider_message_id\)/);
+    assert.doesNotMatch(sql, /foreign key \(source_id\)/);
   });
 });

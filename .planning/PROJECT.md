@@ -18,11 +18,14 @@ HireRabbits must become a governed HRMS without breaking ATS workflows that alre
 - Completed: Employee core and organization setup are present and test-verified.
 - Completed: Attendance, check-ins, shifts, corrections, roster, and overtime foundation are present and test-verified.
 - Completed: Leave setup, applications, approvals, balances, ledger, compensatory leave, and encashment foundation are present and test-verified.
+- Completed: Phase 4 expenses, advances, travel, vehicles, live migration, pre-Phase-5 role-based navigation, central Settings role assignment, and Phase 5 payroll are present and test/browser-verified.
 
 ### Active
 
-- [ ] Build expenses, employee advances, travel requests, and vehicle expense tracking with governed metadata, RLS, API routes, and role-aware UI.
-- [ ] Build payroll-grade salary operations without weakening existing CTC/offers behavior.
+- [x] Build expenses, employee advances, travel requests, and vehicle expense tracking with governed metadata, RLS, API routes, and role-aware UI.
+- [x] Centralize sidebar navigation in typed role-aware config before Phase 5 so future HRMS modules are enabled by config flips, not sidebar JSX edits.
+- [x] Keep Settings user role assignment tied to the central typed role list so new users inherit the correct sidebar visibility.
+- [x] Build payroll-grade salary operations without weakening existing CTC/offers behavior.
 - [ ] Build performance, lifecycle, self-service, reports, notifications, automations, and recruitment unification in later phases.
 - [ ] Keep metadata lineage and hardcoding checks green for every new governed role, route, permission, workflow state, form, report, import alias, and salary or expense component.
 
@@ -55,8 +58,11 @@ HireRabbits must become a governed HRMS without breaking ATS workflows that alre
 |----------|-----------|---------|
 | Use the HRMS reference repo as feature reference only | Avoid copying incompatible Frappe implementation into Next.js/Supabase | Good |
 | Use governed metadata for HRMS roles, routes, permissions, forms, reports, workflows, imports, and payroll/expense concepts | Prevent hardcoded business rules and keep lineage auditable | Good |
-| Resume after leave management and start Phase 4 expenses next | Code and tests show metadata, employee core, attendance, and leave complete; expenses are metadata-only/absent | Pending |
+| Complete Phase 4 before payroll | Metadata, migration, APIs, UI, browser checks, and live Supabase migration have been verified | Good |
+| Move sidebar route visibility into typed `lib/nav/config.ts` before Phase 5 | Prevent sidebar overload and role leakage as payroll/performance/lifecycle/report routes are added | Good |
+| Use central `ROLES` for Settings invite/edit and user API validation | Ensure newly created HRMS users receive roles that match navigation and permission rules | Good |
+| Upgrade existing `salary_components` table in Phase 5 instead of replacing it | Phase 1 metadata governance already owns `salary_components.key`; Phase 5 adds operational columns while preserving metadata lineage | Good |
 | Treat Git status as unreliable for phase completion | `HRMS-main` is untracked from parent repo, so commits cannot prove progress | Pending |
 
 ---
-*Last updated: 2026-05-13 after GSD state recovery.*
+*Last updated: 2026-05-15 after Phase 5 payroll verification and live migration.*

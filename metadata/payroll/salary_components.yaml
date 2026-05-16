@@ -5,16 +5,54 @@ items:
     kind: salary_component
     owner: finance
     source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Component, field_or_state: Basic }
-    introduced_in_phase: 1
+    introduced_in_phase: 5
     db_table: salary_components
     ts_export: METADATA_KEYS
-    api_routes: [app/api/payroll/salary-components]
-    ui_surfaces: ["app/(dashboard)/payroll/salary-components/page.tsx"]
-    tests: [tests/metadata/registry-contract.test.ts]
+    api_routes: [app/api/hrms/payroll/salary-components]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
     category: earning
     calculation: fixed_or_formula
     taxable: true
     recurrence: monthly
     effective_dates:
       from: 2026-05-10
+      to: null
+  - key: salary_component.hra
+    label: House Rent Allowance
+    domain: payroll
+    kind: salary_component
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Component, field_or_state: House Rent Allowance }
+    introduced_in_phase: 5
+    db_table: salary_components
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/payroll/salary-components]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    category: earning
+    calculation: fixed_or_formula
+    taxable: true
+    recurrence: monthly
+    effective_dates:
+      from: 2026-05-15
+      to: null
+  - key: salary_component.pf_employee
+    label: Provident Fund Employee Deduction
+    domain: payroll
+    kind: salary_component
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Component, field_or_state: Provident Fund Employee }
+    introduced_in_phase: 5
+    db_table: salary_components
+    ts_export: METADATA_KEYS
+    api_routes: [app/api/hrms/payroll/salary-components]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    category: deduction
+    calculation: fixed_or_formula
+    taxable: false
+    recurrence: monthly
+    effective_dates:
+      from: 2026-05-15
       to: null

@@ -59,18 +59,20 @@ describe("Time route access", () => {
 
   it("adds Time to the sidebar while preserving existing ATS and People navigation hooks", () => {
     const sidebar = source("components/sidebar.tsx");
+    const navConfig = source("lib/nav/config.ts");
     const routeAccess = source("lib/hrms/route-access.ts");
 
     for (const href of ["/dashboard", "/my-activity", "/candidates", "/jobs", "/hod-portal", "/jds", "/settings"]) {
-      assert.match(sidebar, new RegExp(href.replaceAll("/", "\\/")), `${href} should remain in sidebar`);
+      const target = href === "/settings" ? sidebar : navConfig;
+      assert.match(target, new RegExp(href.replaceAll("/", "\\/")), `${href} should remain in navigation`);
     }
     for (const href of ["/time/attendance", "/time/shifts", "/time/approvals"]) {
       assert.match(routeAccess, new RegExp(href.replaceAll("/", "\\/")), `${href} should be available through Time routes`);
     }
 
-    assert.match(sidebar, /getVisiblePeopleRoutes/);
-    assert.match(sidebar, /getVisibleTimeRoutes/);
-    assert.match(sidebar, />Time</);
+    assert.match(sidebar, /getNavForRole\(profile\.role\)/);
+    assert.match(sidebar, /getSectionsForRole\(profile\.role\)/);
+    assert.match(navConfig, /label: "Time"/);
   });
 
   it("matches Time route metadata labels, roles, and sidebar settings", () => {

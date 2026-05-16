@@ -16,7 +16,9 @@
 - [x] **META-01**: Governed metadata registry exists for roles, permissions, routes, forms, reports, workflows, imports, and salary/expense concepts.
 - [x] **META-02**: Metadata generation produces TypeScript constants and Supabase seed SQL.
 - [x] **META-03**: Metadata hardcoding scanner and lineage report tests are present and passing.
-- [ ] **META-04**: Every new Phase 4 expense/advance/travel route, permission, form, workflow state, approval rule, and report is registered with lineage.
+- [x] **META-04**: Every new Phase 4 expense/advance/travel route, permission, form, workflow state, approval rule, and report is registered with lineage.
+- [x] **NAV-01**: Sidebar navigation is driven by typed role-aware config with disabled future-phase routes hidden until built.
+- [x] **NAV-02**: Settings user invite/edit role controls and user APIs use the central typed role list, so assigned roles follow sidebar visibility rules.
 
 ### Employee Core
 
@@ -41,20 +43,20 @@
 
 ### Expenses, Advances, and Travel
 
-- [ ] **EXP-01**: Employees can create expense claims with governed claim types, items, amounts, dates, notes, and attachments.
-- [ ] **EXP-02**: Managers, department approvers, finance, HR, and admins can approve/reject/cancel expense claims within scoped permissions.
-- [ ] **EXP-03**: Employees can request advances and record settlement state without payroll posting.
-- [ ] **EXP-04**: Employees can submit travel requests with itinerary rows and approval status.
-- [ ] **EXP-05**: Vehicle logs and vehicle services can be tracked with finance/HR visibility.
-- [ ] **EXP-06**: Expense pages appear under a Finance/Expenses navigation group only for authorized roles.
+- [x] **EXP-01**: Employees can create expense claims with governed claim types, items, amounts, dates, notes, and attachments.
+- [x] **EXP-02**: Managers, department approvers, finance, HR, and admins can approve/reject/cancel expense claims within scoped permissions.
+- [x] **EXP-03**: Employees can request advances and record settlement state without payroll posting.
+- [x] **EXP-04**: Employees can submit travel requests with itinerary rows and approval status.
+- [x] **EXP-05**: Vehicle logs and vehicle services can be tracked with finance/HR visibility.
+- [x] **EXP-06**: Expense pages appear under a Finance/Expenses navigation group only for authorized roles.
 
 ### Future HRMS Domains
 
-- [ ] **PAY-01**: Payroll salary components, structures, assignments, runs, salary slips, tax, and benefits are implemented with RLS.
-- [ ] **PERF-01**: Goals, KRAs, appraisal cycles, templates, feedback, and ratings are implemented.
-- [ ] **LIFE-01**: Onboarding, separation, promotion, transfer, grievances, training, and daily work summaries are implemented.
-- [ ] **SELF-01**: Employee self-service routes expose profile, attendance, leave, expenses, salary slips, and notifications.
-- [ ] **REPORT-01**: HRMS reports, dashboards, notifications, and scheduled automations are implemented.
+- [x] **PAY-01**: Payroll salary components, structures, assignments, runs, salary slips, tax, and benefits are implemented with RLS.
+- [x] **PERF-01**: Goals, KRAs, appraisal cycles, templates, feedback, and ratings are implemented.
+- [x] **LIFE-01**: Onboarding, separation, promotion, transfer, grievances, training, and daily work summaries are implemented.
+- [x] **SELF-01**: Employee self-service routes expose profile, attendance, leave, expenses, salary slips, and notifications.
+- [x] **REPORT-01**: HRMS reports, dashboards, notifications, and scheduled automations are implemented.
 
 ## v2 Requirements
 
@@ -81,7 +83,9 @@
 | META-01 | Phase 0 | Complete |
 | META-02 | Phase 0 | Complete |
 | META-03 | Phase 0 | Complete |
-| META-04 | Phase 4 | Pending |
+| META-04 | Phase 4 | Complete |
+| NAV-01 | Pre-Phase 5 | Complete |
+| NAV-02 | Pre-Phase 5 | Complete |
 | EMP-01 | Phase 1 | Complete |
 | EMP-02 | Phase 1 | Complete |
 | EMP-03 | Phase 1 | Complete |
@@ -94,23 +98,23 @@
 | LEAVE-02 | Phase 3 | Complete |
 | LEAVE-03 | Phase 3 | Complete |
 | LEAVE-04 | Phase 3 | Complete |
-| EXP-01 | Phase 4 | Pending |
-| EXP-02 | Phase 4 | Pending |
-| EXP-03 | Phase 4 | Pending |
-| EXP-04 | Phase 4 | Pending |
-| EXP-05 | Phase 4 | Pending |
-| EXP-06 | Phase 4 | Pending |
-| PAY-01 | Phase 5 | Pending |
-| PERF-01 | Phase 6 | Pending |
-| LIFE-01 | Phase 7 | Pending |
-| SELF-01 | Phase 8 | Pending |
-| REPORT-01 | Phase 9 | Pending |
+| EXP-01 | Phase 4 | Complete |
+| EXP-02 | Phase 4 | Complete |
+| EXP-03 | Phase 4 | Complete |
+| EXP-04 | Phase 4 | Complete |
+| EXP-05 | Phase 4 | Complete |
+| EXP-06 | Phase 4 | Complete |
+| PAY-01 | Phase 5 | Complete |
+| PERF-01 | Phase 6 | Complete |
+| LIFE-01 | Phase 7 | Complete |
+| SELF-01 | Phase 8 | Complete |
+| REPORT-01 | Phase 9 | Complete |
 
 **Coverage:**
-- v1 requirements: 30 total
-- Mapped to phases: 30
+- v1 requirements: 32 total
+- Mapped to phases: 32
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-13*
-*Last updated: 2026-05-13 after GSD state recovery*
+*Last updated: 2026-05-15 after Phase 9 live migration*

@@ -23,19 +23,36 @@ The HRMS reference repo at `C:\Users\Admin\Music\Rabbit F\Rabbits-main v1\hrms-d
 <!-- GSD:stack-start source:STACK.md -->
 ## Technology Stack
 
-Technology stack not yet documented. Will populate after codebase mapping or first phase.
+- Next.js 14 App Router with TypeScript.
+- Supabase Auth, Supabase Postgres, Supabase RLS, and Supabase CLI migrations.
+- Tailwind CSS, Radix UI patterns where already present, and `lucide-react` icons.
+- Node test runner through `node --import tsx --test` plus package scripts such as `test:metadata`, `test:expenses`, `test:payroll`, and `test:nav`.
+- Local browser verification uses `agent-browser.cmd` against `localhost:3001` before adding Playwright.
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+- Preserve existing ATS behavior unless a planned HRMS change explicitly requires otherwise.
+- New HRMS business concepts must be registered through governed metadata and generated artifacts, not hardcoded directly in UI/API code.
+- Each HRMS phase follows this order: metadata, migration/RLS, helpers/authorization, APIs, UI/navigation, tests, build, live migration, browser verification, planning docs.
+- Bob owns live Supabase migration application. Worker teams may create migration files and tests, but do not mark a phase live.
+- Sidebar routes belong in `lib/nav/config.ts`; future routes stay `enabled: false` until route, tests, and browser verification pass.
+- Settings role assignment must use the central typed role list and must not hardcode stale role options.
+- After running `npm.cmd run build` while the dev server is active, restart the dev server on port `3001` and rebuild `.next` before browser checks.
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
+- App shell uses a role-aware sidebar rendered from `lib/nav/config.ts`.
+- Auth/profile role data comes from Supabase-backed profile state and central role types.
+- HRMS domains are organized by route groups under `app/(app)` and API routes under `app/api/hrms`.
+- Domain helpers and authorization live under `lib/hrms/*`.
+- Supabase migrations are incremental and include table creation/upgrades, helper functions, triggers, constraints, RLS, and policies in the same migration for each phase.
+- Metadata source files live under `metadata/**`; generated TypeScript and SQL live under `lib/generated/**` and `supabase/generated/metadata_seed.sql`.
+- Completed HRMS domains through Phase 5: metadata governance, employee core, attendance/shifts, leave, expenses/travel/vehicles, role-based navigation, Settings role management, and payroll/salary/tax/benefits.
+- Current next phase: Phase 6 Performance Management.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->

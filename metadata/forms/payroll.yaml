@@ -1,0 +1,272 @@
+items:
+  - key: form.payroll.salary_component
+    label: Salary Component
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Component, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/salary-components]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: code
+        type: text
+        storage_mapping: salary_components.code
+        validation: [required, unique]
+        privacy_class: payroll
+        test_id: salary-component-code
+      - key: component_type
+        type: select
+        storage_mapping: salary_components.component_type
+        validation: [required]
+        options: [earning, deduction, employer_contribution]
+        privacy_class: payroll
+        test_id: salary-component-type
+      - key: amount
+        type: currency
+        storage_mapping: salary_structure_details.amount
+        validation: [optional, non_negative]
+        privacy_class: payroll
+        test_id: salary-component-amount
+  - key: form.payroll.salary_structure
+    label: Salary Structure
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/salary-structures]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: name
+        type: text
+        storage_mapping: salary_structures.name
+        validation: [required, unique]
+        privacy_class: payroll
+        test_id: salary-structure-name
+      - key: currency
+        type: text
+        storage_mapping: salary_structures.currency
+        validation: [required]
+        privacy_class: payroll
+        test_id: salary-structure-currency
+  - key: form.payroll.salary_structure_assignment
+    label: Salary Structure Assignment
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Structure Assignment, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/salary-structure-assignments]
+    ui_surfaces: [route.payroll.salary_structures]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: salary_structure_assignments.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: salary-assignment-employee
+      - key: base_amount
+        type: currency
+        storage_mapping: salary_structure_assignments.base_amount
+        validation: [required, positive]
+        privacy_class: payroll
+        test_id: salary-assignment-base
+  - key: form.payroll.payroll_period
+    label: Payroll Period
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Period, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: fiscal_year
+        type: integer
+        storage_mapping: payroll_periods.fiscal_year
+        validation: [required]
+        privacy_class: payroll
+        test_id: payroll-period-year
+      - key: month
+        type: integer
+        storage_mapping: payroll_periods.month
+        validation: [required, range_1_12]
+        privacy_class: payroll
+        test_id: payroll-period-month
+  - key: form.payroll.payroll_entry
+    label: Payroll Entry
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Payroll Entry, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: payroll_period_id
+        type: payroll_period_reference
+        storage_mapping: payroll_entries.payroll_period_id
+        validation: [required]
+        privacy_class: payroll
+        test_id: payroll-entry-period
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: payroll_entries.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: payroll-entry-employee
+  - key: form.payroll.salary_slip
+    label: Salary Slip
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Slip, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/salary-slips]
+    ui_surfaces: [route.payroll.salary_slips]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: employee_id
+        type: employee_reference
+        storage_mapping: salary_slips.employee_id
+        validation: [required]
+        privacy_class: personal
+        test_id: salary-slip-employee
+      - key: net_pay
+        type: currency
+        storage_mapping: salary_slips.net_pay
+        validation: [required, non_negative]
+        privacy_class: payroll
+        test_id: salary-slip-net-pay
+  - key: form.payroll.additional_salary
+    label: Additional Salary
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Additional Salary, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: amount
+        type: currency
+        storage_mapping: additional_salaries.amount
+        validation: [required, positive]
+        privacy_class: payroll
+        test_id: additional-salary-amount
+  - key: form.payroll.salary_withholding
+    label: Salary Withholding
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Salary Withholding, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/runs]
+    ui_surfaces: [route.payroll.runs]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: amount
+        type: currency
+        storage_mapping: salary_withholdings.amount
+        validation: [required, positive]
+        privacy_class: payroll
+        test_id: salary-withholding-amount
+  - key: form.payroll.tax_exemption_declaration
+    label: Tax Exemption Declaration
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Tax Exemption Declaration, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: declared_amount
+        type: currency
+        storage_mapping: employee_tax_exemption_declarations.declared_amount
+        validation: [required, non_negative]
+        privacy_class: payroll
+        test_id: tax-declaration-amount
+  - key: form.payroll.benefit_application
+    label: Benefit Application
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Benefit Application, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: benefit_type
+        type: text
+        storage_mapping: employee_benefit_applications.benefit_type
+        validation: [required]
+        privacy_class: payroll
+        test_id: benefit-application-type
+  - key: form.payroll.benefit_claim
+    label: Benefit Claim
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Employee Benefit Claim, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: claim_amount
+        type: currency
+        storage_mapping: employee_benefit_claims.claim_amount
+        validation: [required, positive]
+        privacy_class: payroll
+        test_id: benefit-claim-amount
+  - key: form.payroll.gratuity_rule
+    label: Gratuity Rule
+    domain: payroll
+    kind: form
+    owner: finance
+    source_ref: { system: frappe_hrms, module: payroll, artifact: Gratuity Rule, field_or_state: form }
+    introduced_in_phase: 5
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/payroll/tax-benefits]
+    ui_surfaces: [route.payroll.tax_benefits]
+    tests: [tests/metadata/registry-contract.test.ts, tests/payroll/payroll-sql.test.ts]
+    fields:
+      - key: minimum_years
+        type: number
+        storage_mapping: gratuity_rules.minimum_years
+        validation: [required, non_negative]
+        privacy_class: payroll
+        test_id: gratuity-minimum-years

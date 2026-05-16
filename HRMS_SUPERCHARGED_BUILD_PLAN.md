@@ -149,6 +149,25 @@ Practical loop:
 
 Do not try to build the whole HRMS in one execution pass. This is a multi-phase product migration.
 
+## Pre-Phase-5 Navigation Architecture
+
+Status: Complete on 2026-05-15.
+
+Before payroll work begins, the app sidebar is centralized in `lib/nav/config.ts`:
+
+- Every sidebar route is a typed `NAV_CONFIG` entry with explicit role arrays.
+- Future Phase 5-10 entries exist in config with `enabled: false` until their routes are implemented and verified.
+- `components/sidebar.tsx` renders from `getNavForRole(profile.role)` and `getSectionsForRole(profile.role)` instead of hardcoded route JSX.
+- Section headers auto-hide when all items in that section are filtered out.
+- Settings remains outside the main nav loop and is visible only to `admin` and `hr_manager`.
+- Settings user invite/edit role dropdowns render from the central typed `ROLES` list, excluding only `candidate`.
+- User create/edit APIs validate saved role strings against the same central role list before updating `profiles.role`.
+- The dashboard keeps its existing content and adds only a small role-aware context line.
+
+Future phase rule: when a payroll, performance, lifecycle, reports, or recruitment-unification route is built, flip the existing config entry to `enabled: true` only after tests and browser verification pass. Do not add ad-hoc sidebar links.
+
+Role-management rule: when adding or renaming an HRMS role, update the central role type/list first. Do not hardcode role `<option>` entries in Settings, and do not let API routes accept roles outside the central list.
+
 ## GSD Operating Model
 
 GSD owns project state, roadmap, context, research, phase plans, execution summaries, verification, UAT, review, shipping, and milestone audits.
@@ -853,6 +872,10 @@ Key workflows:
 - Approval queue and reports
 
 ### Phase 5: Payroll, Salary, Tax, and Benefits
+
+Status: Complete on 2026-05-15. Implemented governed payroll metadata, migration, helpers, APIs, UI routes, role-based nav enablement, tests, live Supabase migration, and browser verification.
+
+Implementation note: Phase 1 already created `salary_components` as governed metadata keyed by `key`. Phase 5 upgrades that table with payroll operational columns and a unique `id` instead of replacing it.
 
 Goal: Upgrade existing CTC/offers into payroll-grade salary operations.
 

@@ -42,6 +42,7 @@ export async function currentHrmsProfile(supabase: Awaited<ReturnType<typeof cre
     user,
     profile: {
       ...profile,
+      employee_id: approverEmployee?.id ?? null,
       permissions: rolePermissions?.map((permission) => permission.permission_key) ?? [],
       department_approvals: departmentApprovals ?? [],
     } as HrmsProfile & { permissions: string[] },
@@ -55,7 +56,7 @@ export async function resolveLeaveTargetEmployee(
 ) {
   let query = supabase
     .from("employees")
-    .select("id, profile_id, department_id, reporting_manager_id, reporting_manager:employees!employees_reporting_manager_id_fkey(profile_id)");
+    .select("id, profile_id, department_id, reporting_manager_id");
 
   query = employeeId ? query.eq("id", employeeId) : query.eq("profile_id", userId);
   const { data, error } = await query.maybeSingle();

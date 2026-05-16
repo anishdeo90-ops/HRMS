@@ -13,13 +13,20 @@ type PeopleRoute = {
 };
 
 type TimeRoute = PeopleRoute;
-type FinanceRouteKey =
-  | "route.finance.expenses"
-  | "route.finance.expense_claims"
-  | "route.finance.employee_advances"
-  | "route.finance.travel"
-  | "route.finance.vehicles";
-type FinanceRoute = Omit<PeopleRoute, "key"> & { key: FinanceRouteKey };
+const PHASE4_FINANCE_ROUTE_KEYS = [
+  "route.finance.expenses",
+  "route.finance.expense_claims",
+  "route.finance.advances",
+  "route.finance.travel",
+  "route.finance.vehicles",
+] as const;
+
+type FinanceRouteKey = (typeof PHASE4_FINANCE_ROUTE_KEYS)[number];
+type FinanceRoute = {
+  key: FinanceRouteKey;
+  href: string;
+  label: string;
+};
 
 const PEOPLE_ROUTE_ROLES = new Set(["admin", "hr_manager", "hr_user"]);
 const TIME_ATTENDANCE_ROUTE_ROLES = new Set([
@@ -106,7 +113,7 @@ export const FINANCE_ROUTE_ACCESS = {
     label: "Claims",
   },
   advances: {
-    key: "route.finance.employee_advances",
+    key: "route.finance.advances",
     href: "/expenses/advances",
     label: "Advances",
   },

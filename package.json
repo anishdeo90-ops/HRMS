@@ -15,7 +15,14 @@
     "test:employee-core": "node --import tsx --test tests/employee-core/*.test.ts",
     "test:attendance": "node --import tsx --test tests/attendance/*.test.ts",
     "test:leave": "node --import tsx --test tests/leave/*.test.ts",
-    "test:expenses": "node --import tsx --test tests/expenses/*.test.ts"
+    "test:expenses": "node --import tsx --test tests/expenses/*.test.ts",
+    "test:payroll": "node --import tsx --test tests/payroll/*.test.ts",
+    "test:performance": "node --import tsx --test tests/performance/*.test.ts",
+    "test:lifecycle": "node --import tsx --test tests/lifecycle/*.test.ts",
+    "test:self-service": "node --import tsx --test tests/self-service/*.test.ts",
+    "test:reports": "node --import tsx --test tests/reports/*.test.ts",
+    "test:recruitment": "node --import tsx --test tests/recruitment/*.test.ts",
+    "test:nav": "node --import tsx --test tests/nav/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

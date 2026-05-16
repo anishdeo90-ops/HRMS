@@ -4,6 +4,7 @@ export const ROLE_KEYS = [
   "role.admin",
   "role.employee",
   "role.expense_approver",
+  "role.finance_manager",
   "role.hod",
   "role.hr_manager",
   "role.hr_user",

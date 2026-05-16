@@ -1,0 +1,136 @@
+items:
+  - key: form.reports.report_run
+    label: Report Run
+    domain: reports
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: reports, artifact: Phase 9 Report Runs, field_or_state: form }
+    introduced_in_phase: 9
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/reports]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    fields:
+      - key: report_key
+        type: metadata_reference
+        storage_mapping: hrms_report_runs.report_key
+        validation: [required]
+        privacy_class: work
+        test_id: reports-report-run-key
+      - key: scope_type
+        type: select
+        storage_mapping: hrms_report_runs.scope_type
+        validation: [required]
+        options: [company, department, team, self]
+        privacy_class: work
+        test_id: reports-report-run-scope
+      - key: period_start
+        type: date
+        storage_mapping: hrms_report_runs.period_start
+        validation: []
+        privacy_class: work
+        test_id: reports-report-run-period-start
+      - key: period_end
+        type: date
+        storage_mapping: hrms_report_runs.period_end
+        validation: []
+        privacy_class: work
+        test_id: reports-report-run-period-end
+  - key: form.reports.dashboard_widget
+    label: Dashboard Widget
+    domain: reports
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: dashboards, artifact: Phase 9 Dashboard Widgets, field_or_state: form }
+    introduced_in_phase: 9
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/dashboards]
+    ui_surfaces: [route.reports.dashboards]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    fields:
+      - key: widget_key
+        type: text
+        storage_mapping: hrms_dashboard_widgets.widget_key
+        validation: [required]
+        privacy_class: work
+        test_id: reports-dashboard-widget-key
+      - key: report_key
+        type: metadata_reference
+        storage_mapping: hrms_dashboard_widgets.report_key
+        validation: [required]
+        privacy_class: work
+        test_id: reports-dashboard-widget-report
+      - key: widget_type
+        type: select
+        storage_mapping: hrms_dashboard_widgets.widget_type
+        validation: [required]
+        options: [metric, chart, table, list]
+        privacy_class: work
+        test_id: reports-dashboard-widget-type
+  - key: form.reports.notification_rule
+    label: Notification Rule
+    domain: reports
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: notifications, artifact: Phase 9 Notification Rules, field_or_state: form }
+    introduced_in_phase: 9
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/automation/notifications]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    fields:
+      - key: rule_key
+        type: text
+        storage_mapping: hrms_notification_rules.rule_key
+        validation: [required]
+        privacy_class: work
+        test_id: reports-notification-rule-key
+      - key: category
+        type: select
+        storage_mapping: hrms_notification_rules.category
+        validation: [required]
+        options: [attendance, leave, expenses, payroll, performance, lifecycle, recruiting, system]
+        privacy_class: work
+        test_id: reports-notification-rule-category
+      - key: channel
+        type: select
+        storage_mapping: hrms_notification_rules.channel
+        validation: [required]
+        options: [in_app, email, sms, whatsapp]
+        privacy_class: work
+        test_id: reports-notification-rule-channel
+  - key: form.reports.automation_rule
+    label: Automation Rule
+    domain: reports
+    kind: form
+    owner: hr
+    source_ref: { system: hirerabbits_hrms, module: automation, artifact: Phase 9 Automation Rules, field_or_state: form }
+    introduced_in_phase: 9
+    db_table: form_schemas
+    ts_export: FORM_KEYS
+    api_routes: [app/api/hrms/automation]
+    ui_surfaces: [route.reports.overview]
+    tests: [tests/metadata/registry-contract.test.ts, tests/reports/reports-sql.test.ts]
+    fields:
+      - key: automation_key
+        type: text
+        storage_mapping: hrms_automation_schedules.automation_key
+        validation: [required]
+        privacy_class: work
+        test_id: reports-automation-rule-key
+      - key: automation_type
+        type: select
+        storage_mapping: hrms_automation_schedules.automation_type
+        validation: [required]
+        options: [leave_accrual, leave_expiry, attendance_reminder, interview_reminder, birthday_anniversary, payroll_readiness, pending_approval]
+        privacy_class: work
+        test_id: reports-automation-rule-type
+      - key: cron_expression
+        type: text
+        storage_mapping: hrms_automation_schedules.cron_expression
+        validation: [required]
+        privacy_class: work
+        test_id: reports-automation-rule-cron

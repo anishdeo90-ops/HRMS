@@ -8,8 +8,8 @@ items:
     introduced_in_phase: 1
     db_table: form_schemas
     ts_export: FORM_KEYS
-    api_routes: [app/api/employees]
-    ui_surfaces: ["app/(dashboard)/employees/page.tsx"]
+    api_routes: [app/api/hrms/employees]
+    ui_surfaces: ["app/(app)/people/employees/page.tsx"]
     tests: [tests/metadata/registry-contract.test.ts]
     fields:
       - key: employee_code

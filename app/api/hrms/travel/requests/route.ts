@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const TRAVEL_SELECT = [
   "*",
-  "employee:employees(id, employee_code, name, profile_id, department_id, reporting_manager:employees!employees_reporting_manager_id_fkey(profile_id))",
+  "employee:employees!travel_requests_employee_id_fkey(id, employee_code, name, profile_id, department_id, reporting_manager_id)",
   "itinerary:travel_itineraries(*)",
 ].join(",");
 
@@ -15,7 +15,7 @@ function targetFromRecord(record: any) {
     employee_id: record.employee_id,
     profile_id: record.employee?.profile_id,
     department_id: record.employee?.department_id,
-    reporting_manager_profile_id: record.employee?.reporting_manager?.profile_id,
+    reporting_manager_id: record.employee?.reporting_manager_id,
   };
 }
 

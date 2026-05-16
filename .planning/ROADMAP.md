@@ -2,7 +2,7 @@
 
 **Source:** `HRMS_SUPERCHARGED_BUILD_PLAN.md`
 **Recovered:** 2026-05-13
-**Current position:** Phase 4 is next.
+**Current position:** Phase 10 recruitment unification is in progress.
 
 ## Phase Status
 
@@ -12,13 +12,14 @@
 | 1 | Employee Core and Organization Setup | Complete | Employee/organization APIs, People UI, migration `20260510220000_employee_core_organization.sql`, tests passing |
 | 2 | Attendance, Check-ins, and Shifts | Complete | Time UI, attendance/shift/overtime APIs, migration `20260511160000_attendance_checkins_shifts.sql`, tests passing |
 | 3 | Leave Management | Complete | Leave APIs and helpers, migration `20260511190000_leave_management.sql`, tests passing |
-| 4 | Expenses, Advances, and Travel | Ready to execute planning | Metadata seed references exist, implementation absent |
-| 5 | Payroll, Salary, Tax, and Benefits | Pending | Salary metadata exists, payroll-grade app implementation absent |
-| 6 | Performance Management | Pending | Not implemented |
-| 7 | Employee Lifecycle | Pending | Not implemented |
-| 8 | Employee Self-Service Portal | Pending | Not implemented as a full portal |
-| 9 | Reports, Dashboards, Notifications, Automation | Pending | ATS automation exists; HRMS reporting/automation remains pending |
-| 10 | Recruitment Unification | Pending | Existing ATS remains; HRMS terminology unification pending |
+| 4 | Expenses, Advances, and Travel | Complete | Metadata, migration `20260512120000_expenses_advances_travel.sql`, APIs, UI, tests, live Supabase push, and browser checks passed |
+| 4.5 | Role-Based Navigation Architecture | Complete | `lib/nav/config.ts`, config-driven sidebar, role-aware dashboard context, disabled future routes, tests/build/browser checks passed |
+| 5 | Payroll, Salary, Tax, and Benefits | Complete | Payroll metadata, migration `20260515130000_payroll_salary_tax_benefits.sql`, APIs, UI, nav enablement, tests, build, live Supabase push, and browser checks passed |
+| 6 | Performance Management | Complete | Performance metadata, migration `20260515160000_performance_management.sql`, APIs, UI, nav enablement, tests, build, live Supabase push, and browser/API checks passed |
+| 7 | Employee Lifecycle | Complete | Lifecycle metadata, migration, APIs, UI, nav enablement, tests, build, and live migration completed |
+| 8 | Employee Self-Service Portal | Complete | Self-service metadata, notifications migration, APIs, UI, nav enablement, tests, build, and live migration completed |
+| 9 | Reports, Dashboards, Notifications, Automation | Complete | Metadata, migration, APIs, UI, tests, build, live migration, and route guard/CSS checks passed; signed-in browser pass awaits auth profile |
+| 10 | Recruitment Unification | In Progress | Phase 10 planning artifacts created and team lanes dispatched |
 
 ## Phase 0: Foundation and Planning
 
@@ -70,7 +71,7 @@
 
 **Goal:** Add employee expense workflows.
 
-**Status:** Next.
+**Status:** Complete.
 
 **Tables:**
 - `expense_claims`
@@ -96,35 +97,96 @@
 - Vehicle expense tracking.
 - Approval queue and reports.
 
+**Delivered:**
+- Governed metadata, RLS migration, API routes, finance helpers, and UI routes.
+- Finance sidebar visibility through typed role-aware navigation config.
+- Live Supabase migration applied to project `gzjoansgnjsnhcezyxbg`.
+
+## Pre-Phase 5: Role-Based Navigation Architecture
+
+**Goal:** Prevent sidebar sprawl and role leakage before payroll/performance/lifecycle/report routes are added.
+
+**Status:** Complete.
+
+**Delivered:**
+- `lib/nav/config.ts` defines typed `NAV_CONFIG`, `NavSection`, `NavItem`, `getNavForRole`, and `getSectionsForRole`.
+- `components/sidebar.tsx` renders enabled config items per role and hides empty section headers.
+- Future Phase 5-10 routes are present with `enabled: false`.
+- Dashboard shows a minimal role-aware context line.
+
 ## Phase 5: Payroll, Salary, Tax, and Benefits
 
 **Goal:** Upgrade existing CTC/offers into payroll-grade salary operations.
 
-**Status:** Pending.
+**Status:** Complete.
+
+**Tables:**
+- `salary_components`
+- `salary_structures`
+- `salary_structure_details`
+- `salary_structure_assignments`
+- `payroll_periods`
+- `payroll_entries`
+- `salary_slips`
+- `salary_slip_lines`
+- `additional_salaries`
+- `employee_incentives`
+- `salary_withholdings`
+- `income_tax_slabs`
+- `employee_tax_exemption_declarations`
+- `employee_benefit_applications`
+- `employee_benefit_claims`
+- `gratuity_rules`
+
+**Routes:**
+- `/payroll`
+- `/payroll/salary-structures`
+- `/payroll/runs`
+- `/payroll/salary-slips`
+- `/payroll/tax-benefits`
+
+**Delivered:**
+- Governed payroll metadata, RLS migration, helpers, authorization, API routes, UI routes, and payroll navigation enablement.
+- Employee self-service-safe salary slip and tax/benefit surfaces.
+- Live Supabase migration applied after adapting the existing governed `salary_components` table.
 
 ## Phase 6: Performance Management
 
 **Goal:** Add goals, KRAs, appraisals, and feedback.
 
-**Status:** Pending.
+**Status:** Complete.
+
+**Delivered:**
+- Governed performance metadata, RLS migration, helpers, authorization, API routes, UI routes, and performance navigation enablement.
+- Goal/KRA, appraisal cycle, appraisal, feedback, and criteria APIs aligned to the live Phase 6 schema.
+- Live Supabase migration applied to the linked project and browser-verified signed in on `localhost:3001`.
 
 ## Phase 7: Employee Lifecycle
 
 **Goal:** Add lifecycle events after hiring.
 
-**Status:** Pending.
+**Status:** Complete.
 
 ## Phase 8: Employee Self-Service Portal
 
 **Goal:** Give employees a simplified HRMS experience.
 
-**Status:** Pending.
+**Status:** Complete.
 
 ## Phase 9: Reports, Dashboards, Notifications, Automation
 
 **Goal:** Add HRMS reporting and scheduled operations.
 
-**Status:** Pending.
+**Status:** Complete; signed-in browser verification pending on an available auth session.
+
+**Plan:** `.planning/phases/09-reports-dashboards-notifications-automation/09-PLAN.md`
+
+**Delivered:**
+- Governed report, dashboard, notification-rule, and automation metadata with generated artifacts.
+- Helper-backed RLS migration for report runs/exports, dashboard layouts/widgets, notification rules, automation schedules/runs, and automation notifications.
+- Reports, dashboard, notification-rule, and automation APIs plus `/reports` and `/reports/dashboards` UI routes.
+- Reports navigation enabled for authorized HR, finance, and payroll roles.
+- Live Supabase migration applied through `20260516000000`.
 
 ## Phase 10: Recruitment Unification
 
@@ -132,6 +194,8 @@
 
 **Status:** Pending.
 
+**Plan:** `.planning/phases/10-recruitment-unification/10-PLAN.md`
+
 ## Next Command
 
-`$gsd-execute-phase 4`
+Continue Phase 10 recruitment unification integration after Anish, Trisha, and Tannu report lane status.

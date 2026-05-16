@@ -149,8 +149,83 @@ items:
     reason: Module import path, not business metadata.
     expires_after_phase: 3
     replacement_key: code.module.employee_core
+  - literal: Expense claim
+    file: app/(app)/expenses/page.tsx
+    reason: Phase 4 finance UI label backed by governed form metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 6
+    replacement_key: form.expense_claim.request
+  - literal: Expense claim
+    file: app/(app)/expenses/claims/page.tsx
+    reason: Phase 4 finance UI label backed by governed form metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 6
+    replacement_key: form.expense_claim.request
   - literal: "@/lib/hrms/employee-core"
     file: app/api/hrms/employees/from-candidate/[candidateId]/route.ts
     reason: Module import path, not business metadata.
     expires_after_phase: 3
     replacement_key: code.module.employee_core
+  - literal: Employee
+    file: app/(app)/payroll/salary-slips/page.tsx
+    reason: Phase 5 payroll UI fallback label backed by governed salary slip employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 7
+    replacement_key: form.payroll.salary_slip
+  - literal: Employee
+    file: app/(app)/payroll/salary-structures/page.tsx
+    reason: Phase 5 payroll UI fallback label backed by governed salary structure assignment employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 7
+    replacement_key: form.payroll.salary_structure_assignment
+  - literal: Employee
+    file: app/(app)/payroll/runs/page.tsx
+    reason: Phase 5 payroll run UI fallback label backed by governed payroll entry employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 7
+    replacement_key: form.payroll.payroll_entry
+  - literal: Employee
+    file: app/(app)/people/employees/[id]/page.tsx
+    reason: Employee detail UI fallback label backed by governed employee identity metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 8
+    replacement_key: form.employee.core
+  - literal: Employee
+    file: app/(app)/performance/appraisals/page.tsx
+    reason: Phase 6 performance UI fallback label backed by governed appraisal employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 8
+    replacement_key: form.performance.appraisal
+  - literal: Employee
+    file: app/(app)/performance/feedback/page.tsx
+    reason: Phase 6 performance UI fallback label backed by governed feedback employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 8
+    replacement_key: form.performance.feedback
+  - literal: Employee
+    file: app/(app)/lifecycle/page.tsx
+    reason: Phase 7 lifecycle UI fallback label backed by governed lifecycle employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 9
+    replacement_key: route.lifecycle.overview
+  - literal: Employee
+    file: app/(app)/lifecycle/onboarding/page.tsx
+    reason: Phase 7 onboarding UI fallback label backed by governed onboarding employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 9
+    replacement_key: form.lifecycle.onboarding
+  - literal: Employee
+    file: app/(app)/lifecycle/separation/page.tsx
+    reason: Phase 7 separation UI fallback label backed by governed separation employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 9
+    replacement_key: form.lifecycle.separation
+  - literal: Employee
+    file: app/(app)/lifecycle/promotions/page.tsx
+    reason: Phase 7 promotions UI fallback label backed by governed promotion employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 9
+    replacement_key: form.lifecycle.promotion
+  - literal: Employee
+    file: app/(app)/lifecycle/transfers/page.tsx
+    reason: Phase 7 transfers UI fallback label backed by governed transfer employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 9
+    replacement_key: form.lifecycle.transfer
+  - literal: Employee
+    file: app/(app)/training/page.tsx
+    reason: Phase 7 training UI fallback label backed by governed training feedback employee field metadata while UI copy is being wired to generated metadata.
+    expires_after_phase: 9
+    replacement_key: form.lifecycle.training_feedback
+  - literal: Salary register
+    file: lib/hrms/reports.ts
+    reason: Phase 9 reports helper fallback label backed by governed payroll salary register report metadata while helper copy is being wired to generated metadata.
+    expires_after_phase: 10
+    replacement_key: report.payroll.salary_register
