@@ -170,7 +170,6 @@ form_job_links
 form_responses
 forms
 google_drive_settings
-hiring_requests
 interviews
 jd_library
 job_creation_requests
@@ -211,7 +210,6 @@ No HRMS, payroll, attendance, leave, workflow, or other stale tables are require
 | Users | `/users` | Team/admin user management |
 | Settings | `/settings` | Profile, team, masters, email templates, workflows, integrations, AI, backup, billing |
 | Sync | `/sync` | Google Sheets sync tools |
-| HOD Portal | `/hod-portal` | Hiring requests and HOD review |
 | Public Form | `/f/[id]` | Candidate-facing form without login |
 | Public Job Page | `/public/jobs/[id]` | Crawlable job detail page for Google Jobs |
 

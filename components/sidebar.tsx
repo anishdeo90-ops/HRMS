@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Settings, LogOut,
-  Briefcase, FileText, Activity, ChevronLeft, ChevronRight, ClipboardList, HandshakeIcon,
+  Briefcase, FileText, Activity, ChevronLeft, ChevronRight, HandshakeIcon,
   Menu, X, Bell, User, List, Mail, Workflow, Link2, Brain, Database, CreditCard,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -19,7 +19,6 @@ const NAV = [
   { href: "/candidates",  icon: Users,            label: "Candidates" },
   { href: "/jobs",        icon: Briefcase,        label: "Jobs" },
   { href: "/offers",      icon: HandshakeIcon,    label: "Offers",            roles: ["admin", "hr_manager"] },
-  { href: "/hod-portal",  icon: ClipboardList,    label: "HOD Portal",        roles: ["admin", "hr_manager", "hod"] },
   { href: "/jds",         icon: FileText,         label: "JDs & Forms",       roles: ["admin", "hr_manager"] },
 ];
 

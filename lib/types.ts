@@ -485,7 +485,6 @@ export const PROTECTED_CANDIDATE_FIELDS: (keyof Candidate)[] = [
   "present_salary", "expected_salary", "offered_salary",
 ];
 
-// ── Hiring Requests ─────────────────────────────────────
 // ── CTC / Offers ─────────────────────────────────────────────────────────────
 
 export type OfferStatus =
@@ -543,28 +542,4 @@ export interface CTCComponentDef {
   value?: number;
   formula?: string;
   taxable?: boolean;
-}
-
-// ── Hiring Requests ─────────────────────────────────────────────────────────────
-export interface HiringRequest {
-  id: string;
-  title: string;
-  designation_id?: string;
-  site_id?: string;
-  headcount: number;
-  urgency: "low" | "normal" | "high" | "urgent";
-  description?: string;
-  requested_by: string;
-  status: "pending" | "approved" | "rejected" | "converted";
-  reviewed_by?: string;
-  reviewed_at?: string;
-  review_notes?: string;
-  converted_job_id?: string;
-  created_at: string;
-  updated_at: string;
-  // Joined
-  requester?: { name: string };
-  reviewer?: { name: string };
-  designation?: { name: string };
-  site?: { name: string };
 }
