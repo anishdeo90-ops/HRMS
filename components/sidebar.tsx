@@ -9,7 +9,9 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { HireRabbitsLogo } from "@/components/hirerabbits-logo";
+import ProductSwitcher from "@/components/product-switcher";
 import { createClient } from "@/lib/supabase/client";
+import { productForPathname } from "@/lib/products";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
 
@@ -73,6 +75,7 @@ export default function Sidebar({ profile }: SidebarProps) {
     if (!item.roles) return true;
     return item.roles.includes(profile.role);
   });
+  const activeProduct = productForPathname(pathname);
   const isAdmin = profile.role === "admin" || profile.role === "hr_manager";
   const visibleSettingsNav = SETTINGS_NAV.filter((item) => !item.adminOnly || isAdmin);
 
@@ -129,33 +132,47 @@ export default function Sidebar({ profile }: SidebarProps) {
           collapsed ? "lg:w-16" : "lg:w-56"
         )}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-700">
+        {/* Logo + product switcher */}
+        <div
+          className={cn(
+            "flex items-center gap-3 px-4 py-5 border-b border-gray-700",
+            // Collapsed (desktop only): stack logo / waffle / chevron vertically
+            collapsed && "lg:flex-col lg:gap-2 lg:px-2 lg:py-4"
+          )}
+        >
           <HireRabbitsLogo className="h-8 w-8 rounded-lg flex-shrink-0" />
           {!collapsed && (
-            <div>
+            <div className="min-w-0">
               <p className="font-semibold text-sm leading-tight">HireRabbits</p>
-              <p className="text-brand-400 text-xs">Hiring OS</p>
+              <p className="text-brand-400 text-xs">{activeProduct.name}</p>
             </div>
           )}
-          {/* Close button — mobile only */}
-          <button
-            type="button"
-            onClick={closeMobile}
-            className="lg:hidden ml-auto text-gray-400 hover:text-white p-1"
-            aria-label="Close menu"
+          <div
+            className={cn(
+              "ml-auto flex items-center gap-1",
+              collapsed && "lg:ml-0 lg:flex-col lg:gap-2"
+            )}
           >
-            <X size={18} />
-          </button>
-          {/* Collapse toggle — desktop only */}
-          <button
-            type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:block ml-auto text-gray-400 hover:text-white"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
+            <ProductSwitcher collapsed={collapsed} onNavigate={closeMobile} />
+            {/* Close button — mobile only */}
+            <button
+              type="button"
+              onClick={closeMobile}
+              className="lg:hidden text-gray-400 hover:text-white p-1"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+            {/* Collapse toggle — desktop only */}
+            <button
+              type="button"
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:block text-gray-400 hover:text-white"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+          </div>
         </div>
 
         {/* Nav */}

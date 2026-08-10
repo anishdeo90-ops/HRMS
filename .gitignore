@@ -30,3 +30,6 @@ supabase/.temp/
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dev server logs
+.tmp/
