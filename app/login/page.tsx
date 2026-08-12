@@ -25,9 +25,10 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       const next = new URLSearchParams(window.location.search).get("next");
+      // "/" picks the landing product from the signed-in user's role.
       const safeNext = next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/login")
         ? next
-        : "/dashboard";
+        : "/";
       window.location.href = safeNext;
     }
   }

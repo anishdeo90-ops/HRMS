@@ -12,6 +12,7 @@ import { HireRabbitsLogo } from "@/components/hirerabbits-logo";
 import ProductSwitcher from "@/components/product-switcher";
 import { createClient } from "@/lib/supabase/client";
 import { productForPathname } from "@/lib/products";
+import { HRMS_NAV, visibleFor } from "@/lib/hrms/nav";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
 
@@ -71,12 +72,24 @@ export default function Sidebar({ profile }: SidebarProps) {
     router.refresh();
   }
 
-  const visibleNav = NAV.filter((item) => {
-    if (!item.roles) return true;
-    return item.roles.includes(profile.role);
-  });
   const activeProduct = productForPathname(pathname);
   const isAdmin = profile.role === "admin" || profile.role === "hr_manager";
+
+  // Each product brings its own nav. The rail, the logo and everything below the
+  // divider are shared — only the middle list swaps.
+  const visibleNav =
+    activeProduct.key === "hrms"
+      ? visibleFor(HRMS_NAV, profile.role)
+          .filter((m) => m.href !== "/hrms/settings")
+          .map((m) => ({ href: m.href, icon: m.icon, label: m.label }))
+      : NAV.filter((item) => !item.roles || item.roles.includes(profile.role));
+
+  const activeHref = [...visibleNav]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((item) => pathname === item.href || pathname.startsWith(item.href + "/"))?.href;
+
+  const settingsHref = activeProduct.key === "hrms" ? "/hrms/settings" : "/settings";
+  const showSettings = activeProduct.key === "hrms" ? isAdmin : true;
   const visibleSettingsNav = SETTINGS_NAV.filter((item) => !item.adminOnly || isAdmin);
 
   useEffect(() => {
@@ -178,7 +191,8 @@ export default function Sidebar({ profile }: SidebarProps) {
         {/* Nav */}
         <nav className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto">
           {visibleNav.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            // Longest prefix wins, so /hrms/team does not also light up /hrms.
+            const active = activeHref === item.href;
             return (
               <Link
                 key={item.href}
@@ -223,38 +237,45 @@ export default function Sidebar({ profile }: SidebarProps) {
               </span>
             )}
           </Link>
-          <Link
-            href="/settings"
-            onClick={closeMobile}
-            className={cn(
-              "hidden lg:flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-              pathname.startsWith("/settings")
-                ? "bg-brand-500 text-white"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
-            )}
-            title={collapsed ? "Settings" : undefined}
-          >
-            <Settings size={18} className="flex-shrink-0" />
-            {!collapsed && "Settings"}
-          </Link>
-          <button
-            type="button"
-            onClick={() => setMobileSettingsOpen((open) => !open)}
-            className={cn(
-              "lg:hidden flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full",
-              pathname.startsWith("/settings")
-                ? "bg-brand-500 text-white"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
-            )}
-          >
-            <Settings size={18} className="flex-shrink-0" />
-            <span>Settings</span>
-            <ChevronRight
-              size={14}
-              className={cn("ml-auto transition-transform", mobileSettingsOpen && "rotate-90")}
-            />
-          </button>
-          {mobileSettingsOpen && (
+          {showSettings && (
+            <Link
+              href={settingsHref}
+              onClick={closeMobile}
+              className={cn(
+                "items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                // The ATS expands its settings sections inline on mobile, so its
+                // desktop link hides there. HRMS settings is a page, not a menu.
+                activeProduct.key === "hrms" ? "flex" : "hidden lg:flex",
+                pathname.startsWith(settingsHref)
+                  ? "bg-brand-500 text-white"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+              )}
+              title={collapsed ? "Settings" : undefined}
+            >
+              <Settings size={18} className="flex-shrink-0" />
+              {!collapsed && "Settings"}
+            </Link>
+          )}
+          {activeProduct.key !== "hrms" && (
+            <button
+              type="button"
+              onClick={() => setMobileSettingsOpen((open) => !open)}
+              className={cn(
+                "lg:hidden flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full",
+                pathname.startsWith("/settings")
+                  ? "bg-brand-500 text-white"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+              )}
+            >
+              <Settings size={18} className="flex-shrink-0" />
+              <span>Settings</span>
+              <ChevronRight
+                size={14}
+                className={cn("ml-auto transition-transform", mobileSettingsOpen && "rotate-90")}
+              />
+            </button>
+          )}
+          {activeProduct.key !== "hrms" && mobileSettingsOpen && (
             <div className="lg:hidden ml-4 mt-1 space-y-1 border-l border-gray-700 pl-2">
               {visibleSettingsNav.map((item) => {
                 const active = pathname.startsWith("/settings") && activeSettingsSection === item.key;

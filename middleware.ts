@@ -56,9 +56,11 @@ export async function middleware(request: NextRequest) {
 
   if (isLoggedIn && isLoginPage) {
     const next = request.nextUrl.searchParams.get("next");
+    // "/" resolves the landing product from the user's role — middleware has no
+    // profile to read, so it must not guess a product here.
     const safeNext = next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/login")
       ? next
-      : "/dashboard";
+      : "/";
     return NextResponse.redirect(new URL(safeNext, request.url));
   }
 

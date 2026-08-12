@@ -33,7 +33,7 @@ export const PRODUCTS: Product[] = [
     href: "/hrms",
     icon: Network,
     tint: "bg-indigo-500",
-    available: false,
+    available: true,
   },
   {
     key: "payroll",
