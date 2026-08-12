@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Download, KeyRound, Mail, Plus, Trophy, Upload, Users } from "lucide-react";
 import {
@@ -15,15 +15,16 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import {
-  DEMO_DEPARTMENTS,
-  DEMO_DESIGNATIONS,
-  DEMO_EMPLOYEES,
-  DEMO_EMPLOYMENT_TYPES,
-} from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, initials } from "@/lib/hrms/format";
 import { employeeTone, titleCase } from "@/lib/hrms/status";
 import type { Employee } from "@/lib/hrms/types";
+
+type LookupOption = { id: string; name: string };
+type Options = {
+  departments?: LookupOption[];
+  designations?: LookupOption[];
+  employment_types?: LookupOption[];
+};
 
 /**
  * `docs/hrms/02-team.md §2`.
@@ -39,9 +40,37 @@ export default function EmployeeDirectoryPage() {
   const [designation, setDesignation] = useState("");
   const [type, setType] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [options, setOptions] = useState<Options>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    async function load() {
+      setLoading(true);
+      const [employeeRes, optionRes] = await Promise.all([
+        fetch("/api/hrms/employees"),
+        fetch("/api/hrms/options"),
+      ]);
+      const employeeJson = await employeeRes.json();
+      const optionJson = await optionRes.json();
+      if (!employeeRes.ok) throw new Error(employeeJson.error ?? "Unable to load employees");
+      if (!optionRes.ok) throw new Error(optionJson.error ?? "Unable to load HRMS options");
+      if (alive) {
+        setEmployees(employeeJson.data ?? []);
+        setOptions(optionJson.data ?? {});
+      }
+    }
+    load()
+      .catch((error) => toast.error(error instanceof Error ? error.message : "Unable to load employees"))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const rows = useMemo(() => {
-    const base = DEMO_EMPLOYEES.filter((e) =>
+    const base = employees.filter((e) =>
       view === "ex" ? e.status === "separated" : e.status !== "separated"
     );
     const q = search.trim().toLowerCase();
@@ -54,7 +83,7 @@ export default function EmployeeDirectoryPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [view, search, department, designation, type]);
+  }, [employees, view, search, department, designation, type]);
 
   const hasSelection = selected.length > 0;
 
@@ -107,7 +136,7 @@ export default function EmployeeDirectoryPage() {
   return (
     <Card
       title="Employee Directory"
-      subtitle={`${rows.length} of ${DEMO_EMPLOYEES.length} employees`}
+      subtitle={loading ? "Loading employees..." : `${rows.length} of ${employees.length} employees`}
       bodyClassName="p-4"
       actions={
         <div className="flex flex-wrap items-center gap-2">
@@ -127,8 +156,8 @@ export default function EmployeeDirectoryPage() {
     >
       <SubTabs
         tabs={[
-          { key: "current", label: "Current Employees", count: DEMO_EMPLOYEES.filter((e) => e.status !== "separated").length },
-          { key: "ex", label: "Ex Employees", count: DEMO_EMPLOYEES.filter((e) => e.status === "separated").length },
+          { key: "current", label: "Current Employees", count: employees.filter((e) => e.status !== "separated").length },
+          { key: "ex", label: "Ex Employees", count: employees.filter((e) => e.status === "separated").length },
         ]}
         value={view}
         onChange={(v) => {
@@ -153,19 +182,19 @@ export default function EmployeeDirectoryPage() {
           label="All Departments"
           value={department}
           onChange={setDepartment}
-          options={DEMO_DEPARTMENTS.map((d) => ({ value: d.name, label: d.name }))}
+          options={(options.departments ?? []).map((d) => ({ value: d.name, label: d.name }))}
         />
         <SelectFilter
           label="All Designations"
           value={designation}
           onChange={setDesignation}
-          options={DEMO_DESIGNATIONS.map((d) => ({ value: d.name, label: d.name }))}
+          options={(options.designations ?? []).map((d) => ({ value: d.name, label: d.name }))}
         />
         <SelectFilter
           label="All Types"
           value={type}
           onChange={setType}
-          options={DEMO_EMPLOYMENT_TYPES.map((d) => ({ value: d.name, label: d.name }))}
+          options={(options.employment_types ?? []).map((d) => ({ value: d.name, label: d.name }))}
         />
         <Button icon={Upload}>Import</Button>
       </Toolbar>

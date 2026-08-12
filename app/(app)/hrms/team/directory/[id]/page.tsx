@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   ArrowLeft,
   BriefcaseBusiness,
@@ -26,7 +27,6 @@ import {
 import {
   DEMO_APPRAISALS,
   DEMO_EDUCATION,
-  DEMO_EMPLOYEES,
   DEMO_EMPLOYEE_DOCUMENTS,
   DEMO_EXPERIENCE,
   DEMO_FAMILY,
@@ -38,7 +38,7 @@ import {
 } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtLacs, fmtMoney, fmtPercent, initials } from "@/lib/hrms/format";
 import { employeeTone, priorityTone, requestTone, titleCase } from "@/lib/hrms/status";
-import type { Asset, EmployeeDocument, Ticket } from "@/lib/hrms/types";
+import type { Asset, Employee, EmployeeDocument, Ticket } from "@/lib/hrms/types";
 
 type TabKey =
   | "personal"
@@ -76,27 +76,47 @@ const DOC_TONE: Record<EmployeeDocument["status"], string> = {
 export default function EmployeeRecordPage() {
   const params = useParams<{ id: string }>();
   const [tab, setTab] = useState<TabKey>("personal");
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const employee = DEMO_EMPLOYEES.find((e) => e.id === params.id);
-  if (!employee) notFound();
+  useEffect(() => {
+    let alive = true;
+    fetch(`/api/hrms/employees/${params.id}`)
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Unable to load employee");
+        if (alive) setEmployee(json.data);
+      })
+      .catch((error) => toast.error(error instanceof Error ? error.message : "Unable to load employee"))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [params.id]);
+
+  if (loading) {
+    return <Card title="Employee Record"><EmptyState title="Loading employee..." /></Card>;
+  }
+
+  if (!employee) {
+    return <Card title="Employee Record"><EmptyState title="Employee not found" /></Card>;
+  }
 
   /**
    * Profile completion is a real feature, not decoration (§3) — it is what makes
    * HR chase the gaps. Counted over the fields the record actually needs.
    */
-  const completion = useMemo(() => {
-    const tracked: (string | number | undefined)[] = [
-      employee.date_of_birth, employee.gender, employee.blood_group, employee.marital_status,
-      employee.personal_email, employee.mobile, employee.current_address, employee.permanent_address,
-      employee.designation, employee.department, employee.branch, employee.employment_type,
-      employee.reporting_manager, employee.date_of_joining, employee.shift_name,
-      employee.emergency_contact_name, employee.emergency_contact_number,
-      employee.pan, employee.aadhaar_last4, employee.bank_name, employee.bank_account_last4,
-      employee.ifsc, employee.uan, employee.ctc_annual_paise,
-    ];
-    const filled = tracked.filter((v) => v != null && v !== "").length;
-    return Math.round((filled / tracked.length) * 100);
-  }, [employee]);
+  const tracked: (string | number | undefined)[] = [
+    employee.date_of_birth, employee.gender, employee.blood_group, employee.marital_status,
+    employee.personal_email, employee.mobile, employee.current_address, employee.permanent_address,
+    employee.designation, employee.department, employee.branch, employee.employment_type,
+    employee.reporting_manager, employee.date_of_joining, employee.shift_name,
+    employee.emergency_contact_name, employee.emergency_contact_number,
+    employee.pan, employee.aadhaar_last4, employee.bank_name, employee.bank_account_last4,
+    employee.ifsc, employee.uan, employee.ctc_annual_paise,
+  ];
+  const filled = tracked.filter((v) => v != null && v !== "").length;
+  const completion = Math.round((filled / tracked.length) * 100);
 
   const separation = DEMO_SEPARATIONS.find((s) => s.employee_id === employee.id);
   const tickets = DEMO_TICKETS.filter((t) => t.raised_by_id === employee.id);

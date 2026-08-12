@@ -2,6 +2,8 @@
 
 This manual describes the current repository state. The app is a Next.js 14 ATS connected to Supabase for authentication and data. The old database/auth stack has been removed from runtime code.
 
+For the HRMS conversion work, see `HRMS_USER_MANUAL.md`.
+
 ## Current Status
 
 - App package: `hirerabbits-ats`

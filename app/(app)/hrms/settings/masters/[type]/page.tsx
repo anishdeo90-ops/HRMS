@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { ArrowLeft, Plus } from "lucide-react";
 import {
@@ -20,10 +20,26 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_EMPLOYEES } from "@/lib/hrms/demo-data";
 import { masterBySlug } from "@/lib/hrms/masters";
 import { EMPTY } from "@/lib/hrms/format";
 import type { BusinessUnit, LookupItem } from "@/lib/hrms/types";
+
+type Option = { id: string; name: string; parent_id?: string };
+type Options = {
+  business_units?: Option[];
+  departments?: Option[];
+  employees?: Option[];
+};
+
+const BACKEND_TYPES = new Set([
+  "branch",
+  "business-unit",
+  "department",
+  "sub-department",
+  "designation",
+  "employment-type",
+  "function-role",
+]);
 
 /**
  * One screen for every flat organisation master.
@@ -34,24 +50,143 @@ import type { BusinessUnit, LookupItem } from "@/lib/hrms/types";
  */
 export default function MasterPage() {
   const params = useParams<{ type: string }>();
-  const master = masterBySlug(params.type);
-  if (!master) notFound();
+  const selectedMaster = masterBySlug(params.type);
+  if (!selectedMaster) {
+    notFound();
+    return null;
+  }
+  const master = selectedMaster!;
 
   const [search, setSearch] = useState("");
   const [showInactive, setShowInactive] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<LookupItem | null>(null);
+  const [rows, setRows] = useState<LookupItem[]>(master.items);
+  const [options, setOptions] = useState<Options>({});
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [parentId, setParentId] = useState("");
+  const [headId, setHeadId] = useState("");
+  const [description, setDescription] = useState("");
   const [active, setActive] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const backendEnabled = BACKEND_TYPES.has(params.type);
 
-  const rows = useMemo(() => {
+  useEffect(() => {
+    let alive = true;
+    if (!backendEnabled) {
+      setRows(master.items);
+      return;
+    }
+    Promise.all([
+      fetch(`/api/hrms/masters/${params.type}`).then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Unable to load master rows");
+        return json.data ?? [];
+      }),
+      fetch("/api/hrms/options").then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Unable to load HRMS options");
+        return json.data ?? {};
+      }),
+    ])
+      .then(([masterRows, optionRows]) => {
+        if (!alive) return;
+        setRows(masterRows);
+        setOptions(optionRows);
+      })
+      .catch((error) => toast.error(error instanceof Error ? error.message : "Unable to load master rows"));
+    return () => {
+      alive = false;
+    };
+  }, [backendEnabled, master.items, params.type]);
+
+  const parentOptions = useMemo(() => {
+    if (params.type === "department") return options.business_units ?? [];
+    if (params.type === "sub-department") return (options.departments ?? []).filter((d) => !d.parent_id);
+    return master.parentOptions ?? [];
+  }, [master.parentOptions, options.business_units, options.departments, params.type]);
+
+  function openForm(item?: LookupItem) {
+    setEditing(item ?? null);
+    setName(item?.name ?? "");
+    setCode(item?.code ?? "");
+    setParentId(item?.parent_id ?? "");
+    setHeadId((item as BusinessUnit | undefined)?.head_employee_id ?? "");
+    setDescription(item?.description ?? "");
+    setActive(item?.is_active ?? true);
+    setAddOpen(true);
+  }
+
+  async function saveMaster() {
+    if (!backendEnabled) {
+      toast.success(`${master.label} saved`);
+      setAddOpen(false);
+      return;
+    }
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/hrms/masters/${params.type}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editing?.id,
+          name,
+          code,
+          parent_id: parentId,
+          head_employee_id: headId,
+          description,
+          is_active: active,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? `${master.label} save failed`);
+      setRows((prev) => {
+        const next = json.data as LookupItem;
+        return prev.some((row) => row.id === next.id)
+          ? prev.map((row) => (row.id === next.id ? next : row))
+          : [...prev, next];
+      });
+      toast.success(`${master.label} saved`);
+      setAddOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : `${master.label} save failed`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleActive(item: LookupItem) {
+    if (!backendEnabled) {
+      toast.success(`${item.name} ${item.is_active ? "deactivated" : "reactivated"}`);
+      return;
+    }
+    const nextActive = !item.is_active;
+    const res = await fetch(`/api/hrms/masters/${params.type}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: item.id, is_active: nextActive }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      toast.error(json.error ?? "Status update failed");
+      return;
+    }
+    setRows((prev) => prev.map((row) => (row.id === item.id ? json.data : row)));
+    toast.success(`${item.name} ${nextActive ? "reactivated" : "deactivated"}`);
+  }
+
+  const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return master.items.filter((i) => {
+    return rows.filter((i) => {
       if (!showInactive && !i.is_active) return false;
       if (!q) return true;
       return [i.name, i.code, i.parent_name].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [master, search, showInactive]);
+  }, [rows, search, showInactive]);
 
   const columns: Column<LookupItem>[] = [
     {
@@ -115,14 +250,12 @@ export default function MasterPage() {
       align: "right",
       render: (i) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" onClick={() => toast.success(`${i.name} opened`)}>
+          <Button variant="ghost" onClick={() => openForm(i)}>
             Edit
           </Button>
           <Button
             variant="ghost"
-            onClick={() =>
-              toast.success(`${i.name} ${i.is_active ? "deactivated" : "reactivated"}`)
-            }
+            onClick={() => toggleActive(i)}
           >
             {i.is_active ? "Deactivate" : "Reactivate"}
           </Button>
@@ -145,7 +278,7 @@ export default function MasterPage() {
         subtitle={master.description}
         bodyClassName="p-4"
         actions={
-          <Button icon={Plus} variant="primary" onClick={() => setAddOpen(true)}>
+          <Button icon={Plus} variant="primary" onClick={() => openForm()}>
             Add {master.label}
           </Button>
         }
@@ -168,7 +301,7 @@ export default function MasterPage() {
 
         <DataTable
           columns={columns}
-          rows={rows}
+          rows={filteredRows}
           getKey={(i) => i.id}
           empty={`No ${master.plural.toLowerCase()} defined`}
           dense
@@ -183,37 +316,35 @@ export default function MasterPage() {
       <Modal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        title={`Add ${master.label}`}
+        title={`${editing ? "Edit" : "Add"} ${master.label}`}
         footer={
           <>
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success(`${master.label} added`);
-                setAddOpen(false);
-              }}
+              disabled={!name.trim() || saving}
+              onClick={saveMaster}
             >
-              Save
+              {saving ? "Saving..." : "Save"}
             </Button>
           </>
         }
       >
         <FormGrid columns={2}>
           <FormField label="Name" required span={!master.hasCode}>
-            <Input placeholder={`${master.label} name`} />
+            <Input placeholder={`${master.label} name`} value={name} onChange={(e) => setName(e.target.value)} />
           </FormField>
           {master.hasCode && (
             <FormField label="Code" hint="Short identifier used in exports and reports">
-              <Input placeholder="e.g. MUM" />
+              <Input placeholder="e.g. MUM" value={code} onChange={(e) => setCode(e.target.value)} />
             </FormField>
           )}
           {master.parentLabel && (
             <FormField label={master.parentLabel} required span>
-              <Select defaultValue="">
+              <Select value={parentId} onChange={(e) => setParentId(e.target.value)}>
                 <option value="">Select</option>
-                {(master.parentOptions ?? []).map((p) => (
-                  <option key={p.id}>{p.name}</option>
+                {parentOptions.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </Select>
             </FormField>
@@ -224,17 +355,17 @@ export default function MasterPage() {
               span
               hint="Approvals routed to the business head resolve to this person"
             >
-              <Select defaultValue="">
+              <Select value={headId} onChange={(e) => setHeadId(e.target.value)}>
                 <option value="">Select</option>
-                {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
-                  <option key={e.id}>{e.name}</option>
+                {(options.employees ?? []).map((e) => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
                 ))}
               </Select>
             </FormField>
           )}
           {master.hasDescription && (
             <FormField label="Description" span>
-              <Textarea placeholder="What this is used for" />
+              <Textarea placeholder="What this is used for" value={description} onChange={(e) => setDescription(e.target.value)} />
             </FormField>
           )}
           <FormField label="Active" span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ImagePlus, Info, PenLine, Plus, Trash2 } from "lucide-react";
 import {
@@ -14,16 +14,6 @@ import {
   Textarea,
   Toggle,
 } from "@/components/hrms/ui";
-import {
-  DEMO_BRANCHES,
-  DEMO_DEPARTMENTS,
-  DEMO_DESIGNATIONS,
-  DEMO_EMPLOYEES,
-  DEMO_EMPLOYMENT_TYPES,
-  DEMO_FUNCTION_ROLES,
-  DEMO_SHIFTS,
-  DEMO_SUB_DEPARTMENTS,
-} from "@/lib/hrms/demo-data";
 import { todayISO } from "@/lib/hrms/format";
 
 /**
@@ -61,6 +51,25 @@ interface QualificationDraft {
   year: string;
 }
 
+type LookupOption = {
+  id: string;
+  name: string;
+  code?: string;
+  parent_id?: string;
+  business_unit_id?: string;
+  status?: string;
+};
+
+type Options = {
+  branches?: LookupOption[];
+  departments?: LookupOption[];
+  designations?: LookupOption[];
+  function_roles?: LookupOption[];
+  employment_types?: LookupOption[];
+  shifts?: LookupOption[];
+  employees?: LookupOption[];
+};
+
 export default function AddEmployeePage() {
   const router = useRouter();
   const [country, setCountry] = useState("India");
@@ -68,17 +77,97 @@ export default function AddEmployeePage() {
   const [city, setCity] = useState("");
   const [configurePayroll, setConfigurePayroll] = useState(true);
   const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [employeeCode, setEmployeeCode] = useState("");
   const [workEmail, setWorkEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [personalEmail, setPersonalEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [currentAddress, setCurrentAddress] = useState("");
+  const [dateOfJoining, setDateOfJoining] = useState(todayISO());
+  const [branchId, setBranchId] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [subDepartmentId, setSubDepartmentId] = useState("");
+  const [designationId, setDesignationId] = useState("");
+  const [functionRoleId, setFunctionRoleId] = useState("");
+  const [employmentTypeId, setEmploymentTypeId] = useState("");
+  const [shiftId, setShiftId] = useState("");
+  const [reportingManagerId, setReportingManagerId] = useState("");
+  const [assistantManagerId, setAssistantManagerId] = useState("");
+  const [buddyId, setBuddyId] = useState("");
+  const [options, setOptions] = useState<Options>({});
+  const [saving, setSaving] = useState(false);
   const [qualifications, setQualifications] = useState<QualificationDraft[]>([
     { key: "q1", qualification: "", institute: "", year: "" },
   ]);
 
+  useEffect(() => {
+    fetch("/api/hrms/options")
+      .then(async (res) => {
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Unable to load HRMS options");
+        setOptions(json.data ?? {});
+      })
+      .catch((error) => toast.error(error instanceof Error ? error.message : "Unable to load HRMS options"));
+  }, []);
+
   const valid = firstName.trim() && lastName.trim() && workEmail.trim();
 
-  function save() {
-    toast.success("Employee created");
-    router.push("/hrms/team/directory");
+  async function save() {
+    if (!valid) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/hrms/employees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: firstName,
+          middle_name: middleName,
+          last_name: lastName,
+          employee_code: employeeCode,
+          work_email: workEmail,
+          gender,
+          date_of_birth: dateOfBirth,
+          blood_group: bloodGroup,
+          marital_status: maritalStatus,
+          personal_email: personalEmail,
+          mobile,
+          current_address: currentAddress,
+          date_of_joining: dateOfJoining,
+          branch_id: branchId,
+          department_id: subDepartmentId || departmentId,
+          designation_id: designationId,
+          function_role_id: functionRoleId,
+          employment_type_id: employmentTypeId,
+          shift_id: shiftId,
+          reporting_manager_id: reportingManagerId,
+          assistant_manager_id: assistantManagerId,
+          buddy_id: buddyId,
+          payroll_enabled: configurePayroll,
+          custom_fields: {
+            country,
+            state,
+            city,
+            qualifications: qualifications.filter((q) => q.qualification || q.institute || q.year),
+          },
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error ?? "Employee create failed");
+        return;
+      }
+      toast.success("Employee created");
+      router.push(`/hrms/team/directory/${json.data.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Employee create failed");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -89,13 +178,13 @@ export default function AddEmployeePage() {
             <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
           </FormField>
           <FormField label="Middle Name">
-            <Input />
+            <Input value={middleName} onChange={(e) => setMiddleName(e.target.value)} />
           </FormField>
           <FormField label="Last Name" required>
             <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
           </FormField>
           <FormField label="Gender" required hint="Nullable in practice — the directory shows an Unspecified slice">
-            <Select defaultValue="">
+            <Select value={gender} onChange={(e) => setGender(e.target.value)}>
               <option value="">Select</option>
               {GENDERS.map((g) => (
                 <option key={g}>{g}</option>
@@ -103,10 +192,10 @@ export default function AddEmployeePage() {
             </Select>
           </FormField>
           <FormField label="Date Of Birth" required>
-            <Input type="date" />
+            <Input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
           </FormField>
           <FormField label="Blood Group">
-            <Select defaultValue="">
+            <Select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}>
               <option value="">Select</option>
               {BLOOD_GROUPS.map((b) => (
                 <option key={b}>{b}</option>
@@ -120,7 +209,7 @@ export default function AddEmployeePage() {
             <Input />
           </FormField>
           <FormField label="Marital Status">
-            <Select defaultValue="">
+            <Select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)}>
               <option value="">Select</option>
               {MARITAL.map((m) => (
                 <option key={m}>{m}</option>
@@ -128,7 +217,7 @@ export default function AddEmployeePage() {
             </Select>
           </FormField>
           <FormField label="Personal Mail ID" required hint="Distinct from the work email below">
-            <Input type="email" placeholder="name@gmail.com" />
+            <Input type="email" placeholder="name@gmail.com" value={personalEmail} onChange={(e) => setPersonalEmail(e.target.value)} />
           </FormField>
           <FormField label="Personal Phone No" required>
             <div className="flex gap-2">
@@ -137,14 +226,14 @@ export default function AddEmployeePage() {
                 <option>+971</option>
                 <option>+1</option>
               </Select>
-              <Input type="tel" placeholder="10-digit mobile" />
+              <Input type="tel" placeholder="10-digit mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} />
             </div>
           </FormField>
           <FormField label="Hobbies">
             <Input placeholder="Optional" />
           </FormField>
           <FormField label="Address" span>
-            <Textarea placeholder="Current residential address" />
+            <Textarea placeholder="Current residential address" value={currentAddress} onChange={(e) => setCurrentAddress(e.target.value)} />
           </FormField>
         </FormGrid>
       </Card>
@@ -215,61 +304,66 @@ export default function AddEmployeePage() {
       <Card title="Professional Details">
         <FormGrid columns={3}>
           <FormField label="Employee Code" hint="Leave blank to auto-generate">
-            <Input placeholder="Auto-generated" />
+            <Input placeholder="Auto-generated" value={employeeCode} onChange={(e) => setEmployeeCode(e.target.value)} />
           </FormField>
           <FormField label="Email" required hint="Work email — becomes the login">
             <Input type="email" value={workEmail} onChange={(e) => setWorkEmail(e.target.value)} />
           </FormField>
           <FormField label="Date of Joining" required>
-            <Input type="date" defaultValue={todayISO()} />
+            <Input type="date" value={dateOfJoining} onChange={(e) => setDateOfJoining(e.target.value)} />
           </FormField>
 
           <FormField label="Branch" required>
-            <Select defaultValue="">
+            <Select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_BRANCHES.filter((b) => b.is_active).map((b) => (
-                <option key={b.id}>{b.name}</option>
+              {(options.branches ?? []).map((b) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Department" required>
-            <Select defaultValue="">
+            <Select value={departmentId} onChange={(e) => {
+              setDepartmentId(e.target.value);
+              setSubDepartmentId("");
+            }}>
               <option value="">Select</option>
-              {DEMO_DEPARTMENTS.map((d) => (
-                <option key={d.id}>{d.name}</option>
+              {(options.departments ?? []).filter((d) => !d.parent_id).map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Sub-Department">
-            <Select defaultValue="">
+            <Select value={subDepartmentId} onChange={(e) => setSubDepartmentId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_SUB_DEPARTMENTS.map((d) => (
-                <option key={d.id}>{d.name}</option>
+              {(options.departments ?? [])
+                .filter((d) => d.parent_id && (!departmentId || d.parent_id === departmentId))
+                .map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </Select>
           </FormField>
 
           <FormField label="Designation" required>
-            <Select defaultValue="">
+            <Select value={designationId} onChange={(e) => setDesignationId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_DESIGNATIONS.map((d) => (
-                <option key={d.id}>{d.name}</option>
+              {(options.designations ?? []).map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Function Role" hint="What the person does, independent of their title">
-            <Select defaultValue="">
+            <Select value={functionRoleId} onChange={(e) => setFunctionRoleId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_FUNCTION_ROLES.map((f) => (
-                <option key={f.id}>{f.name}</option>
+              {(options.function_roles ?? []).map((f) => (
+                <option key={f.id} value={f.id}>{f.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Employee Type" required>
-            <Select defaultValue="">
+            <Select value={employmentTypeId} onChange={(e) => setEmploymentTypeId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_EMPLOYMENT_TYPES.map((t) => (
-                <option key={t.id}>{t.name}</option>
+              {(options.employment_types ?? []).map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </Select>
           </FormField>
@@ -295,10 +389,10 @@ export default function AddEmployeePage() {
           </FormField>
 
           <FormField label="Reporting Manager" required>
-            <Select defaultValue="">
+            <Select value={reportingManagerId} onChange={(e) => setReportingManagerId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
-                <option key={e.id}>{e.name}</option>
+              {(options.employees ?? []).map((e) => (
+                <option key={e.id} value={e.id}>{e.name}</option>
               ))}
             </Select>
           </FormField>
@@ -306,27 +400,27 @@ export default function AddEmployeePage() {
             label="Asst. Reporting Manager"
             hint="The fallback approver when the primary is unavailable"
           >
-            <Select defaultValue="">
+            <Select value={assistantManagerId} onChange={(e) => setAssistantManagerId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
-                <option key={e.id}>{e.name}</option>
+              {(options.employees ?? []).map((e) => (
+                <option key={e.id} value={e.id}>{e.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Buddy" hint="Onboarding mentor">
-            <Select defaultValue="">
+            <Select value={buddyId} onChange={(e) => setBuddyId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
-                <option key={e.id}>{e.name}</option>
+              {(options.employees ?? []).map((e) => (
+                <option key={e.id} value={e.id}>{e.name}</option>
               ))}
             </Select>
           </FormField>
 
           <FormField label="Default Shift">
-            <Select defaultValue="">
+            <Select value={shiftId} onChange={(e) => setShiftId(e.target.value)}>
               <option value="">Select</option>
-              {DEMO_SHIFTS.filter((s) => s.is_active).map((s) => (
-                <option key={s.id}>{s.name}</option>
+              {(options.shifts ?? []).map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </Select>
           </FormField>
@@ -336,8 +430,8 @@ export default function AddEmployeePage() {
           >
             <Select defaultValue="">
               <option value="">Not referred</option>
-              {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
-                <option key={e.id}>{e.name}</option>
+              {(options.employees ?? []).map((e) => (
+                <option key={e.id} value={e.id}>{e.name}</option>
               ))}
             </Select>
           </FormField>
@@ -453,8 +547,8 @@ export default function AddEmployeePage() {
 
         <div className="mt-5 flex items-center justify-end gap-2">
           <Button onClick={() => router.push("/hrms/team/directory")}>Cancel</Button>
-          <Button variant="primary" disabled={!valid} onClick={save}>
-            Save Employee
+          <Button variant="primary" disabled={!valid || saving} onClick={save}>
+            {saving ? "Saving..." : "Save Employee"}
           </Button>
         </div>
       </Card>
