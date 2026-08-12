@@ -78,7 +78,8 @@ Departments seen: Finance, HR, Sales, Marketing, Engineering.
 
 ## 3. Reports page
 
-Three cards of report links. None of the report screens captured yet.
+Re-verified 2026-08-10. **The Reports page is a launcher and nothing else** —
+three cards, eleven links, no filters, no widgets, no data of its own.
 
 **Employee Reports** — Employee Left Reports · Employee Joining Reports
 **Leave Reports** — Leave Approval · Leave Balance
@@ -89,7 +90,68 @@ Punch Rejection Report
 > Three separate penalty/rejection reports imply an attendance **penalty engine** —
 > rules flagging late marks, short hours and invalid punches, each with a
 > consequence. Confirmed by the Penalty Violations panel on the Add Leave form
-> (`04-me.md §3`). This is the attendance → Payroll bridge.
+> (`04-me.md §3`), and fully specified in
+> `12-advanced-settings-cron-holiday.md §8.5–8.8`. This is the attendance →
+> Payroll bridge.
+
+### 3.1 Every report maps to a table the spec already defines
+
+| Report | Reads from |
+|---|---|
+| Employee Left Reports | `employees` + separation events — `entity_events 'separation.finalised'` (§10 seam 4) |
+| Employee Joining Reports | `employee_assignments` period start / `onboarding_cases.date_of_joining` |
+| Leave Approval | `approval_requests` where `request_type = 'leave'` |
+| Leave Balance | `sum(leave_ledger_entries.amount)` — the balance *is* the report |
+| Attendance Register | `attendance_days` |
+| Monthly Register | `attendance_days`, pivoted by month |
+| In - Out Register | `attendance_punches` joined to `attendance_days` |
+| Attendance Regularization | `approval_requests` where `request_type = 'regularization'` |
+| Punch Rejection Report | `attendance_punches where is_rejected` |
+| **Penalty Violation Report** | ⚠ see §3.2 |
+| **Penalty Summary Report** | ⚠ see §3.2 |
+
+Nine of eleven need **no new structure** — they are queries, and they are the
+reason `payable_fraction` is stored rather than recomputed
+(`10-foundation-spec.md §6.2a`). A report must return the same number in
+December that the employee saw in August.
+
+### 3.2 ⚠ The two penalty reports need one table we have not yet specified
+
+`attendance_days.payable_fraction` records *that* a day was docked. Neither report
+can be written from it, because both need to say **which rule fired and why**:
+
+- *Violation* — one row per incident: employee, date, trigger, actual vs threshold,
+  the deduction applied.
+- *Summary* — the same, aggregated per employee per period, which is what makes
+  "three lates allowed, then every one costs a half day"
+  (`12-… §8.7`) auditable.
+
+`payable_fraction` is a single number and cannot answer either. It also cannot
+distinguish a half day lost to lateness from one lost to short hours — a
+distinction an employee will certainly dispute.
+
+```sql
+hrms.attendance_day_penalties
+  id, org_id, employee_id, work_date,
+  attendance_rule_id fk,          -- which rule fired (12-… §8.6)
+  trigger text,                   -- 'late_in' | 'early_out' | 'short_duration'
+  actual_value int,               -- minutes late / minutes short
+  threshold_value int,
+  occurrence_index int,           -- "this was your 4th late arrival this cycle"
+  was_waived bool,                -- consumed a grace allowance instead
+  deduction_id fk,                -- NULL when waived
+  applied_fraction numeric,       -- the contribution to payable_fraction
+  created_at
+```
+
+`attendance_days.payable_fraction` then becomes the **sum of the day's penalty
+rows** — derived from an itemised record rather than written directly. That is
+what lets an employee be shown *why*, and what lets a regularization
+cascade-recompute correctly (`10-foundation-spec.md §4.4`).
+
+> This is the only structural change the entire Reports section produces, and it
+> belongs in the attendance module spec rather than the foundation — no other
+> table depends on it.
 
 ---
 

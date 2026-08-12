@@ -31,17 +31,31 @@ and per-tenant branding, and keep URLs clean.
 
 ## 2. Left sidebar (primary nav)
 
-| # | Item | Flyout captured? |
-|---|------|------------------|
-| 1 | Dashboard | n/a — no flyout observed |
-| 2 | Me | ⬜ not yet captured |
-| 3 | Team | ✅ |
-| 4 | Performance Review | ✅ (batch 0) |
-| 5 | Onboarding | ⬜ not yet captured |
-| 6 | Survey | ⬜ not yet captured |
-| 7 | Learning | ⬜ not yet captured |
-| 8 | More | ✅ |
-| 9 | Organization Tree | ⬜ not yet captured — may have no flyout |
+| # | Item | Status |
+|---|------|--------|
+| 1 | Dashboard | ✅ `01-dashboard.md` |
+| 2 | Me | ✅ `04-me.md` |
+| 3 | Team | ✅ `02-team.md` · `05` · `06` — all 8 tabs |
+| 4 | Performance Review | ✅ `13-performance-review.md` — all 7 tabs |
+| 5 | Onboarding | ✅ `14-onboarding.md` — all 7 tabs |
+| 6 | **Survey** | 🚫 **out of scope** — decided 2026-08-10 |
+| 7 | **Learning** | 🚫 **out of scope** — decided 2026-08-10 |
+| 8 | More | ✅ `15-more-module.md` (Inventory tab ⬜, modelled from the employee Assets tab) |
+| 9 | **Organization Tree** | 🚫 **out of scope as a module** — decided 2026-08-10 |
+
+> **Scope decision — 2026-08-10 (Anish).** Survey, Learning and Organization Tree
+> are not being built. Nothing in the foundation depends on them, and no captured
+> screen references them.
+>
+> Organization Tree is worth a note: it is a *visualisation* of
+> `business_units → departments → employee_assignments`, all of which exist in the
+> schema regardless. If it is ever wanted it is a read-only view over data already
+> there, not a module — so dropping it costs nothing and reverses cheaply.
+>
+> **Capture is complete as of this date.** Every remaining ⬜ in these documents is
+> a dropdown option list, a form behind a button, or a filter panel — each noted in
+> place, none blocking. See `10-foundation-spec.md §11`: no blocking questions
+> remain.
 
 Sidebar is icon + label, dark navy, single level. Flyout opens on hover/click
 with the module's pages. The same pages also appear as a **horizontal tab strip**
