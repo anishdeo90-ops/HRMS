@@ -18,7 +18,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_EMAIL_TEMPLATES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import type { EmailTemplateMaster } from "@/lib/hrms/types";
 
 /**
@@ -42,13 +42,14 @@ export default function EmailMasterPage() {
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [active, setActive] = useState(true);
+  const [templates, reload] = useHrmsData<EmailTemplateMaster[]>("/api/hrms/settings/email-templates", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_EMAIL_TEMPLATES.filter(
+    return templates.filter(
       (t) => !q || [t.name, t.event_key, t.subject].some((f) => f.toLowerCase().includes(q))
     );
-  }, [search]);
+  }, [templates, search]);
 
   const columns: Column<EmailTemplateMaster>[] = [
     { key: "name", header: "Template", render: (t) => <span className="font-medium text-gray-900">{t.name}</span> },
@@ -73,10 +74,10 @@ export default function EmailMasterPage() {
       align: "right",
       render: (t) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" onClick={() => toast.success(`Test email sent for ${t.name}`)}>
+          <Button variant="ghost" disabled>
             Send Test
           </Button>
-          <Button variant="ghost" onClick={() => toast.success(`${t.name} opened`)}>
+          <Button variant="ghost" disabled>
             Edit
           </Button>
         </div>
@@ -115,7 +116,14 @@ export default function EmailMasterPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/settings/email-templates", {
+                  name: "New Template",
+                  event_key: `event.${templates.length + 1}`,
+                  subject: "New template",
+                  is_active: active,
+                });
+                await reload();
                 toast.success("Template saved");
                 setAddOpen(false);
               }}

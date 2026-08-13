@@ -10,10 +10,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_ONBOARDING_CASES } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtLacs } from "@/lib/hrms/format";
 import { CASE_TONE, titleCase } from "@/lib/hrms/status";
 import type { OnboardingCase } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/14-onboarding.md §4` — every case, whatever its state.
@@ -25,17 +25,18 @@ import type { OnboardingCase } from "@/lib/hrms/types";
 export default function CandidateApprovalListPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const cases = useApiData<OnboardingCase[]>("/api/hrms/onboarding", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ONBOARDING_CASES.filter((c) => {
+    return cases.filter((c) => {
       if (status && c.status !== status) return false;
       if (!q) return true;
       return [c.candidate_name, c.case_code, c.designation, c.email].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, status]);
+  }, [cases, search, status]);
 
   const columns: Column<OnboardingCase>[] = [
     { key: "code", header: "Case Code", render: (c) => <span className="font-medium text-gray-900">{c.case_code}</span> },

@@ -19,7 +19,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_BRANCHES, DEMO_HOLIDAYS } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { fmtDate, todayISO } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 import type { Holiday } from "@/lib/hrms/types";
@@ -39,20 +39,22 @@ export default function HolidayCalendarPage() {
   const [type, setType] = useState("");
   const [year, setYear] = useState("2026");
   const [addOpen, setAddOpen] = useState(false);
+  const [holidays, reload] = useHrmsData<Holiday[]>("/api/hrms/settings/holidays", []);
+  const [options] = useHrmsData<{ branches: { id: string; name: string }[] }>("/api/hrms/options", { branches: [] });
 
   const today = todayISO();
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_HOLIDAYS.filter((h) => {
+    return holidays.filter((h) => {
       if (year && !h.holiday_date.startsWith(year)) return false;
       if (type && h.holiday_type !== type) return false;
       if (!q) return true;
       return [h.name, h.applies_to].some((f) => f.toLowerCase().includes(q));
     }).sort((a, b) => a.holiday_date.localeCompare(b.holiday_date));
-  }, [search, type, year]);
+  }, [holidays, search, type, year]);
 
-  const upcoming = DEMO_HOLIDAYS.filter((h) => h.is_active && h.holiday_date >= today).length;
+  const upcoming = holidays.filter((h) => h.is_active && h.holiday_date >= today).length;
 
   const columns: Column<Holiday>[] = [
     { key: "name", header: "Holiday", render: (h) => <span className="font-medium text-gray-900">{h.name}</span> },
@@ -82,7 +84,7 @@ export default function HolidayCalendarPage() {
       header: "Actions",
       align: "right",
       render: (h) => (
-        <Button variant="ghost" onClick={() => toast.success(`${h.name} opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -108,7 +110,7 @@ export default function HolidayCalendarPage() {
           <StatCard label="Upcoming" value={upcoming} tint="bg-green-50 text-green-600" />
           <StatCard
             label="Restricted"
-            value={DEMO_HOLIDAYS.filter((h) => h.holiday_type === "restricted").length}
+            value={holidays.filter((h) => h.holiday_type === "restricted").length}
             tint="bg-amber-50 text-amber-600"
           />
         </div>
@@ -155,7 +157,14 @@ export default function HolidayCalendarPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/settings/holidays", {
+                  name: "New Holiday",
+                  holiday_date: todayISO(),
+                  holiday_type: "public",
+                  applies_to: "All branches",
+                });
+                await reload();
                 toast.success("Holiday added");
                 setAddOpen(false);
               }}
@@ -184,7 +193,7 @@ export default function HolidayCalendarPage() {
           <FormField label="Applies To" required hint="Regional holidays scope to specific branches">
             <Select defaultValue="">
               <option value="">All branches</option>
-              {DEMO_BRANCHES.map((b) => (
+              {options.branches.map((b) => (
                 <option key={b.id}>{b.name}</option>
               ))}
             </Select>

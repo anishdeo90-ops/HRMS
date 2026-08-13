@@ -3,13 +3,8 @@
 import { useMemo, useState } from "react";
 import { CakeSlice, CalendarDays, ChevronLeft, ChevronRight, PartyPopper, Plane, UserPlus } from "lucide-react";
 import { Badge, Button, Card, EmptyState, Toggle } from "@/components/hrms/ui";
-import {
-  DEMO_APPROVAL_REQUESTS,
-  DEMO_DASHBOARD,
-  DEMO_HOLIDAYS,
-  DEMO_ONBOARDING_CASES,
-} from "@/lib/hrms/demo-data";
 import { fmtDate } from "@/lib/hrms/format";
+import { useApiData } from "@/lib/hrms/use-api-data";
 import { cn } from "@/lib/utils";
 
 /**
@@ -53,50 +48,7 @@ export default function CalendarPage() {
     joinee: true,
   });
 
-  const events = useMemo<CalendarEvent[]>(() => {
-    const out: CalendarEvent[] = [];
-
-    for (const h of DEMO_HOLIDAYS) {
-      if (!h.is_active) continue;
-      out.push({ date: h.holiday_date, kind: "holiday", label: h.name, detail: h.applies_to });
-    }
-
-    for (const r of DEMO_APPROVAL_REQUESTS) {
-      if (r.status !== "approved" || !r.from_date) continue;
-      if (!["leave", "wfh", "on_duty"].includes(r.request_type)) continue;
-      out.push({
-        date: r.from_date.slice(0, 10),
-        kind: "leave",
-        label: r.employee_name,
-        detail: r.subject,
-      });
-    }
-
-    for (const b of DEMO_DASHBOARD.birthdays) {
-      out.push({ date: b.date, kind: "birthday", label: b.name, detail: b.department });
-    }
-
-    for (const a of DEMO_DASHBOARD.anniversaries) {
-      out.push({
-        date: a.date,
-        kind: "anniversary",
-        label: a.name,
-        detail: `${a.years} ${a.years === 1 ? "year" : "years"}`,
-      });
-    }
-
-    for (const c of DEMO_ONBOARDING_CASES) {
-      if (!c.proposed_doj || c.status === "offer_declined" || c.status === "rejected") continue;
-      out.push({
-        date: (c.actual_doj ?? c.proposed_doj).slice(0, 10),
-        kind: "joinee",
-        label: c.candidate_name,
-        detail: c.designation,
-      });
-    }
-
-    return out;
-  }, []);
+  const events = useApiData<CalendarEvent[]>("/api/hrms/calendar", []);
 
   /** Monday-first grid, padded to whole weeks. */
   const grid = useMemo(() => {

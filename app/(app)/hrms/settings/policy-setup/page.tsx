@@ -17,7 +17,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_BRANCHES, DEMO_DEPARTMENTS, DEMO_EMPLOYMENT_TYPES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { fmtDate } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 
@@ -55,14 +55,16 @@ export default function PolicySetupPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [scope, setScope] = useState<Policy["scope"]>("organization");
   const [requiresAck, setRequiresAck] = useState(true);
+  const [policies, reload] = useHrmsData<Policy[]>("/api/hrms/settings/policies", []);
+  const [options] = useHrmsData<{ branches: { id: string; name: string }[]; departments: { id: string; name: string }[]; employment_types: { id: string; name: string }[] }>("/api/hrms/options", { branches: [], departments: [], employment_types: [] });
 
   const scopeOptions =
     scope === "branch"
-      ? DEMO_BRANCHES
+      ? options.branches
       : scope === "department"
-        ? DEMO_DEPARTMENTS
+        ? options.departments
         : scope === "employment_type"
-          ? DEMO_EMPLOYMENT_TYPES
+          ? options.employment_types
           : [];
 
   const columns: Column<Policy>[] = [
@@ -124,11 +126,11 @@ export default function PolicySetupPage() {
       render: (p) => (
         <div className="flex justify-end gap-1">
           {p.requires_acknowledgement && p.acknowledged < p.applicable && (
-            <Button variant="ghost" onClick={() => toast.success(`Reminder sent for ${p.name}`)}>
+            <Button variant="ghost" disabled>
               Remind
             </Button>
           )}
-          <Button variant="ghost" onClick={() => toast.success(`${p.name} opened`)}>
+          <Button variant="ghost" disabled>
             Edit
           </Button>
         </div>
@@ -147,7 +149,7 @@ export default function PolicySetupPage() {
       }
     >
       <Card title="Policies" bodyClassName="p-4">
-        <DataTable columns={columns} rows={POLICIES} getKey={(p) => p.id} empty="No policies published" dense />
+        <DataTable columns={columns} rows={policies} getKey={(p) => p.id} empty="No policies published" dense />
         <p className="mt-3 text-xs text-gray-500">
           Publishing a new version resets acknowledgement — otherwise everyone stays &ldquo;signed
           off&rdquo; on a document they never read.
@@ -163,7 +165,14 @@ export default function PolicySetupPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/settings/policies", {
+                  name: `Policy ${policies.length + 1}`,
+                  version: "v1.0",
+                  scope,
+                  requires_acknowledgement: requiresAck,
+                });
+                await reload();
                 toast.success("Policy published");
                 setAddOpen(false);
               }}

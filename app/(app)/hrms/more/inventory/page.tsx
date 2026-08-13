@@ -18,10 +18,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_ASSETS, DEMO_EMPLOYEES } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, todayISO } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
-import type { Asset } from "@/lib/hrms/types";
+import type { Asset, Employee } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/15-more-module.md §4`.
@@ -43,15 +43,18 @@ export default function InventoryPage() {
   const [status, setStatus] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [allocateFor, setAllocateFor] = useState<Asset | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const assets = useApiData<Asset[]>("/api/hrms/assets", []);
+  const employees = useApiData<Employee[]>("/api/hrms/employees", []);
 
   const categories = useMemo(
-    () => Array.from(new Set(DEMO_ASSETS.map((a) => a.category))),
-    []
+    () => Array.from(new Set(assets.map((a) => a.category))),
+    [assets]
   );
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ASSETS.filter((a) => {
+    return assets.filter((a) => {
       if (category && a.category !== category) return false;
       if (status && a.status !== status) return false;
       if (!q) return true;
@@ -59,17 +62,50 @@ export default function InventoryPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, category, status]);
+  }, [assets, search, category, status]);
 
   const stats = useMemo(
     () => ({
-      total: DEMO_ASSETS.length,
-      allocated: DEMO_ASSETS.filter((a) => a.status === "allocated").length,
-      inStock: DEMO_ASSETS.filter((a) => a.status === "in_stock").length,
-      inRepair: DEMO_ASSETS.filter((a) => a.status === "in_repair").length,
+      total: assets.length,
+      allocated: assets.filter((a) => a.status === "allocated").length,
+      inStock: assets.filter((a) => a.status === "in_stock").length,
+      inRepair: assets.filter((a) => a.status === "in_repair").length,
     }),
-    []
+    [assets]
   );
+
+  async function addAsset() {
+    const res = await fetch("/api/hrms/assets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ asset_code: `AST-${Date.now().toString().slice(-6)}`, category: "Laptop", make: "Unspecified", status: "in_stock" }),
+    });
+    if (!res.ok) return toast.error("Could not add asset");
+    toast.success("Asset added to inventory");
+    setAddOpen(false);
+  }
+
+  async function allocate() {
+    if (!allocateFor || !selectedEmployee) return toast.error("Select an employee");
+    const res = await fetch("/api/hrms/assets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "allocate", asset_id: allocateFor.id, employee_id: selectedEmployee, allocated_on: todayISO() }),
+    });
+    if (!res.ok) return toast.error("Could not allocate asset");
+    toast.success(`${allocateFor.asset_code} allocated`);
+    setAllocateFor(null);
+  }
+
+  async function returnAsset(asset: Asset) {
+    const res = await fetch("/api/hrms/assets", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ asset_id: asset.id }),
+    });
+    if (!res.ok) return toast.error("Could not return asset");
+    toast.success(`${asset.asset_code} returned to stock`);
+  }
 
   const columns: Column<Asset>[] = [
     { key: "code", header: "Asset Code", render: (a) => <span className="font-medium text-gray-900">{a.asset_code}</span> },
@@ -95,7 +131,7 @@ export default function InventoryPage() {
             Allocate
           </Button>
         ) : a.status === "allocated" ? (
-          <Button variant="ghost" onClick={() => toast.success(`${a.asset_code} returned to stock`)}>
+          <Button variant="ghost" onClick={() => returnAsset(a)}>
             De-allocate
           </Button>
         ) : (
@@ -160,10 +196,7 @@ export default function InventoryPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success("Asset added to inventory");
-                setAddOpen(false);
-              }}
+              onClick={addAsset}
             >
               Save
             </Button>
@@ -209,10 +242,7 @@ export default function InventoryPage() {
             <Button onClick={() => setAllocateFor(null)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success(`${allocateFor?.asset_code} allocated`);
-                setAllocateFor(null);
-              }}
+              onClick={allocate}
             >
               Allocate
             </Button>
@@ -221,10 +251,10 @@ export default function InventoryPage() {
       >
         <FormGrid columns={2}>
           <FormField label="Allocate To" required>
-            <Select defaultValue="">
+            <Select value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)}>
               <option value="">Select an employee</option>
-              {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
-                <option key={e.id}>
+              {employees.filter((e) => e.status !== "separated").map((e) => (
+                <option key={e.id} value={e.id}>
                   {e.employee_code} — {e.name}
                 </option>
               ))}

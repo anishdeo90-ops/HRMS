@@ -39,6 +39,8 @@ const BACKEND_TYPES = new Set([
   "designation",
   "employment-type",
   "function-role",
+  "announcement-category",
+  "expense-type",
 ]);
 
 /**
@@ -120,8 +122,7 @@ export default function MasterPage() {
 
   async function saveMaster() {
     if (!backendEnabled) {
-      toast.success(`${master.label} saved`);
-      setAddOpen(false);
+      toast.error(`${master.label} is not wired to the backend yet`);
       return;
     }
     if (!name.trim()) return;
@@ -159,7 +160,7 @@ export default function MasterPage() {
 
   async function toggleActive(item: LookupItem) {
     if (!backendEnabled) {
-      toast.success(`${item.name} ${item.is_active ? "deactivated" : "reactivated"}`);
+      toast.error(`${master.label} status is not wired to the backend yet`);
       return;
     }
     const nextActive = !item.is_active;

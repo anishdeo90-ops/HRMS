@@ -1,14 +1,3 @@
-import {
-  DEMO_ANNOUNCEMENT_CATEGORIES,
-  DEMO_BRANCHES,
-  DEMO_BUSINESS_UNITS,
-  DEMO_DEPARTMENTS,
-  DEMO_DESIGNATIONS,
-  DEMO_EMPLOYMENT_TYPES,
-  DEMO_EXPENSE_TYPES,
-  DEMO_FUNCTION_ROLES,
-  DEMO_SUB_DEPARTMENTS,
-} from "./demo-data";
 import type { LookupItem } from "./types";
 
 /**
@@ -41,7 +30,7 @@ export const MASTERS: MasterDefinition[] = [
     label: "Branch",
     plural: "Branches",
     description: "Physical locations. Holiday calendars and announcements scope to these.",
-    items: DEMO_BRANCHES,
+    items: [],
     hasCode: true,
   },
   {
@@ -50,7 +39,7 @@ export const MASTERS: MasterDefinition[] = [
     plural: "Business Units",
     description:
       "Owns departments and names a head. `approver_source = business_head` resolves from here.",
-    items: DEMO_BUSINESS_UNITS,
+    items: [],
     hasCode: true,
     hasHead: true,
   },
@@ -59,27 +48,27 @@ export const MASTERS: MasterDefinition[] = [
     label: "Department",
     plural: "Departments",
     description: "Reports into a business unit. Departments and business units are separate axes, not tree levels.",
-    items: DEMO_DEPARTMENTS,
+    items: [],
     hasCode: true,
     parentLabel: "Business Unit",
-    parentOptions: DEMO_BUSINESS_UNITS,
+    parentOptions: [],
   },
   {
     slug: "sub-department",
     label: "Sub-Department",
     plural: "Sub-Departments",
     description: "One level below department.",
-    items: DEMO_SUB_DEPARTMENTS,
+    items: [],
     hasCode: false,
     parentLabel: "Department",
-    parentOptions: DEMO_DEPARTMENTS,
+    parentOptions: [],
   },
   {
     slug: "designation",
     label: "Designation",
     plural: "Designations",
     description: "Job titles. KRAs and appraisal templates attach to these.",
-    items: DEMO_DESIGNATIONS,
+    items: [],
     hasCode: true,
   },
   {
@@ -87,7 +76,7 @@ export const MASTERS: MasterDefinition[] = [
     label: "Employment Type",
     plural: "Employment Types",
     description: "Permanent, contract, intern, consultant. Drives notice period and document checklists.",
-    items: DEMO_EMPLOYMENT_TYPES,
+    items: [],
     hasCode: true,
   },
   {
@@ -96,7 +85,7 @@ export const MASTERS: MasterDefinition[] = [
     plural: "Function Roles",
     description:
       "What a person does, independent of their title — which is why it is separate from Designation.",
-    items: DEMO_FUNCTION_ROLES,
+    items: [],
     hasCode: false,
     hasDescription: true,
   },
@@ -105,7 +94,7 @@ export const MASTERS: MasterDefinition[] = [
     label: "Announcement Category",
     plural: "Announcement Categories",
     description: "The lookup announcements are filed under.",
-    items: DEMO_ANNOUNCEMENT_CATEGORIES,
+    items: [],
     hasCode: false,
   },
   {
@@ -114,7 +103,7 @@ export const MASTERS: MasterDefinition[] = [
     plural: "Expense Types",
     description:
       "A strict list. Free-typed types fill the master with `Travel`, `travel` and `Trvl`, and every expense report becomes unusable.",
-    items: DEMO_EXPENSE_TYPES,
+    items: [],
     hasCode: false,
   },
 ];

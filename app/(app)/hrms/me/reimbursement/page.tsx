@@ -4,21 +4,19 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Plus, Receipt } from "lucide-react";
 import { Badge, Button, Card, DataTable, StatCard, Toolbar, type Column } from "@/components/hrms/ui";
-import { DEMO_EXPENSE_CLAIMS, DEMO_ME } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtMoney } from "@/lib/hrms/format";
 import { requestTone, titleCase } from "@/lib/hrms/status";
 import type { ExpenseClaim } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /** `docs/hrms/04-me.md §5` — my own claims. The approver view lives under More. */
 export default function MyReimbursementPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const claims = useApiData<ExpenseClaim[]>("/api/hrms/expenses", []);
 
-  const mine = useMemo(
-    () => DEMO_EXPENSE_CLAIMS.filter((c) => c.employee_id === DEMO_ME.id),
-    []
-  );
+  const mine = claims;
 
   const rows = useMemo(
     () =>

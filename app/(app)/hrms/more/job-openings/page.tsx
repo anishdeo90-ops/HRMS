@@ -20,10 +20,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_JOB_OPENINGS } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtLacs } from "@/lib/hrms/format";
 import { priorityTone } from "@/lib/hrms/status";
 import type { JobOpeningView } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/15-more-module.md §1`.
@@ -40,30 +40,45 @@ export default function JobOpeningsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [referOpen, setReferOpen] = useState(false);
+  const jobs = useApiData<JobOpeningView[]>("/api/hrms/jobs", []);
+  const [referral, setReferral] = useState({ name: "", email: "", mobile: "", job_id: "", notes: "" });
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_JOB_OPENINGS.filter((j) => {
+    return jobs.filter((j) => {
       if (status && j.status !== status) return false;
+      if (view === "mine" && j.created_by !== "Priya Nair") return false;
       if (!q) return true;
       return [j.job_title, j.created_by].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, status]);
+  }, [jobs, search, status, view]);
 
   const stats = useMemo(
     () => ({
-      active: DEMO_JOB_OPENINGS.filter((j) => j.status === "Open" || j.status === "In Progress").length,
-      openings: DEMO_JOB_OPENINGS.filter((j) => j.status !== "Closed").reduce(
+      active: jobs.filter((j) => j.status === "Open" || j.status === "In Progress").length,
+      openings: jobs.filter((j) => j.status !== "Closed").reduce(
         (s, j) => s + j.openings,
         0
       ),
-      onHold: DEMO_JOB_OPENINGS.filter((j) => j.status === "On Hold").length,
-      closed: DEMO_JOB_OPENINGS.filter((j) => j.status === "Closed").length,
+      onHold: jobs.filter((j) => j.status === "On Hold").length,
+      closed: jobs.filter((j) => j.status === "Closed").length,
     }),
-    []
+    [jobs]
   );
+
+  async function submitReferral() {
+    const res = await fetch("/api/hrms/referrals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(referral),
+    });
+    if (!res.ok) return toast.error("Could not submit referral");
+    toast.success("Candidate referred — the referral is linked to your record");
+    setReferOpen(false);
+    setReferral({ name: "", email: "", mobile: "", job_id: "", notes: "" });
+  }
 
   const columns: Column<JobOpeningView>[] = [
     {
@@ -142,8 +157,8 @@ export default function JobOpeningsPage() {
 
         <SubTabs
           tabs={[
-            { key: "mine", label: "My Jobs", count: DEMO_JOB_OPENINGS.filter((j) => j.created_by === "Priya Nair").length },
-            { key: "all", label: "All Jobs", count: DEMO_JOB_OPENINGS.length },
+            { key: "mine", label: "My Jobs", count: jobs.filter((j) => j.created_by === "Priya Nair").length },
+            { key: "all", label: "All Jobs", count: jobs.length },
           ]}
           value={view}
           onChange={setView}
@@ -185,10 +200,7 @@ export default function JobOpeningsPage() {
             <Button onClick={() => setReferOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success("Candidate referred — the referral is linked to your record");
-                setReferOpen(false);
-              }}
+              onClick={submitReferral}
             >
               Submit Referral
             </Button>
@@ -197,19 +209,19 @@ export default function JobOpeningsPage() {
       >
         <FormGrid columns={2}>
           <FormField label="Candidate Name" required>
-            <Input placeholder="Full name" />
+            <Input placeholder="Full name" value={referral.name} onChange={(e) => setReferral((r) => ({ ...r, name: e.target.value }))} />
           </FormField>
           <FormField label="Email" required>
-            <Input type="email" placeholder="name@example.com" />
+            <Input type="email" placeholder="name@example.com" value={referral.email} onChange={(e) => setReferral((r) => ({ ...r, email: e.target.value }))} />
           </FormField>
           <FormField label="Mobile" required>
-            <Input type="tel" placeholder="10-digit mobile" />
+            <Input type="tel" placeholder="10-digit mobile" value={referral.mobile} onChange={(e) => setReferral((r) => ({ ...r, mobile: e.target.value }))} />
           </FormField>
           <FormField label="Referring For" required>
-            <Select defaultValue="">
+            <Select value={referral.job_id} onChange={(e) => setReferral((r) => ({ ...r, job_id: e.target.value }))}>
               <option value="">Select a job</option>
-              {DEMO_JOB_OPENINGS.filter((j) => j.status !== "Closed").map((j) => (
-                <option key={j.id}>{j.job_title}</option>
+              {jobs.filter((j) => j.status !== "Closed").map((j) => (
+                <option key={j.id} value={j.id}>{j.job_title}</option>
               ))}
             </Select>
           </FormField>
@@ -219,7 +231,7 @@ export default function JobOpeningsPage() {
             </div>
           </FormField>
           <FormField label="Why are you referring them?" span>
-            <Textarea placeholder="Context helps the recruiter prioritise the profile" />
+            <Textarea placeholder="Context helps the recruiter prioritise the profile" value={referral.notes} onChange={(e) => setReferral((r) => ({ ...r, notes: e.target.value }))} />
           </FormField>
         </FormGrid>
         <p className="mt-4 rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-700">

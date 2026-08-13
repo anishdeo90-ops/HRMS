@@ -13,10 +13,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_ONBOARDING_CASES } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtLacs, todayISO } from "@/lib/hrms/format";
 import { CASE_TONE, titleCase } from "@/lib/hrms/status";
 import type { OnboardingCase } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/14-onboarding.md §7` — the handover point.
@@ -28,12 +28,23 @@ import type { OnboardingCase } from "@/lib/hrms/types";
 export default function NewJoineesPage() {
   const [view, setView] = useState<"upcoming" | "joined">("upcoming");
   const [search, setSearch] = useState("");
+  const cases = useApiData<OnboardingCase[]>("/api/hrms/onboarding", []);
 
   const today = todayISO();
 
+  async function markJoined(c: OnboardingCase) {
+    const res = await fetch(`/api/hrms/onboarding/${c.id}/actions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "join", candidate_name: c.candidate_name, email: c.email, mobile: c.mobile, actual_doj: c.actual_doj ?? c.proposed_doj ?? today }),
+    });
+    if (!res.ok) return toast.error("Could not convert new joinee");
+    toast.success(`${c.candidate_name} converted to an employee`);
+  }
+
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ONBOARDING_CASES.filter((c) => {
+    return cases.filter((c) => {
       if (view === "joined" && c.status !== "joined") return false;
       if (
         view === "upcoming" &&
@@ -45,7 +56,7 @@ export default function NewJoineesPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [view, search]);
+  }, [cases, view, search]);
 
   const columns: Column<OnboardingCase>[] = [
     { key: "code", header: "Case Code", render: (c) => <span className="font-medium text-gray-900">{c.case_code}</span> },
@@ -113,7 +124,7 @@ export default function NewJoineesPage() {
                 ? "Documents must be complete before joining"
                 : undefined
             }
-            onClick={() => toast.success(`${c.candidate_name} converted to an employee`)}
+            onClick={() => markJoined(c)}
           >
             Mark Joined
           </Button>
@@ -121,7 +132,7 @@ export default function NewJoineesPage() {
     },
   ];
 
-  const joiningThisWeek = DEMO_ONBOARDING_CASES.filter(
+  const joiningThisWeek = cases.filter(
     (c) =>
       c.proposed_doj &&
       !c.actual_doj &&
@@ -140,12 +151,12 @@ export default function NewJoineesPage() {
         />
         <StatCard
           label="Joined To Date"
-          value={DEMO_ONBOARDING_CASES.filter((c) => c.status === "joined").length}
+          value={cases.filter((c) => c.status === "joined").length}
           tint="bg-green-50 text-green-600"
         />
         <StatCard
           label="Offers Declined"
-          value={DEMO_ONBOARDING_CASES.filter((c) => c.status === "offer_declined").length}
+          value={cases.filter((c) => c.status === "offer_declined").length}
           tint="bg-red-50 text-red-600"
         />
       </div>
@@ -161,7 +172,7 @@ export default function NewJoineesPage() {
             {
               key: "joined",
               label: "Joined",
-              count: DEMO_ONBOARDING_CASES.filter((c) => c.status === "joined").length,
+              count: cases.filter((c) => c.status === "joined").length,
             },
           ]}
           value={view}

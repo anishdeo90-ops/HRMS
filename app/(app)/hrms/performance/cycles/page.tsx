@@ -16,7 +16,7 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_CYCLES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDate, todayISO } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 import type { PerformanceCycle } from "@/lib/hrms/types";
@@ -33,15 +33,16 @@ export default function PerformanceCyclesPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [cycles, reload] = useHrmsData<PerformanceCycle[]>("/api/hrms/performance/cycles", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_CYCLES.filter((c) => {
+    return cycles.filter((c) => {
       if (status && c.status !== status) return false;
       if (!q) return true;
       return [c.cycle_name, c.cycle_code].some((f) => String(f ?? "").toLowerCase().includes(q));
     });
-  }, [search, status]);
+  }, [cycles, search, status]);
 
   const columns: Column<PerformanceCycle>[] = [
     { key: "code", header: "Cycle Code", render: (c) => <span className="font-medium text-gray-900">{c.cycle_code}</span> },
@@ -87,11 +88,11 @@ export default function PerformanceCyclesPage() {
       render: (c) => (
         <div className="flex justify-end gap-1">
           {c.status === "draft" && (
-            <Button variant="success" onClick={() => toast.success(`${c.cycle_name} activated`)}>
+            <Button variant="success" disabled>
               Activate
             </Button>
           )}
-          <Button variant="ghost" onClick={() => toast.success(`${c.cycle_name} opened`)}>
+          <Button variant="ghost" disabled>
             Edit
           </Button>
         </div>
@@ -147,7 +148,14 @@ export default function PerformanceCyclesPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/performance/cycles", {
+                  cycle_name: `Cycle ${cycles.length + 1}`,
+                  cycle_type: "quarterly",
+                  period_start: todayISO(),
+                  period_end: todayISO(),
+                });
+                await reload();
                 toast.success("Cycle created as a draft");
                 setAddOpen(false);
               }}

@@ -17,7 +17,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_SHIFTS } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { fmtDuration, fmtLimit } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 import type { Shift } from "@/lib/hrms/types";
@@ -40,6 +40,7 @@ export default function ShiftsPage() {
   const [weekOffs, setWeekOffs] = useState<string[]>(["Saturday", "Sunday"]);
   const [active, setActive] = useState(true);
   const [mode, setMode] = useState<Shift["attendance_mode"]>("working_hours_only");
+  const [shifts, reload] = useHrmsData<Shift[]>("/api/hrms/settings/shifts", []);
 
   const columns: Column<Shift>[] = [
     { key: "name", header: "Shift", render: (s) => <span className="font-medium text-gray-900">{s.name}</span> },
@@ -92,7 +93,7 @@ export default function ShiftsPage() {
       header: "Actions",
       align: "right",
       render: (s) => (
-        <Button variant="ghost" onClick={() => toast.success(`${s.name} opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -111,7 +112,7 @@ export default function ShiftsPage() {
     >
       <div className="space-y-5">
         <Card title="Shifts" bodyClassName="p-4">
-          <DataTable columns={columns} rows={DEMO_SHIFTS} getKey={(s) => s.id} empty="No shifts defined" dense />
+          <DataTable columns={columns} rows={shifts} getKey={(s) => s.id} empty="No shifts defined" dense />
           <p className="mt-3 text-xs text-gray-500">
             A night shift crossing midnight stays one row on its business day — punches may fall on
             the next calendar date without splitting the day in two.
@@ -167,7 +168,22 @@ export default function ShiftsPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/settings/shifts", {
+                  name: `Shift ${shifts.length + 1}`,
+                  code: `S${shifts.length + 1}`,
+                  start_time: "09:30",
+                  end_time: "18:30",
+                  break_minutes: 60,
+                  working_hours: 8,
+                  grace_in_minutes: mode === "working_hours_only" ? 0 : 15,
+                  grace_out_minutes: mode === "working_hours_only" ? 0 : 15,
+                  half_day_after_minutes: 240,
+                  attendance_mode: mode,
+                  week_off_days: weekOffs,
+                  is_active: active,
+                });
+                await reload();
                 toast.success("Shift created");
                 setAddOpen(false);
               }}

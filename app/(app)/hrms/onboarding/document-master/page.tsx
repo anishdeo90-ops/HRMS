@@ -18,8 +18,8 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_DOCUMENT_TYPES, DEMO_EMPLOYMENT_TYPES } from "@/lib/hrms/demo-data";
 import type { DocumentTypeMaster } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/14-onboarding.md §2` / `08-masters.md §2`.
@@ -33,20 +33,32 @@ export default function DocumentMasterPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [requiresExpiry, setRequiresExpiry] = useState(false);
   const [mandatory, setMandatory] = useState(true);
+  const documents = useApiData<DocumentTypeMaster[]>("/api/hrms/onboarding/documents", []);
+
+  async function addDocumentType() {
+    const res = await fetch("/api/hrms/onboarding/documents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "New Document", category: "General", applies_to: "All", is_mandatory: mandatory, requires_expiry: requiresExpiry }),
+    });
+    if (!res.ok) return toast.error("Could not add document type");
+    toast.success("Document type added");
+    setAddOpen(false);
+  }
 
   const categories = useMemo(
-    () => Array.from(new Set(DEMO_DOCUMENT_TYPES.map((d) => d.category))),
-    []
+    () => Array.from(new Set(documents.map((d) => d.category))),
+    [documents]
   );
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_DOCUMENT_TYPES.filter((d) => {
+    return documents.filter((d) => {
       if (category && d.category !== category) return false;
       if (!q) return true;
       return [d.name, d.category, d.applies_to].some((f) => f.toLowerCase().includes(q));
     });
-  }, [search, category]);
+  }, [documents, search, category]);
 
   const columns: Column<DocumentTypeMaster>[] = [
     { key: "name", header: "Document", render: (d) => <span className="font-medium text-gray-900">{d.name}</span> },
@@ -81,16 +93,6 @@ export default function DocumentMasterPage() {
         <Badge tone={d.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}>
           {d.is_active ? "Active" : "Inactive"}
         </Badge>
-      ),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      align: "right",
-      render: (d) => (
-        <Button variant="ghost" onClick={() => toast.success(`${d.name} opened`)}>
-          Edit
-        </Button>
       ),
     },
   ];
@@ -135,10 +137,7 @@ export default function DocumentMasterPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success("Document type added");
-                setAddOpen(false);
-              }}
+              onClick={addDocumentType}
             >
               Save
             </Button>
@@ -160,9 +159,9 @@ export default function DocumentMasterPage() {
           <FormField label="Applies To" required>
             <Select defaultValue="">
               <option value="">All employees</option>
-              {DEMO_EMPLOYMENT_TYPES.map((t) => (
-                <option key={t.id}>{t.name}</option>
-              ))}
+              <option>Permanent</option>
+              <option>Contract</option>
+              <option>Intern</option>
               <option>Experienced hires</option>
               <option>Facility Services</option>
             </Select>

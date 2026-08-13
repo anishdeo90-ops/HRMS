@@ -18,6 +18,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 
@@ -54,6 +55,7 @@ export default function AchievementsPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [basis, setBasis] = useState<Achievement["award_basis"]>("manual");
   const [active, setActive] = useState(true);
+  const [achievements, reload] = useHrmsData<Achievement[]>("/api/hrms/settings/achievements", []);
 
   const columns: Column<Achievement>[] = [
     {
@@ -101,7 +103,7 @@ export default function AchievementsPage() {
       header: "Actions",
       align: "right",
       render: (a) => (
-        <Button variant="ghost" onClick={() => toast.success(`${a.name} opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -121,7 +123,7 @@ export default function AchievementsPage() {
       <Card title="Catalogue" bodyClassName="p-4">
         <DataTable
           columns={columns}
-          rows={ACHIEVEMENTS}
+          rows={achievements}
           getKey={(a) => a.id}
           empty="No achievements defined"
           dense
@@ -137,7 +139,15 @@ export default function AchievementsPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/settings/achievements", {
+                  name: `Achievement ${achievements.length + 1}`,
+                  description: "Recognition",
+                  category: "performance",
+                  award_basis: basis,
+                  is_active: active,
+                });
+                await reload();
                 toast.success("Achievement added");
                 setAddOpen(false);
               }}

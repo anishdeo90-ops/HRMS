@@ -19,14 +19,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import {
-  DEMO_ONBOARDING_CASES,
-  DEMO_ONBOARDING_FORMS,
-  DEMO_SHIFTS,
-} from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtLacs } from "@/lib/hrms/format";
 import { CASE_TONE, titleCase } from "@/lib/hrms/status";
-import type { OnboardingCase } from "@/lib/hrms/types";
+import type { OnboardingCase, OnboardingFormMaster } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/14-onboarding.md §5`.
@@ -38,17 +34,31 @@ import type { OnboardingCase } from "@/lib/hrms/types";
 export default function OnboardingInitiationPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState<OnboardingCase | null>(null);
+  const cases = useApiData<OnboardingCase[]>("/api/hrms/onboarding", []);
+  const forms = useApiData<OnboardingFormMaster[]>("/api/hrms/onboarding/forms", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ONBOARDING_CASES.filter((c) => {
+    return cases.filter((c) => {
       if (!["approved", "offer_sent", "documents_pending"].includes(c.status)) return false;
       if (!q) return true;
       return [c.candidate_name, c.case_code].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search]);
+  }, [cases, search]);
+
+  async function initiate() {
+    if (!open) return;
+    const res = await fetch(`/api/hrms/onboarding/${open.id}/actions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "initiate" }),
+    });
+    if (!res.ok) return toast.error("Could not initiate onboarding");
+    toast.success(`Joining kit sent to ${open.candidate_name}`);
+    setOpen(null);
+  }
 
   const columns: Column<OnboardingCase>[] = [
     { key: "code", header: "Case Code", render: (c) => <span className="font-medium text-gray-900">{c.case_code}</span> },
@@ -84,10 +94,10 @@ export default function OnboardingInitiationPage() {
     <div className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard label="Ready to Initiate" value={rows.filter((c) => c.status === "approved").length} tint="bg-brand-50 text-brand-600" />
-        <StatCard label="Offer Sent" value={DEMO_ONBOARDING_CASES.filter((c) => c.status === "offer_sent").length} />
+        <StatCard label="Offer Sent" value={cases.filter((c) => c.status === "offer_sent").length} />
         <StatCard
           label="Documents Pending"
-          value={DEMO_ONBOARDING_CASES.filter((c) => c.status === "documents_pending").length}
+          value={cases.filter((c) => c.status === "documents_pending").length}
           tint="bg-amber-50 text-amber-600"
         />
       </div>
@@ -119,10 +129,7 @@ export default function OnboardingInitiationPage() {
             <Button
               variant="primary"
               icon={Send}
-              onClick={() => {
-                toast.success(`Joining kit sent to ${open?.candidate_name}`);
-                setOpen(null);
-              }}
+              onClick={initiate}
             >
               Send Joining Kit
             </Button>
@@ -146,7 +153,7 @@ export default function OnboardingInitiationPage() {
               >
                 <Select defaultValue="">
                   <option value="">Select</option>
-                  {DEMO_ONBOARDING_FORMS.filter((f) => f.is_active).map((f) => (
+                  {forms.filter((f) => f.is_active).map((f) => (
                     <option key={f.id}>
                       {f.form_name} ({f.documents_required} documents)
                     </option>
@@ -159,9 +166,7 @@ export default function OnboardingInitiationPage() {
               <FormField label="Default Shift" required>
                 <Select defaultValue="">
                   <option value="">Select</option>
-                  {DEMO_SHIFTS.filter((s) => s.is_active).map((s) => (
-                    <option key={s.id}>{s.name}</option>
-                  ))}
+                  <option>General Shift</option>
                 </Select>
               </FormField>
               <FormField label="Reporting Manager" required>

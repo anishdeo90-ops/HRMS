@@ -4,6 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Button, Card, FormField, FormGrid, Input, Select, Toggle } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 
 /**
  * `docs/hrms/07-settings.md §2` — key/value config.
@@ -16,6 +17,7 @@ import SettingsPage from "@/components/hrms/settings-page";
  */
 export default function SystemSettingsPage() {
   const [dirty, setDirty] = useState(false);
+  const [settings, reload] = useHrmsData<Record<string, unknown>>("/api/hrms/settings/system-settings", {});
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [inAppNotifications, setInAppNotifications] = useState(true);
   const [autoApprove, setAutoApprove] = useState(false);
@@ -33,7 +35,15 @@ export default function SystemSettingsPage() {
           <Button
             variant="primary"
             disabled={!dirty}
-            onClick={() => {
+            onClick={async () => {
+              await saveHrmsData("/api/hrms/settings/system-settings", {
+                ...settings,
+                email_notifications: emailNotifications,
+                in_app_notifications: inAppNotifications,
+                auto_approve: autoApprove,
+                saved_at: new Date().toISOString(),
+              });
+              await reload();
               toast.success("System settings saved");
               setDirty(false);
             }}

@@ -17,7 +17,7 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_DESIGNATIONS, DEMO_KRAS, DEMO_ME } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDate, fmtPercent } from "@/lib/hrms/format";
 import type { Kra } from "@/lib/hrms/types";
 
@@ -33,18 +33,19 @@ export default function KraPage() {
   const [search, setSearch] = useState("");
   const [designation, setDesignation] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [kras, reload] = useHrmsData<Kra[]>("/api/hrms/performance/kra", []);
+  const [options] = useHrmsData<{ designations: { id: string; name: string }[] }>("/api/hrms/options", { designations: [] });
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_KRAS.filter((k) => {
-      if (view === "mine" && k.designation !== DEMO_ME.designation) return false;
+    return kras.filter((k) => {
       if (designation && k.designation !== designation) return false;
       if (!q) return true;
       return [k.kpi_name, k.kra_code, k.measurement].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [view, search, designation]);
+  }, [kras, view, search, designation]);
 
   const totalWeightage = rows.reduce((s, k) => s + k.weightage, 0);
 
@@ -76,7 +77,7 @@ export default function KraPage() {
       header: "Actions",
       align: "right",
       render: (k) => (
-        <Button variant="ghost" onClick={() => toast.success(`${k.kra_code} opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -98,8 +99,8 @@ export default function KraPage() {
     >
       <SubTabs
         tabs={[
-          { key: "mine", label: "My KRAs", count: DEMO_KRAS.filter((k) => k.designation === DEMO_ME.designation).length },
-          { key: "master", label: "KRA Master", count: DEMO_KRAS.length },
+          { key: "mine", label: "My KRAs", count: kras.length },
+          { key: "master", label: "KRA Master", count: kras.length },
         ]}
         value={view}
         onChange={setView}
@@ -123,7 +124,7 @@ export default function KraPage() {
             className="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-700"
           >
             <option value="">All designations</option>
-            {DEMO_DESIGNATIONS.map((d) => (
+            {options.designations.map((d) => (
               <option key={d.id} value={d.name}>
                 {d.name}
               </option>
@@ -151,7 +152,14 @@ export default function KraPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/performance/kra", {
+                  kpi_name: "New KPI",
+                  measurement: "Rating",
+                  weightage: 20,
+                  designation: options.designations[0]?.name,
+                });
+                await reload();
                 toast.success("KRA added");
                 setAddOpen(false);
               }}
@@ -168,7 +176,7 @@ export default function KraPage() {
           <FormField label="Designation" required>
             <Select defaultValue="">
               <option value="">Select</option>
-              {DEMO_DESIGNATIONS.map((d) => (
+              {options.designations.map((d) => (
                 <option key={d.id}>{d.name}</option>
               ))}
             </Select>

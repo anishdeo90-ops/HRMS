@@ -207,15 +207,15 @@ export default function EmployeeDirectoryPage() {
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Button
             icon={Mail}
-            disabled={!hasSelection}
-            onClick={() => toast.success(`Exit formalities email sent to ${selected.length}`)}
+            disabled
+            title="Exit formalities email workflow is not part of Task 1 API"
           >
             Send Exit Formalities Email
           </Button>
           <Button
             icon={KeyRound}
-            disabled={!hasSelection}
-            onClick={() => toast.success(`Password change email sent to ${selected.length}`)}
+            disabled
+            title="Password change email workflow is not part of Task 1 API"
           >
             Send Password Change Email
           </Button>

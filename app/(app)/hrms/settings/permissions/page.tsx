@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Lock, Plus } from "lucide-react";
 import { Badge, Button, Card, EmptyState, Toggle } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_ROLES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
+import type { RoleDefinition } from "@/lib/hrms/types";
 
 /**
  * `docs/hrms/07-settings.md §4`.
@@ -62,26 +63,28 @@ const PERMISSION_GROUPS: { group: string; permissions: { key: string; label: str
 ];
 
 export default function PermissionManagementPage() {
-  const [selectedRole, setSelectedRole] = useState(DEMO_ROLES[1].id);
-  const role = DEMO_ROLES.find((r) => r.id === selectedRole);
-  const [grants, setGrants] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(DEMO_ROLES[1].permissions.map((p) => [p, true]))
-  );
+  const [roles, reload] = useHrmsData<RoleDefinition[]>("/api/hrms/settings/permissions", []);
+  const [selectedRole, setSelectedRole] = useState("");
+  const role = roles.find((r) => r.id === (selectedRole || roles[0]?.id));
+  const [grants, setGrants] = useState<Record<string, boolean>>({});
 
   function pick(roleId: string) {
-    const next = DEMO_ROLES.find((r) => r.id === roleId);
+    const next = roles.find((r) => r.id === roleId);
     setSelectedRole(roleId);
     setGrants(Object.fromEntries((next?.permissions ?? []).map((p) => [p, true])));
   }
 
   const isSuperRole = role?.permissions.includes("*");
+  useEffect(() => {
+    if (role) setGrants(Object.fromEntries(role.permissions.map((p) => [p, true])));
+  }, [role?.id]);
 
   return (
     <SettingsPage
       title="Permission Management"
       description="Roles carry permissions; people carry roles. Nothing is granted to an individual."
       actions={
-        <Button icon={Plus} variant="primary" onClick={() => toast.success("New role created")}>
+        <Button icon={Plus} variant="primary" disabled>
           Add Role
         </Button>
       }
@@ -89,7 +92,7 @@ export default function PermissionManagementPage() {
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         <Card title="Roles" bodyClassName="p-0">
           <ul className="divide-y divide-gray-100">
-            {DEMO_ROLES.map((r) => (
+            {roles.map((r) => (
               <li key={r.id}>
                 <button
                   type="button"
@@ -126,11 +129,21 @@ export default function PermissionManagementPage() {
           bodyClassName="p-0"
           actions={
             role && !role.is_system ? (
-              <Button variant="primary" onClick={() => toast.success("Permissions saved")}>
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  await saveHrmsData("/api/hrms/settings/permissions", {
+                    role_key: role.id,
+                    permissions: Object.keys(grants).filter((key) => grants[key]),
+                  });
+                  await reload();
+                  toast.success("Permissions saved");
+                }}
+              >
                 Save
               </Button>
             ) : (
-              <Button onClick={() => toast.success(`${role?.name} cloned`)}>Clone Role</Button>
+              <Button disabled>Clone Role</Button>
             )
           }
         >

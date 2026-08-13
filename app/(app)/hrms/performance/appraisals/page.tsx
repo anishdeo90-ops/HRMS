@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import toast from "react-hot-toast";
 import {
   Badge,
   Button,
@@ -13,10 +12,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_APPRAISALS, DEMO_CYCLES, DEMO_ME } from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtAggregate, fmtDate } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
-import type { Appraisal } from "@/lib/hrms/types";
+import type { Appraisal, PerformanceCycle } from "@/lib/hrms/types";
 
 /** `docs/hrms/13-performance-review.md §4` — My, Team and HR appraisal views. */
 
@@ -33,11 +32,12 @@ export default function AppraisalsPage() {
   const [search, setSearch] = useState("");
   const [cycle, setCycle] = useState("");
   const [status, setStatus] = useState("");
+  const [appraisals] = useHrmsData<Appraisal[]>("/api/hrms/performance/appraisals", []);
+  const [cycles] = useHrmsData<PerformanceCycle[]>("/api/hrms/performance/cycles", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_APPRAISALS.filter((a) => {
-      if (view === "mine" && a.employee_id !== DEMO_ME.id) return false;
+    return appraisals.filter((a) => {
       if (view === "hr" && a.status !== "hr_review" && a.status !== "completed") return false;
       if (cycle && a.cycle_name !== cycle) return false;
       if (status && a.status !== status) return false;
@@ -46,20 +46,20 @@ export default function AppraisalsPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [view, search, cycle, status]);
+  }, [appraisals, view, search, cycle, status]);
 
   const stats = useMemo(() => {
-    const rated = DEMO_APPRAISALS.filter((a) => a.final_rating != null);
+    const rated = appraisals.filter((a) => a.final_rating != null);
     return {
-      total: DEMO_APPRAISALS.length,
-      completed: DEMO_APPRAISALS.filter((a) => a.status === "completed").length,
-      awaitingMe: DEMO_APPRAISALS.filter((a) => a.status === "manager_review").length,
+      total: appraisals.length,
+      completed: appraisals.filter((a) => a.status === "completed").length,
+      awaitingMe: appraisals.filter((a) => a.status === "manager_review").length,
       averageRating:
         rated.length === 0
           ? null
           : Math.round((rated.reduce((s, a) => s + (a.final_rating ?? 0), 0) / rated.length) * 10) / 10,
     };
-  }, []);
+  }, [appraisals]);
 
   const columns: Column<Appraisal>[] = [
     { key: "code", header: "Employee Code", render: (a) => a.employee_code },
@@ -107,14 +107,7 @@ export default function AppraisalsPage() {
       header: "Actions",
       align: "right",
       render: (a) => (
-        <Button
-          variant="ghost"
-          onClick={() =>
-            toast.success(
-              a.status === "completed" ? `${a.employee_name}'s appraisal opened` : "Review form opened"
-            )
-          }
-        >
+        <Button variant="ghost" disabled>
           {a.status === "completed" ? "View" : "Review"}
         </Button>
       ),
@@ -137,9 +130,9 @@ export default function AppraisalsPage() {
       <Card title="Appraisals" subtitle="One templated system — ranking and review are not two products" bodyClassName="p-4">
         <SubTabs
           tabs={[
-            { key: "mine", label: "My Appraisal", count: DEMO_APPRAISALS.filter((a) => a.employee_id === DEMO_ME.id).length },
-            { key: "team", label: "Team Appraisal", count: DEMO_APPRAISALS.length },
-            { key: "hr", label: "HR Appraisal", count: DEMO_APPRAISALS.filter((a) => a.status === "hr_review" || a.status === "completed").length },
+            { key: "mine", label: "My Appraisal", count: appraisals.length },
+            { key: "team", label: "Team Appraisal", count: appraisals.length },
+            { key: "hr", label: "HR Appraisal", count: appraisals.filter((a) => a.status === "hr_review" || a.status === "completed").length },
           ]}
           value={view}
           onChange={setView}
@@ -160,7 +153,7 @@ export default function AppraisalsPage() {
             label="All Cycles"
             value={cycle}
             onChange={setCycle}
-            options={DEMO_CYCLES.map((c) => ({ value: c.cycle_name, label: c.cycle_name }))}
+            options={cycles.map((c) => ({ value: c.cycle_name, label: c.cycle_name }))}
           />
           <SelectFilter
             label="All Stages"

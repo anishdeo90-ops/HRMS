@@ -24,21 +24,22 @@ import {
   SubTabs,
   type Column,
 } from "@/components/hrms/ui";
-import {
-  DEMO_APPRAISALS,
-  DEMO_EDUCATION,
-  DEMO_EMPLOYEE_DOCUMENTS,
-  DEMO_EXPERIENCE,
-  DEMO_FAMILY,
-  DEMO_GOALS,
-  DEMO_MY_ASSETS,
-  DEMO_RANKING,
-  DEMO_SEPARATIONS,
-  DEMO_TICKETS,
-} from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDate, fmtLacs, fmtMoney, fmtPercent, initials } from "@/lib/hrms/format";
 import { employeeTone, priorityTone, requestTone, titleCase } from "@/lib/hrms/status";
-import type { Asset, Employee, EmployeeDocument, Ticket } from "@/lib/hrms/types";
+import type {
+  Appraisal,
+  Asset,
+  Employee,
+  EmployeeDocument,
+  EmployeeEducation,
+  EmployeeExperience,
+  EmployeeFamilyMember,
+  Goal,
+  RankingEntry,
+  Separation,
+  Ticket,
+} from "@/lib/hrms/types";
 
 type TabKey =
   | "personal"
@@ -78,6 +79,16 @@ export default function EmployeeRecordPage() {
   const [tab, setTab] = useState<TabKey>("personal");
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
+  const [assets] = useHrmsData<Asset[]>("/api/hrms/assets", []);
+  const [ticketsAll] = useHrmsData<Ticket[]>("/api/hrms/tickets", []);
+  const [separations] = useHrmsData<Separation[]>("/api/hrms/separations", []);
+  const [goalsAll] = useHrmsData<Goal[]>("/api/hrms/performance/goals", []);
+  const [appraisalsAll] = useHrmsData<Appraisal[]>("/api/hrms/performance/appraisals", []);
+  const [rankingAll] = useHrmsData<RankingEntry[]>("/api/hrms/performance/ranking", []);
+  const documents: EmployeeDocument[] = [];
+  const education: EmployeeEducation[] = [];
+  const experience: EmployeeExperience[] = [];
+  const family: EmployeeFamilyMember[] = [];
 
   useEffect(() => {
     let alive = true;
@@ -118,11 +129,12 @@ export default function EmployeeRecordPage() {
   const filled = tracked.filter((v) => v != null && v !== "").length;
   const completion = Math.round((filled / tracked.length) * 100);
 
-  const separation = DEMO_SEPARATIONS.find((s) => s.employee_id === employee.id);
-  const tickets = DEMO_TICKETS.filter((t) => t.raised_by_id === employee.id);
-  const goals = DEMO_GOALS.filter((g) => g.employee_id === employee.id);
-  const appraisals = DEMO_APPRAISALS.filter((a) => a.employee_id === employee.id);
-  const ranking = DEMO_RANKING.find((r) => r.employee_id === employee.id);
+  const separation = separations.find((s) => s.employee_id === employee.id);
+  const tickets = ticketsAll.filter((t) => t.raised_by_id === employee.id);
+  const goals = goalsAll.filter((g) => g.employee_id === employee.id);
+  const appraisals = appraisalsAll.filter((a) => a.employee_id === employee.id);
+  const ranking = rankingAll.find((r) => r.employee_id === employee.id);
+  const employeeAssets = assets.filter((a) => a.allocated_to === employee.name);
 
   const docColumns: Column<EmployeeDocument>[] = [
     { key: "type", header: "Document", render: (d) => <span className="font-medium text-gray-900">{d.document_type}</span> },
@@ -258,11 +270,11 @@ export default function EmployeeRecordPage() {
 
           <div className="grid gap-5 lg:grid-cols-2">
             <Card title="Education" bodyClassName="p-0">
-              {DEMO_EDUCATION.length === 0 ? (
+              {education.length === 0 ? (
                 <EmptyState title="No education records" />
               ) : (
                 <ul className="divide-y divide-gray-100">
-                  {DEMO_EDUCATION.map((e) => (
+                  {education.map((e) => (
                     <li key={e.id} className="px-5 py-3">
                       <p className="text-sm font-medium text-gray-900">
                         {e.qualification}
@@ -279,11 +291,11 @@ export default function EmployeeRecordPage() {
             </Card>
 
             <Card title="Prior Experience" bodyClassName="p-0">
-              {DEMO_EXPERIENCE.length === 0 ? (
+              {experience.length === 0 ? (
                 <EmptyState title="No prior experience recorded" />
               ) : (
                 <ul className="divide-y divide-gray-100">
-                  {DEMO_EXPERIENCE.map((x) => (
+                  {experience.map((x) => (
                     <li key={x.id} className="px-5 py-3">
                       <p className="text-sm font-medium text-gray-900">{x.designation}</p>
                       <p className="text-xs text-gray-500">{x.company}</p>
@@ -309,7 +321,7 @@ export default function EmployeeRecordPage() {
                 </tr>
               </thead>
               <tbody>
-                {DEMO_FAMILY.map((f) => (
+                {family.map((f) => (
                   <tr key={f.id} className="border-t border-gray-100">
                     <td className="px-5 py-2 font-medium text-gray-900">{f.name}</td>
                     <td className="px-5 py-2 text-gray-600">{f.relation}</td>
@@ -388,7 +400,7 @@ export default function EmployeeRecordPage() {
         >
           <DataTable
             columns={docColumns}
-            rows={DEMO_EMPLOYEE_DOCUMENTS}
+            rows={documents}
             getKey={(d) => d.id}
             empty="No documents on file"
             dense
@@ -520,7 +532,7 @@ export default function EmployeeRecordPage() {
         <Card title="Allocated Assets" bodyClassName="p-4">
           <DataTable
             columns={assetColumns}
-            rows={DEMO_MY_ASSETS}
+            rows={employeeAssets}
             getKey={(a) => a.id}
             empty="No assets allocated"
             dense

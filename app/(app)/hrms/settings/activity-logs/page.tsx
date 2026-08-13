@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card, DataTable, SelectFilter, Toolbar, type Column } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_ACTIVITY_LOG } from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDateTime } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 import type { ActivityLogEntry } from "@/lib/hrms/types";
@@ -18,22 +18,23 @@ import type { ActivityLogEntry } from "@/lib/hrms/types";
 export default function ActivityLogsPage() {
   const [search, setSearch] = useState("");
   const [entity, setEntity] = useState("");
+  const [activity] = useHrmsData<ActivityLogEntry[]>("/api/hrms/settings/activity-logs", []);
 
   const entities = useMemo(
-    () => Array.from(new Set(DEMO_ACTIVITY_LOG.map((e) => e.entity_type))),
-    []
+    () => Array.from(new Set(activity.map((e) => e.entity_type))),
+    [activity]
   );
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ACTIVITY_LOG.filter((e) => {
+    return activity.filter((e) => {
       if (entity && e.entity_type !== entity) return false;
       if (!q) return true;
       return [e.actor_name, e.action, e.entity_label].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, entity]);
+  }, [activity, search, entity]);
 
   const columns: Column<ActivityLogEntry>[] = [
     { key: "when", header: "When", render: (e) => fmtDateTime(e.occurred_at) },

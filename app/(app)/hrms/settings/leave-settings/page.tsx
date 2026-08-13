@@ -17,7 +17,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_LEAVE_TYPES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { fmtLimit } from "@/lib/hrms/format";
 import type { LeaveType } from "@/lib/hrms/types";
 
@@ -34,6 +34,7 @@ export default function LeaveSettingsPage() {
   const [halfDay, setHalfDay] = useState(true);
   const [needsDoc, setNeedsDoc] = useState(false);
   const [unlimited, setUnlimited] = useState(false);
+  const [leaveTypes, reload] = useHrmsData<LeaveType[]>("/api/hrms/settings/leave-types", []);
 
   const columns: Column<LeaveType>[] = [
     { key: "name", header: "Leave Type", render: (t) => <span className="font-medium text-gray-900">{t.name}</span> },
@@ -89,7 +90,7 @@ export default function LeaveSettingsPage() {
       header: "Actions",
       align: "right",
       render: (t) => (
-        <Button variant="ghost" onClick={() => toast.success(`${t.name} opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -110,7 +111,7 @@ export default function LeaveSettingsPage() {
         <Card title="Leave Types" bodyClassName="p-4">
           <DataTable
             columns={columns}
-            rows={DEMO_LEAVE_TYPES}
+            rows={leaveTypes}
             getKey={(t) => t.id}
             empty="No leave types defined"
             dense
@@ -174,7 +175,16 @@ export default function LeaveSettingsPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/settings/leave-types", {
+                  name: "New Leave Type",
+                  code: `LT${leaveTypes.length + 1}`,
+                  is_paid: paid,
+                  allows_half_day: halfDay,
+                  requires_document: needsDoc,
+                  annual_quota_days: unlimited ? null : 0,
+                });
+                await reload();
                 toast.success("Leave type added");
                 setAddOpen(false);
               }}

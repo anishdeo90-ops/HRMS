@@ -12,10 +12,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_EXPENSE_CLAIMS } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtMoney } from "@/lib/hrms/format";
 import { requestTone, titleCase } from "@/lib/hrms/status";
 import type { ExpenseClaim } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/15-more-module.md §3`.
@@ -33,35 +33,46 @@ export default function ReimbursementApprovalPage() {
   const [status, setStatus] = useState("pending");
   const [selected, setSelected] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const claims = useApiData<ExpenseClaim[]>("/api/hrms/expenses", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_EXPENSE_CLAIMS.filter((c) => {
+    return claims.filter((c) => {
       if (status && c.status !== status) return false;
       if (!q) return true;
       return [c.claim_code, c.employee_name, c.employee_code].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, status]);
+  }, [claims, search, status]);
 
   const stats = useMemo(
     () => ({
-      pending: DEMO_EXPENSE_CLAIMS.filter((c) => c.status === "pending").length,
-      pendingValue: DEMO_EXPENSE_CLAIMS.filter((c) => c.status === "pending").reduce(
+      pending: claims.filter((c) => c.status === "pending").length,
+      pendingValue: claims.filter((c) => c.status === "pending").reduce(
         (s, c) => s + c.total_amount_paise,
         0
       ),
-      approvedValue: DEMO_EXPENSE_CLAIMS.filter((c) => c.status === "approved").reduce(
+      approvedValue: claims.filter((c) => c.status === "approved").reduce(
         (s, c) => s + c.total_amount_paise,
         0
       ),
-      missingReceipts: DEMO_EXPENSE_CLAIMS.filter((c) =>
+      missingReceipts: claims.filter((c) =>
         c.lines.some((l) => !l.has_receipt)
       ).length,
     }),
-    []
+    [claims]
   );
+
+  async function setClaimStatus(id: string, status: "approved" | "rejected") {
+    const res = await fetch("/api/hrms/expenses", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    });
+    if (!res.ok) return toast.error("Could not update claim");
+    toast.success(`Claim ${status}`);
+  }
 
   const columns: Column<ExpenseClaim>[] = [
     {
@@ -130,10 +141,10 @@ export default function ReimbursementApprovalPage() {
           </Button>
           {c.status === "pending" && (
             <>
-              <Button variant="success" icon={Check} onClick={() => toast.success(`${c.claim_code} approved`)}>
+              <Button variant="success" icon={Check} onClick={() => setClaimStatus(c.id, "approved")}>
                 Approve
               </Button>
-              <Button variant="danger" icon={X} onClick={() => toast.success(`${c.claim_code} rejected`)}>
+              <Button variant="danger" icon={X} onClick={() => setClaimStatus(c.id, "rejected")}>
                 Reject
               </Button>
             </>
@@ -143,7 +154,7 @@ export default function ReimbursementApprovalPage() {
     },
   ];
 
-  const openClaim = DEMO_EXPENSE_CLAIMS.find((c) => c.id === expanded);
+  const openClaim = claims.find((c) => c.id === expanded);
 
   return (
     <div className="space-y-5">
@@ -194,7 +205,7 @@ export default function ReimbursementApprovalPage() {
               icon={Check}
               disabled={selected.length === 0}
               onClick={() => {
-                toast.success(`${selected.length} claims approved`);
+                Promise.all(selected.map((id) => setClaimStatus(id, "approved")));
                 setSelected([]);
               }}
             >
@@ -205,7 +216,7 @@ export default function ReimbursementApprovalPage() {
               icon={X}
               disabled={selected.length === 0}
               onClick={() => {
-                toast.success(`${selected.length} claims rejected`);
+                Promise.all(selected.map((id) => setClaimStatus(id, "rejected")));
                 setSelected([]);
               }}
             >

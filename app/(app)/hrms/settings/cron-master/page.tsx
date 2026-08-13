@@ -13,7 +13,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_CRON_JOBS } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDateTime } from "@/lib/hrms/format";
 import type { CronJob } from "@/lib/hrms/types";
 
@@ -27,10 +27,11 @@ import type { CronJob } from "@/lib/hrms/types";
  */
 export default function CronMasterPage() {
   const [enabled, setEnabled] = useState<Record<string, boolean>>(
-    Object.fromEntries(DEMO_CRON_JOBS.map((j) => [j.id, j.is_enabled]))
+    {}
   );
+  const [jobs, reload] = useHrmsData<CronJob[]>("/api/hrms/settings/cron-jobs", []);
 
-  const failing = DEMO_CRON_JOBS.filter((j) => j.last_status === "failed");
+  const failing = jobs.filter((j) => j.last_status === "failed");
 
   const columns: Column<CronJob>[] = [
     {
@@ -72,9 +73,11 @@ export default function CronMasterPage() {
       align: "center",
       render: (j) => (
         <Toggle
-          checked={!!enabled[j.id]}
-          onChange={(v) => {
+          checked={enabled[j.id] ?? j.is_enabled}
+          onChange={async (v) => {
             setEnabled((prev) => ({ ...prev, [j.id]: v }));
+            await saveHrmsData("/api/hrms/settings/cron-jobs", { id: j.id, is_enabled: v });
+            await reload();
             toast.success(`${j.name} ${v ? "enabled" : "disabled"}`);
           }}
           label={j.name}
@@ -86,7 +89,7 @@ export default function CronMasterPage() {
       header: "Actions",
       align: "right",
       render: (j) => (
-        <Button icon={Play} onClick={() => toast.success(`${j.name} queued`)}>
+        <Button icon={Play} disabled>
           Run Now
         </Button>
       ),
@@ -118,7 +121,7 @@ export default function CronMasterPage() {
         )}
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <StatCard label="Jobs" value={DEMO_CRON_JOBS.length} />
+          <StatCard label="Jobs" value={jobs.length} />
           <StatCard
             label="Enabled"
             value={Object.values(enabled).filter(Boolean).length}
@@ -128,7 +131,7 @@ export default function CronMasterPage() {
         </div>
 
         <Card title="Scheduled Jobs" bodyClassName="p-4">
-          <DataTable columns={columns} rows={DEMO_CRON_JOBS} getKey={(j) => j.id} empty="No jobs configured" dense />
+          <DataTable columns={columns} rows={jobs} getKey={(j) => j.id} empty="No jobs configured" dense />
           <p className="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
             The attendance register job is load-bearing: if it does not run, days do not exist to
             be marked on, and absences cannot be counted. It should alert on failure rather than

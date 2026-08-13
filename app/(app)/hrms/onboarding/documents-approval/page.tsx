@@ -13,26 +13,51 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_DOCUMENT_TYPES, DEMO_ONBOARDING_CASES } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate } from "@/lib/hrms/format";
 import { CASE_TONE, titleCase } from "@/lib/hrms/status";
-import type { OnboardingCase } from "@/lib/hrms/types";
+import type { DocumentTypeMaster, OnboardingCase } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /** `docs/hrms/14-onboarding.md §6` — verifying what the candidate uploaded. */
 export default function DocumentsApprovalPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState<OnboardingCase | null>(null);
+  const cases = useApiData<OnboardingCase[]>("/api/hrms/onboarding", []);
+  const documents = useApiData<DocumentTypeMaster[]>("/api/hrms/onboarding/documents", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ONBOARDING_CASES.filter((c) => {
+    return cases.filter((c) => {
       if (!["documents_pending", "documents_submitted"].includes(c.status)) return false;
       if (!q) return true;
       return [c.candidate_name, c.case_code].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search]);
+  }, [cases, search]);
+
+  async function markDocument(id: string, status: "verified" | "rejected") {
+    if (!open) return;
+    const res = await fetch("/api/hrms/onboarding/documents", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ onboarding_case_id: open.id, document_type_id: id, status }),
+    });
+    if (!res.ok) return toast.error("Could not update document");
+    toast.success(status === "verified" ? "Document verified" : "Document sent back");
+  }
+
+  async function verifyAll() {
+    if (!open) return;
+    const res = await fetch(`/api/hrms/onboarding/${open.id}/actions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "submit_documents" }),
+    });
+    if (!res.ok) return toast.error("Could not verify documents");
+    toast.success("All documents verified");
+    setOpen(null);
+  }
 
   const columns: Column<OnboardingCase>[] = [
     { key: "code", header: "Case Code", render: (c) => <span className="font-medium text-gray-900">{c.case_code}</span> },
@@ -83,16 +108,16 @@ export default function DocumentsApprovalPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard
           label="Ready to Verify"
-          value={DEMO_ONBOARDING_CASES.filter((c) => c.status === "documents_submitted").length}
+          value={cases.filter((c) => c.status === "documents_submitted").length}
           icon={FileCheck2}
           tint="bg-brand-50 text-brand-600"
         />
         <StatCard
           label="Still Collecting"
-          value={DEMO_ONBOARDING_CASES.filter((c) => c.status === "documents_pending").length}
+          value={cases.filter((c) => c.status === "documents_pending").length}
           tint="bg-amber-50 text-amber-600"
         />
-        <StatCard label="Document Types" value={DEMO_DOCUMENT_TYPES.filter((d) => d.is_active).length} />
+        <StatCard label="Document Types" value={documents.filter((d) => d.is_active).length} />
       </div>
 
       <Card
@@ -122,10 +147,7 @@ export default function DocumentsApprovalPage() {
             <Button
               variant="success"
               icon={Check}
-              onClick={() => {
-                toast.success("All documents verified");
-                setOpen(null);
-              }}
+              onClick={verifyAll}
             >
               Verify All
             </Button>
@@ -134,7 +156,7 @@ export default function DocumentsApprovalPage() {
       >
         {open && (
           <ul className="divide-y divide-gray-100">
-            {DEMO_DOCUMENT_TYPES.filter((d) => d.is_active).map((d, i) => {
+            {documents.filter((d) => d.is_active).map((d, i) => {
               const received = i < (open.documents_received ?? 0);
               return (
                 <li key={d.id} className="flex items-center gap-3 py-3">
@@ -155,14 +177,14 @@ export default function DocumentsApprovalPage() {
                         <Button
                           variant="success"
                           icon={Check}
-                          onClick={() => toast.success(`${d.name} verified`)}
+                          onClick={() => markDocument(d.id, "verified")}
                         >
                           Verify
                         </Button>
                         <Button
                           variant="danger"
                           icon={X}
-                          onClick={() => toast.success(`${d.name} sent back`)}
+                          onClick={() => markDocument(d.id, "rejected")}
                         >
                           Reject
                         </Button>

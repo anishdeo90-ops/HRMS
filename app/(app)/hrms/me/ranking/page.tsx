@@ -3,13 +3,26 @@
 import { useState } from "react";
 import { Trophy } from "lucide-react";
 import { Badge, Card, DataTable, StatCard, Toolbar, type Column } from "@/components/hrms/ui";
-import {
-  DEMO_MY_RANKING,
-  DEMO_RANKING_CRITERIA,
-  DEMO_ME,
-  type MyRankingRow,
-} from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtAggregate, fmtPercent } from "@/lib/hrms/format";
+
+interface MyRankingRow {
+  id: string;
+  employee_code: string;
+  employee_name: string;
+  quarter: string;
+  rank: number;
+  cohort_size: number;
+  scores: Record<string, number>;
+  overall_percentage: number;
+  overall_score: number;
+}
+
+const RANKING_CRITERIA = [
+  { key: "delivery", label: "Delivery", weightage: 25 },
+  { key: "quality", label: "Quality", weightage: 25 },
+  { key: "ownership", label: "Ownership", weightage: 25 },
+];
 
 /**
  * `docs/hrms/04-me.md §4`.
@@ -20,16 +33,17 @@ import { EMPTY, fmtAggregate, fmtPercent } from "@/lib/hrms/format";
  */
 export default function MyRankingPage() {
   const [quarter, setQuarter] = useState("");
+  const [ranking] = useHrmsData<MyRankingRow[]>("/api/hrms/performance/ranking", []);
 
-  const rows = DEMO_MY_RANKING.filter((r) => !quarter || r.quarter === quarter);
-  const latest = DEMO_MY_RANKING[0];
+  const rows = ranking.filter((r) => !quarter || r.quarter === quarter);
+  const latest = ranking[0];
 
   const columns: Column<MyRankingRow>[] = [
-    { key: "code", header: "Employee Code", render: () => DEMO_ME.employee_code },
+    { key: "code", header: "Employee Code", render: (r) => r.employee_code },
     {
       key: "name",
       header: "Employee Name",
-      render: () => <span className="font-medium text-gray-900">{DEMO_ME.name}</span>,
+      render: (r) => <span className="font-medium text-gray-900">{r.employee_name}</span>,
     },
     { key: "quarter", header: "Quarter", render: (r) => r.quarter },
     {
@@ -42,7 +56,7 @@ export default function MyRankingPage() {
         </Badge>
       ),
     },
-    ...DEMO_RANKING_CRITERIA.map<Column<MyRankingRow>>((c) => ({
+    ...RANKING_CRITERIA.map<Column<MyRankingRow>>((c) => ({
       key: c.key,
       header: c.label,
       align: "center",
@@ -84,7 +98,7 @@ export default function MyRankingPage() {
           label="Overall Percentage"
           value={latest ? fmtPercent(latest.overall_percentage) : EMPTY}
         />
-        <StatCard label="Quarters Rated" value={DEMO_MY_RANKING.length} />
+        <StatCard label="Quarters Rated" value={ranking.length} />
       </div>
 
       <Card title="Your Ranking" subtitle="Rated quarterly against your department cohort" bodyClassName="p-4">
@@ -96,7 +110,7 @@ export default function MyRankingPage() {
             className="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-700"
           >
             <option value="">All quarters</option>
-            {DEMO_MY_RANKING.map((r) => (
+            {ranking.map((r) => (
               <option key={r.id} value={r.quarter}>
                 {r.quarter}
               </option>

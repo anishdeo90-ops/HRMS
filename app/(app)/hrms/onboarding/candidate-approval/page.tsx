@@ -17,10 +17,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_ONBOARDING_CASES } from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, fmtLacs } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
 import type { OnboardingCase } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/14-onboarding.md §3` — the first ATS crossing.
@@ -34,17 +34,18 @@ export default function CandidateApprovalPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState<OnboardingCase | null>(null);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
+  const cases = useApiData<OnboardingCase[]>("/api/hrms/onboarding", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ONBOARDING_CASES.filter((c) => {
+    return cases.filter((c) => {
       if (c.status !== "pending_approval") return false;
       if (!q) return true;
       return [c.candidate_name, c.case_code, c.designation].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search]);
+  }, [cases, search]);
 
   const overBudget = (c: OnboardingCase) =>
     c.offered_annual_salary_paise != null &&
@@ -138,9 +139,22 @@ export default function CandidateApprovalPage() {
     },
   ];
 
-  const flagged = DEMO_ONBOARDING_CASES.filter(
+  const flagged = cases.filter(
     (c) => c.status === "pending_approval" && overBudget(c)
   ).length;
+
+  async function submitDecision() {
+    if (!open || !decision) return;
+    const res = await fetch(`/api/hrms/onboarding/${open.id}/actions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: decision, candidate_name: open.candidate_name, email: open.email, mobile: open.mobile }),
+    });
+    if (!res.ok) return toast.error("Could not update onboarding case");
+    toast.success(decision === "approve" ? `${open.candidate_name}'s offer approved` : `${open.candidate_name}'s offer rejected`);
+    setOpen(null);
+    setDecision(null);
+  }
 
   return (
     <div className="space-y-5">
@@ -195,15 +209,7 @@ export default function CandidateApprovalPage() {
             </Button>
             <Button
               variant={decision === "approve" ? "success" : "danger"}
-              onClick={() => {
-                toast.success(
-                  decision === "approve"
-                    ? `${open?.candidate_name}'s offer approved`
-                    : `${open?.candidate_name}'s offer rejected — the ATS candidate is reopened`
-                );
-                setOpen(null);
-                setDecision(null);
-              }}
+              onClick={submitDecision}
             >
               {decision === "approve" ? "Approve" : "Reject"}
             </Button>

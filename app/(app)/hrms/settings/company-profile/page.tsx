@@ -5,10 +5,12 @@ import toast from "react-hot-toast";
 import { ImagePlus } from "lucide-react";
 import { Button, Card, FormField, FormGrid, Input, Select, Textarea } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 
 /** `docs/hrms/07-settings.md §1` — one record per organisation. */
 export default function CompanyProfilePage() {
   const [dirty, setDirty] = useState(false);
+  const [profile, reload] = useHrmsData<Record<string, string>>("/api/hrms/settings/company-profile", {});
   const touch = () => setDirty(true);
 
   return (
@@ -23,7 +25,12 @@ export default function CompanyProfilePage() {
           <Button
             variant="primary"
             disabled={!dirty}
-            onClick={() => {
+            onClick={async () => {
+              await saveHrmsData("/api/hrms/settings/company-profile", {
+                ...profile,
+                saved_at: new Date().toISOString(),
+              });
+              await reload();
               toast.success("Company profile saved");
               setDirty(false);
             }}
@@ -37,10 +44,10 @@ export default function CompanyProfilePage() {
         <Card title="Identity">
           <FormGrid columns={2}>
             <FormField label="Legal Name" required>
-              <Input defaultValue="HireRabbits Technologies Private Limited" onChange={touch} />
+              <Input defaultValue={profile.legal_name ?? "HireRabbits Technologies Private Limited"} onChange={touch} />
             </FormField>
             <FormField label="Display Name" required hint="Shown in the app and on generated letters">
-              <Input defaultValue="HireRabbits" onChange={touch} />
+              <Input defaultValue={profile.display_name ?? "HireRabbits"} onChange={touch} />
             </FormField>
             <FormField
               label="Company Slug"

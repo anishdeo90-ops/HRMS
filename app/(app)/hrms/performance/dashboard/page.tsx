@@ -13,45 +13,42 @@ import {
 } from "recharts";
 import { Award, Target, TrendingUp, Users } from "lucide-react";
 import { Badge, Card, EmptyState, StatCard } from "@/components/hrms/ui";
-import {
-  DEMO_APPRAISALS,
-  DEMO_CYCLES,
-  DEMO_GOALS,
-  DEMO_RANKING,
-} from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtAggregate, fmtDate, fmtPercent } from "@/lib/hrms/format";
 import { CHART } from "@/lib/hrms/theme";
 import { requestTone, titleCase } from "@/lib/hrms/status";
+import type { Appraisal, Goal, PerformanceCycle, RankingEntry } from "@/lib/hrms/types";
 
 /** `docs/hrms/13-performance-review.md §1`. */
 export default function PerformanceDashboardPage() {
-  const activeCycle = DEMO_CYCLES.find((c) => c.status === "active");
+  const [data] = useHrmsData<{ cycles: PerformanceCycle[]; goals: Goal[]; appraisals: Appraisal[]; ranking: RankingEntry[] }>("/api/hrms/performance", { cycles: [], goals: [], appraisals: [], ranking: [] });
+  const activeCycle = data.cycles.find((c) => c.status === "active");
 
   const stats = useMemo(() => {
-    const completed = DEMO_APPRAISALS.filter((a) => a.status === "completed");
+    const completed = data.appraisals.filter((a) => a.status === "completed");
     const rated = completed.filter((a) => a.final_rating != null);
     return {
-      goals: DEMO_GOALS.length,
-      goalsCompleted: DEMO_GOALS.filter((g) => g.status === "completed").length,
+      goals: data.goals.length,
+      goalsCompleted: data.goals.filter((g) => g.status === "completed").length,
       averageProgress: Math.round(
-        DEMO_GOALS.reduce((s, g) => s + g.progress_percent, 0) / (DEMO_GOALS.length || 1)
+        data.goals.reduce((s, g) => s + g.progress_percent, 0) / (data.goals.length || 1)
       ),
-      appraisalsDue: DEMO_APPRAISALS.filter((a) => a.status !== "completed").length,
+      appraisalsDue: data.appraisals.filter((a) => a.status !== "completed").length,
       // `—` when nothing has been rated, never a fabricated 0.
       averageRating:
         rated.length === 0
           ? null
           : Math.round((rated.reduce((s, a) => s + (a.final_rating ?? 0), 0) / rated.length) * 10) / 10,
     };
-  }, []);
+  }, [data]);
 
   const statusBreakdown = useMemo(() => {
     const order = ["not_started", "self_review", "manager_review", "hr_review", "completed"];
     return order.map((status) => ({
       status: titleCase(status),
-      count: DEMO_APPRAISALS.filter((a) => a.status === status).length,
+      count: data.appraisals.filter((a) => a.status === status).length,
     }));
-  }, []);
+  }, [data.appraisals]);
 
   return (
     <div className="space-y-5">
@@ -140,11 +137,11 @@ export default function PerformanceDashboardPage() {
           }
           bodyClassName="p-0"
         >
-          {DEMO_RANKING.length === 0 ? (
+          {data.ranking.length === 0 ? (
             <EmptyState title="Nobody rated yet" />
           ) : (
             <ul className="divide-y divide-gray-100">
-              {DEMO_RANKING.slice(0, 5).map((r) => (
+              {data.ranking.slice(0, 5).map((r) => (
                 <li key={r.employee_id} className="flex items-center gap-3 px-5 py-2.5">
                   <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-amber-50 text-xs font-bold text-amber-700">
                     {r.rank}
@@ -162,11 +159,11 @@ export default function PerformanceDashboardPage() {
       </div>
 
       <Card title="Goals At Risk" subtitle="Below half progress with the cycle already running" bodyClassName="p-0">
-        {DEMO_GOALS.filter((g) => g.progress_percent < 50 && g.status !== "completed").length === 0 ? (
+        {data.goals.filter((g) => g.progress_percent < 50 && g.status !== "completed").length === 0 ? (
           <EmptyState title="No goals at risk" />
         ) : (
           <ul className="divide-y divide-gray-100">
-            {DEMO_GOALS.filter((g) => g.progress_percent < 50 && g.status !== "completed").map((g) => (
+            {data.goals.filter((g) => g.progress_percent < 50 && g.status !== "completed").map((g) => (
               <li key={g.id} className="px-5 py-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

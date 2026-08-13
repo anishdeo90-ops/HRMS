@@ -16,8 +16,9 @@ import {
   Toolbar,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_BRANCHES, DEMO_DEPARTMENTS, DEMO_EMPLOYEES, DEMO_SHIFTS } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { fmtDate, initials, todayISO } from "@/lib/hrms/format";
+import type { Employee, Shift } from "@/lib/hrms/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -50,6 +51,8 @@ export default function RosterPage() {
   const [department, setDepartment] = useState("");
   const [search, setSearch] = useState("");
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [roster, reload] = useHrmsData<{ employees: Employee[]; shifts: Shift[]; assignments: { employee_id: string; roster_date: string; shift_id?: string; is_week_off: boolean }[] }>("/api/hrms/settings/roster", { employees: [], shifts: [], assignments: [] });
+  const [options] = useHrmsData<{ branches: { name: string }[]; departments: { name: string }[] }>("/api/hrms/options", { branches: [], departments: [] });
 
   const days = useMemo(() => {
     const out: { iso: string; label: string; weekend: boolean }[] = [];
@@ -67,14 +70,14 @@ export default function RosterPage() {
 
   const employees = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_EMPLOYEES.filter((e) => {
+    return roster.employees.filter((e) => {
       if (e.status === "separated") return false;
       if (branch && e.branch !== branch) return false;
       if (department && e.department !== department) return false;
       if (!q) return true;
       return [e.name, e.employee_code].some((f) => String(f ?? "").toLowerCase().includes(q));
     });
-  }, [search, branch, department]);
+  }, [roster.employees, search, branch, department]);
 
   /** Until the roster table exists, cells fall back to the employee's default shift. */
   function shiftFor(employeeIndex: number, dayIndex: number): string {
@@ -98,7 +101,7 @@ export default function RosterPage() {
       description="Which shift each employee works on each date. Blank cells fall back to their default shift."
       actions={
         <>
-          <Button icon={Copy} onClick={() => toast.success("Last week's roster copied forward")}>
+          <Button icon={Copy} disabled>
             Copy Last Week
           </Button>
           <Button icon={CalendarRange} variant="primary" onClick={() => setBulkOpen(true)}>
@@ -141,13 +144,13 @@ export default function RosterPage() {
             label="All Branches"
             value={branch}
             onChange={setBranch}
-            options={DEMO_BRANCHES.map((b) => ({ value: b.name, label: b.name }))}
+            options={options.branches.map((b) => ({ value: b.name, label: b.name }))}
           />
           <SelectFilter
             label="All Departments"
             value={department}
             onChange={setDepartment}
-            options={DEMO_DEPARTMENTS.map((d) => ({ value: d.name, label: d.name }))}
+            options={options.departments.map((d) => ({ value: d.name, label: d.name }))}
           />
         </Toolbar>
 
@@ -198,7 +201,7 @@ export default function RosterPage() {
                         <td key={d.iso} className={cn("px-2 py-2 text-center", d.weekend && "bg-gray-50/70")}>
                           <button
                             type="button"
-                            onClick={() => toast.success(`${e.name} — ${fmtDate(d.iso)} reassigned`)}
+                            disabled
                             className={cn(
                               "w-full rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-opacity hover:opacity-80",
                               SHIFT_TONE[shift] ?? "border-gray-200 bg-white text-gray-600"
@@ -244,7 +247,20 @@ export default function RosterPage() {
             <Button onClick={() => setBulkOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                const first = employees[0];
+                const shift = roster.shifts.find((s) => s.is_active);
+                if (!first) {
+                  toast.error("No employee matches the current filters");
+                  return;
+                }
+                await saveHrmsData("/api/hrms/settings/roster", {
+                  employee_id: first.id,
+                  shift_id: shift?.id,
+                  roster_date: todayISO(),
+                  is_week_off: !shift,
+                });
+                await reload();
                 toast.success("Roster updated");
                 setBulkOpen(false);
               }}
@@ -258,7 +274,7 @@ export default function RosterPage() {
           <FormField label="Shift" required>
             <Select defaultValue="">
               <option value="">Select</option>
-              {DEMO_SHIFTS.filter((s) => s.is_active).map((s) => (
+              {roster.shifts.filter((s) => s.is_active).map((s) => (
                 <option key={s.id}>{s.name}</option>
               ))}
               <option>Week Off</option>

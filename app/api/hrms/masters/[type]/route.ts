@@ -17,7 +17,19 @@ export async function GET(_req: NextRequest, { params }: { params: { type: strin
   const supabase = await authed();
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data, error } = await supabase.rpc("hrms_master_rows", { master_slug: params.type });
+  if (params.type === "announcement-category" || params.type === "expense-type") {
+    const table = params.type === "announcement-category" ? "announcement_categories" : "expense_types";
+    const { data, error } = await supabase.schema("hrms").from(table).select("id,name,is_active").order("name");
+    if (error) return NextResponse.json({ error: error.message }, { status: status(error) });
+    return NextResponse.json({ data: data ?? [] });
+  }
+
+  const resource = ["announcement-category", "expense-type"].includes(params.type)
+    ? params.type
+    : null;
+  const { data, error } = resource
+    ? await supabase.rpc("hrms_settings_resource", { resource_key: resource })
+    : await supabase.rpc("hrms_master_rows", { master_slug: params.type });
   if (error) return NextResponse.json({ error: error.message }, { status: status(error) });
 
   return NextResponse.json({ data: data ?? [] });
@@ -32,10 +44,32 @@ export async function POST(req: NextRequest, { params }: { params: { type: strin
     return NextResponse.json({ error: "name is required" }, { status: 400 });
   }
 
-  const { data, error } = await supabase.rpc("hrms_save_master", {
-    master_slug: params.type,
-    payload: body,
-  });
+  if (params.type === "announcement-category" || params.type === "expense-type") {
+    const { data: member } = await supabase
+      .from("org_members")
+      .select("org_id")
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    const table = params.type === "announcement-category" ? "announcement_categories" : "expense_types";
+    const { data, error } = await supabase.schema("hrms").from(table).insert({
+      org_id: member?.org_id,
+      name: body.name,
+      is_active: body.is_active ?? true,
+    }).select().single();
+    if (error) return NextResponse.json({ error: error.message }, { status: status(error) });
+    return NextResponse.json({ data });
+  }
+
+  const resource = ["announcement-category", "expense-type"].includes(params.type)
+    ? params.type
+    : null;
+  const { data, error } = resource
+    ? await supabase.rpc("hrms_save_settings_resource", { resource_key: resource, payload: body })
+    : await supabase.rpc("hrms_save_master", {
+        master_slug: params.type,
+        payload: body,
+      });
   if (error) return NextResponse.json({ error: error.message }, { status: status(error) });
 
   return NextResponse.json({ data });
@@ -50,11 +84,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { type: stri
     return NextResponse.json({ error: "id and is_active are required" }, { status: 400 });
   }
 
-  const { data, error } = await supabase.rpc("hrms_set_master_active", {
-    master_slug: params.type,
-    row_id: body.id,
-    active: body.is_active,
-  });
+  const resource = ["announcement-category", "expense-type"].includes(params.type)
+    ? params.type
+    : null;
+  const { data, error } = resource
+    ? await supabase.rpc("hrms_save_settings_resource", {
+        resource_key: resource,
+        payload: { id: body.id, is_active: body.is_active },
+      })
+    : await supabase.rpc("hrms_set_master_active", {
+        master_slug: params.type,
+        row_id: body.id,
+        active: body.is_active,
+      });
   if (error) return NextResponse.json({ error: error.message }, { status: status(error) });
 
   return NextResponse.json({ data });

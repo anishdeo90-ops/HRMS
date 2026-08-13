@@ -18,10 +18,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_CYCLES, DEMO_EMPLOYEES, DEMO_GOALS, DEMO_ME } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDate, fmtPercent, todayISO } from "@/lib/hrms/format";
 import { requestTone, titleCase } from "@/lib/hrms/status";
-import type { Goal } from "@/lib/hrms/types";
+import type { Employee, Goal, PerformanceCycle } from "@/lib/hrms/types";
 
 /**
  * `docs/hrms/13-performance-review.md §2` — My Goals, Team Goals, Goal Approval.
@@ -35,11 +35,13 @@ export default function GoalsPage() {
   const [cycle, setCycle] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [goals, reload] = useHrmsData<Goal[]>("/api/hrms/performance/goals", []);
+  const [cycles] = useHrmsData<PerformanceCycle[]>("/api/hrms/performance/cycles", []);
+  const [employees] = useHrmsData<Employee[]>("/api/hrms/employees", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_GOALS.filter((g) => {
-      if (view === "mine" && g.employee_id !== DEMO_ME.id) return false;
+    return goals.filter((g) => {
       if (view === "approval" && g.status !== "pending") return false;
       if (cycle && g.cycle_name !== cycle) return false;
       if (!q) return true;
@@ -47,7 +49,7 @@ export default function GoalsPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [view, search, cycle]);
+  }, [goals, view, search, cycle]);
 
   const columns: Column<Goal>[] = [
     { key: "code", header: "Goal Code", render: (g) => <span className="font-medium text-gray-900">{g.goal_code}</span> },
@@ -96,10 +98,10 @@ export default function GoalsPage() {
             align: "right",
             render: (g: Goal) => (
               <div className="flex justify-end gap-1">
-                <Button variant="success" icon={Check} onClick={() => toast.success(`${g.goal_code} approved`)}>
+                <Button variant="success" icon={Check} disabled>
                   Approve
                 </Button>
-                <Button variant="danger" icon={X} onClick={() => toast.success(`${g.goal_code} rejected`)}>
+                <Button variant="danger" icon={X} disabled>
                   Reject
                 </Button>
               </div>
@@ -122,9 +124,9 @@ export default function GoalsPage() {
     >
       <SubTabs
         tabs={[
-          { key: "mine", label: "My Goals", count: DEMO_GOALS.filter((g) => g.employee_id === DEMO_ME.id).length },
-          { key: "team", label: "Team Goals", count: DEMO_GOALS.length },
-          { key: "approval", label: "Goal Approval", count: DEMO_GOALS.filter((g) => g.status === "pending").length },
+          { key: "mine", label: "My Goals", count: goals.length },
+          { key: "team", label: "Team Goals", count: goals.length },
+          { key: "approval", label: "Goal Approval", count: goals.filter((g) => g.status === "pending").length },
         ]}
         value={view}
         onChange={(v) => {
@@ -150,7 +152,7 @@ export default function GoalsPage() {
           className="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-700"
         >
           <option value="">All cycles</option>
-          {DEMO_CYCLES.map((c) => (
+          {cycles.map((c) => (
             <option key={c.id} value={c.cycle_name}>
               {c.cycle_name}
             </option>
@@ -167,22 +169,14 @@ export default function GoalsPage() {
             <Button
               variant="success"
               icon={Check}
-              disabled={selected.length === 0}
-              onClick={() => {
-                toast.success(`${selected.length} goals approved`);
-                setSelected([]);
-              }}
+              disabled
             >
               Approve
             </Button>
             <Button
               variant="danger"
               icon={X}
-              disabled={selected.length === 0}
-              onClick={() => {
-                toast.success(`${selected.length} goals rejected`);
-                setSelected([]);
-              }}
+              disabled
             >
               Reject
             </Button>
@@ -211,7 +205,16 @@ export default function GoalsPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/performance/goals", {
+                  title: "New Goal",
+                  employee_id: employees[0]?.id,
+                  cycle_name: cycles.find((c) => c.status === "active")?.cycle_name,
+                  weightage: 25,
+                  target: "Target",
+                  due_date: todayISO(),
+                });
+                await reload();
                 toast.success("Goal submitted for approval");
                 setAddOpen(false);
               }}
@@ -226,8 +229,8 @@ export default function GoalsPage() {
             <Input placeholder="e.g. Reduce time-to-fill to under 21 days" />
           </FormField>
           <FormField label="Employee" required>
-            <Select defaultValue={DEMO_ME.name}>
-              {DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e) => (
+            <Select defaultValue={employees[0]?.name ?? ""}>
+              {employees.filter((e) => e.status !== "separated").map((e) => (
                 <option key={e.id}>{e.name}</option>
               ))}
             </Select>
@@ -235,7 +238,7 @@ export default function GoalsPage() {
           <FormField label="Performance Cycle" required>
             <Select defaultValue="">
               <option value="">Select</option>
-              {DEMO_CYCLES.filter((c) => c.status === "active").map((c) => (
+              {cycles.filter((c) => c.status === "active").map((c) => (
                 <option key={c.id}>{c.cycle_name}</option>
               ))}
             </Select>

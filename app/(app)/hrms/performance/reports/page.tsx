@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import toast from "react-hot-toast";
 import { Plus, TrendingDown, TrendingUp } from "lucide-react";
 import {
   Badge,
@@ -13,7 +12,7 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_DEPARTMENTS, DEMO_RANKING, DEMO_RANKING_CRITERIA } from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtAggregate } from "@/lib/hrms/format";
 import type { RankingEntry } from "@/lib/hrms/types";
 
@@ -55,15 +54,18 @@ const NARRATIVE: Record<string, Partial<TeamRankRow>> = {
     next_level_scope: "Team Lead in 2-3 cycles.",
   },
 };
+const RANKING_CRITERIA = ["Delivery", "Quality", "Ownership", "Collaboration"];
 
 export default function PerformanceReportsPage() {
   const [view, setView] = useState<"employee" | "team">("employee");
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("");
+  const [ranking] = useHrmsData<TeamRankRow[]>("/api/hrms/performance/ranking", []);
+  const [options] = useHrmsData<{ departments: { name: string }[] }>("/api/hrms/options", { departments: [] });
 
   const rows = useMemo<TeamRankRow[]>(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_RANKING.map((r) => ({
+    return ranking.map((r) => ({
       ...r,
       quarter: "Q2 FY 2026-27",
       ...NARRATIVE[r.employee_id],
@@ -74,7 +76,7 @@ export default function PerformanceReportsPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, department]);
+  }, [ranking, search, department]);
 
   const baseColumns: Column<TeamRankRow>[] = [
     {
@@ -106,9 +108,9 @@ export default function PerformanceReportsPage() {
     },
     { key: "department", header: "Department", render: (r) => r.department ?? EMPTY },
     { key: "quarter", header: "Quarter", render: (r) => r.quarter },
-    ...DEMO_RANKING_CRITERIA.slice(0, 4).map<Column<TeamRankRow>>((c) => ({
-      key: c.key,
-      header: c.label,
+    ...RANKING_CRITERIA.map<Column<TeamRankRow>>((label) => ({
+      key: label,
+      header: label,
       align: "center",
       render: () => fmtAggregate(4, " / 5"),
     })),
@@ -169,7 +171,7 @@ export default function PerformanceReportsPage() {
       header: "Actions",
       align: "right",
       render: (r) => (
-        <Button variant="ghost" onClick={() => toast.success(`${r.employee_name}'s rank opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -183,7 +185,7 @@ export default function PerformanceReportsPage() {
       bodyClassName="p-4"
       actions={
         view === "team" ? (
-          <Button icon={Plus} variant="primary" onClick={() => toast.success("Add Team Rank opened")}>
+          <Button icon={Plus} variant="primary" disabled>
             Add Team Rank
           </Button>
         ) : undefined
@@ -212,7 +214,7 @@ export default function PerformanceReportsPage() {
           label="All Departments"
           value={department}
           onChange={setDepartment}
-          options={DEMO_DEPARTMENTS.map((d) => ({ value: d.name, label: d.name }))}
+          options={options.departments.map((d) => ({ value: d.name, label: d.name }))}
         />
       </Toolbar>
 

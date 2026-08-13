@@ -14,7 +14,7 @@ import {
   Toggle,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_BRANCHES, DEMO_DEPARTMENTS, DEMO_EMPLOYMENT_TYPES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { fmtLimit } from "@/lib/hrms/format";
 
 /**
@@ -42,6 +42,8 @@ interface LimitRule {
 
 export default function GeneralSettingsPage() {
   const [dirty, setDirty] = useState(false);
+  const [options] = useHrmsData<{ branches: { name: string }[]; departments: { name: string }[]; employment_types: { name: string }[] }>("/api/hrms/options", { branches: [], departments: [], employment_types: [] });
+  const [settings, reload] = useHrmsData<Record<string, unknown>>("/api/hrms/settings/general", {});
   const [attendanceMode, setAttendanceMode] = useState<"working_hours_only" | "strict_shift_timing">(
     "working_hours_only"
   );
@@ -57,9 +59,9 @@ export default function GeneralSettingsPage() {
   const touch = () => setDirty(true);
 
   const scopeOptions = (scope: LimitRule["scope"]) => {
-    if (scope === "branch") return DEMO_BRANCHES.map((b) => b.name);
-    if (scope === "department") return DEMO_DEPARTMENTS.map((d) => d.name);
-    if (scope === "employment_type") return DEMO_EMPLOYMENT_TYPES.map((t) => t.name);
+    if (scope === "branch") return options.branches.map((b) => b.name);
+    if (scope === "department") return options.departments.map((d) => d.name);
+    if (scope === "employment_type") return options.employment_types.map((t) => t.name);
     return ["All employees"];
   };
 
@@ -75,7 +77,16 @@ export default function GeneralSettingsPage() {
           <Button
             variant="primary"
             disabled={!dirty}
-            onClick={() => {
+            onClick={async () => {
+              await saveHrmsData("/api/hrms/settings/general", {
+                ...settings,
+                attendance_mode: attendanceMode,
+                allow_backdated: allowBackdated,
+                require_reason: requireReason,
+                auto_escalate: autoEscalate,
+                regularization_rules: rules,
+              });
+              await reload();
               toast.success("General settings saved");
               setDirty(false);
             }}
@@ -149,7 +160,7 @@ export default function GeneralSettingsPage() {
                   {
                     key: Math.random().toString(36).slice(2),
                     scope: "department",
-                    scopeValue: DEMO_DEPARTMENTS[0].name,
+                    scopeValue: options.departments[0]?.name ?? "All employees",
                     perMonth: 3,
                     withinDays: 7,
                   },

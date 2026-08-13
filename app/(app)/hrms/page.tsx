@@ -30,16 +30,10 @@ import {
 } from "lucide-react";
 import { Badge, Button, Card, EmptyState, StatCard } from "@/components/hrms/ui";
 import { useHrmsProfile } from "@/components/hrms/hrms-context";
-import {
-  DEMO_ANNOUNCEMENTS,
-  DEMO_DASHBOARD,
-  DEMO_EMPLOYEES,
-  DEMO_HOLIDAYS,
-  DEMO_ME,
-  DEMO_ONBOARDING_CASES,
-} from "@/lib/hrms/demo-data";
 import { EMPTY, fmtAggregate, fmtDate, fmtLacs, fmtText } from "@/lib/hrms/format";
 import { CHART, TINT } from "@/lib/hrms/theme";
+import { useApiData } from "@/lib/hrms/use-api-data";
+import type { Announcement, Employee, Holiday, OnboardingCase } from "@/lib/hrms/types";
 
 const BRAND = CHART.primary;
 const CONTRAST = CHART.secondary;
@@ -57,8 +51,18 @@ export default function HrmsDashboardPage() {
   const profile = useHrmsProfile();
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
   const [department, setDepartment] = useState("");
+  const api = useApiData<{
+    dashboard: any;
+    employees: Employee[];
+    onboarding: OnboardingCase[];
+    announcements: Announcement[];
+    me: Employee | null;
+  }>("/api/hrms/dashboard", { dashboard: {}, employees: [], onboarding: [], announcements: [], me: null });
 
-  const d = DEMO_DASHBOARD;
+  const d = api.dashboard;
+  const employees = api.employees;
+  const me = api.me;
+  const announcements = api.announcements;
 
   /**
    * Aggregates that have no denominator render `—`, never `0`. The reference
@@ -66,8 +70,8 @@ export default function HrmsDashboardPage() {
    * dressed up as a real one (`01-dashboard.md §3`).
    */
   const aggregates = useMemo(() => {
-    const withDob = DEMO_EMPLOYEES.filter((e) => e.date_of_birth);
-    const withDoj = DEMO_EMPLOYEES.filter((e) => e.date_of_joining);
+    const withDob = employees.filter((e) => e.date_of_birth);
+    const withDoj = employees.filter((e) => e.date_of_joining);
     const years = (iso: string) =>
       (Date.now() - new Date(iso).getTime()) / (365.25 * 24 * 3600 * 1000);
 
@@ -80,11 +84,11 @@ export default function HrmsDashboardPage() {
       // No prior-experience rows in the demo set — so this is genuinely unknown.
       averageExperience: null as number | null,
     };
-  }, []);
+  }, [employees]);
 
   const genderRatio = useMemo(() => {
     const counts = { Female: 0, Male: 0, Unspecified: 0 };
-    for (const e of DEMO_EMPLOYEES) {
+    for (const e of employees) {
       if (e.gender === "Female") counts.Female += 1;
       else if (e.gender === "Male") counts.Male += 1;
       // A row with no gender gets its own slice rather than being dropped.
@@ -95,7 +99,7 @@ export default function HrmsDashboardPage() {
       { name: "Male", value: counts.Male, fill: CONTRAST },
       { name: "Unspecified", value: counts.Unspecified, fill: GRAY },
     ].filter((s) => s.value > 0);
-  }, []);
+  }, [employees]);
 
   const hiringTrend = useMemo(
     () =>
@@ -111,24 +115,25 @@ export default function HrmsDashboardPage() {
 
   const upcomingHolidays = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
-    return DEMO_HOLIDAYS.filter((h) => h.is_active && h.holiday_date >= today)
+    return ((d.holidays ?? []) as Holiday[])
+      .filter((h) => h.is_active && h.holiday_date >= today)
       .sort((a, b) => a.holiday_date.localeCompare(b.holiday_date))
       .slice(0, 4);
-  }, []);
+  }, [d.holidays]);
 
   const upcomingJoinees = useMemo(
     () =>
-      DEMO_ONBOARDING_CASES.filter(
+      api.onboarding.filter(
         (c) => c.proposed_doj && !c.actual_doj && c.status !== "offer_declined" && c.status !== "rejected"
       )
         .sort((a, b) => (a.proposed_doj ?? "").localeCompare(b.proposed_doj ?? ""))
         .slice(0, 4),
-    []
+    [api.onboarding]
   );
 
   const departments = useMemo(
-    () => Array.from(new Set(DEMO_EMPLOYEES.map((e) => e.department).filter(Boolean))) as string[],
-    []
+    () => Array.from(new Set(employees.map((e) => e.department).filter(Boolean))) as string[],
+    [employees]
   );
 
   return (
@@ -144,19 +149,19 @@ export default function HrmsDashboardPage() {
             <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <BriefcaseBusiness size={14} className="text-brand-300" />
-                <span>{fmtText(DEMO_ME.designation)}</span>
+                <span>{fmtText(me?.designation)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users size={14} className="text-brand-300" />
-                <span>{fmtText(DEMO_ME.employee_code)}</span>
+                <span>{fmtText(me?.employee_code)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <UserPlus size={14} className="text-brand-300" />
-                <span>{fmtText(DEMO_ME.reporting_manager)}</span>
+                <span>{fmtText(me?.reporting_manager)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CalendarDays size={14} className="text-brand-300" />
-                <span>{fmtDate(DEMO_ME.date_of_joining)}</span>
+                <span>{fmtDate(me?.date_of_joining)}</span>
               </div>
             </dl>
           </div>
@@ -186,8 +191,8 @@ export default function HrmsDashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             label="Total Employees"
-            value={d.headcount}
-            hint={`+${d.headcount_change} vs last quarter`}
+            value={d.headcount ?? 0}
+            hint={`+${d.headcount_change ?? 0} vs last quarter`}
             icon={Users}
             href="/hrms/team/directory"
           />
@@ -214,14 +219,14 @@ export default function HrmsDashboardPage() {
           />
           <StatCard
             label="Attrition Rate"
-            value={`${d.attrition_percent}%`}
+            value={`${d.attrition_percent ?? 0}%`}
             hint="Exits ÷ headcount, rolling 12 months"
             icon={TrendingDown}
             tint={TINT.bad}
           />
           <StatCard
             label="Pending Approvals"
-            value={d.pending_approvals}
+            value={d.pending_approvals ?? 0}
             hint="Across every request type"
             icon={FileText}
             tint={TINT.brand}
@@ -297,10 +302,10 @@ export default function HrmsDashboardPage() {
           <Card title="Today's Team Insights" subtitle={fmtDate(new Date())}>
             <dl className="grid grid-cols-2 gap-3">
               {[
-                { label: "Total Available", value: d.present_today + d.on_leave_today },
-                { label: "Present", value: d.present_today },
-                { label: "Absent", value: d.absent_today },
-                { label: "Leave", value: d.on_leave_today },
+                { label: "Total Available", value: (d.present_today ?? 0) + (d.on_leave_today ?? 0) },
+                { label: "Present", value: d.present_today ?? 0 },
+                { label: "Absent", value: d.absent_today ?? 0 },
+                { label: "Leave", value: d.on_leave_today ?? 0 },
                 { label: "WFH", value: 4 },
                 { label: "On Duty", value: 2 },
               ].map((m) => (
@@ -376,11 +381,11 @@ export default function HrmsDashboardPage() {
           </Card>
 
           <Card title="Upcoming Birthdays" bodyClassName="p-0">
-            {d.birthdays.length === 0 ? (
+            {(d.birthdays ?? []).length === 0 ? (
               <EmptyState title="No upcoming birthdays" icon={CakeSlice} />
             ) : (
               <ul className="divide-y divide-gray-100">
-                {d.birthdays.map((b) => (
+                {(d.birthdays ?? []).map((b: any) => (
                   <li key={b.id} className="flex items-center justify-between gap-3 px-5 py-2.5">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-gray-900">{b.name}</p>
@@ -396,11 +401,11 @@ export default function HrmsDashboardPage() {
           </Card>
 
           <Card title="Upcoming Work Anniversaries" bodyClassName="p-0">
-            {d.anniversaries.length === 0 ? (
+            {(d.anniversaries ?? []).length === 0 ? (
               <EmptyState title="No upcoming work anniversaries" icon={PartyPopper} />
             ) : (
               <ul className="divide-y divide-gray-100">
-                {d.anniversaries.map((a) => (
+                {(d.anniversaries ?? []).map((a: any) => (
                   <li key={a.id} className="flex items-center justify-between gap-3 px-5 py-2.5">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-gray-900">{a.name}</p>
@@ -452,15 +457,15 @@ export default function HrmsDashboardPage() {
               </Link>
             }
           >
-            <p className="text-3xl font-bold text-gray-900">{d.open_positions}</p>
+            <p className="text-3xl font-bold text-gray-900">{d.open_positions ?? 0}</p>
             <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
               <div>
                 <dt className="text-xs text-gray-500">New This Week</dt>
-                <dd className="font-semibold text-gray-900">{d.new_this_week}</dd>
+                <dd className="font-semibold text-gray-900">{d.new_this_week ?? 0}</dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">On Hold</dt>
-                <dd className="font-semibold text-gray-900">{d.on_hold}</dd>
+                <dd className="font-semibold text-gray-900">{d.on_hold ?? 0}</dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Highest Budget</dt>
@@ -468,7 +473,7 @@ export default function HrmsDashboardPage() {
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Current Strength</dt>
-                <dd className="font-semibold text-gray-900">{d.headcount}</dd>
+                <dd className="font-semibold text-gray-900">{d.headcount ?? 0}</dd>
               </div>
             </dl>
           </Card>
@@ -476,7 +481,7 @@ export default function HrmsDashboardPage() {
           <Card title="Headcount by Department">
             <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={d.headcount_by_department} layout="vertical" margin={{ left: 8 }}>
+                <BarChart data={d.headcount_by_department ?? []} layout="vertical" margin={{ left: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} horizontal={false} />
                   <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} stroke={CHART.axis} />
                   <YAxis
@@ -506,11 +511,11 @@ export default function HrmsDashboardPage() {
           }
           bodyClassName="p-0"
         >
-          {DEMO_ANNOUNCEMENTS.length === 0 ? (
+          {announcements.length === 0 ? (
             <EmptyState title="No announcements" />
           ) : (
             <ul className="divide-y divide-gray-100">
-              {DEMO_ANNOUNCEMENTS.slice(0, 5).map((a) => (
+              {announcements.slice(0, 5).map((a) => (
                 <li key={a.id} className="px-5 py-3">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium text-gray-900">{a.title}</p>
@@ -533,19 +538,19 @@ export default function HrmsDashboardPage() {
               <Link href="/hrms/team/approvals" className="text-gray-600 hover:text-brand-600">
                 Approvals pending
               </Link>
-              <span className="font-semibold text-gray-900">{d.pending_approvals}</span>
+              <span className="font-semibold text-gray-900">{d.pending_approvals ?? 0}</span>
             </li>
             <li className="flex items-center justify-between">
               <Link href="/hrms/onboarding/documents-approval" className="text-gray-600 hover:text-brand-600">
                 Documents to verify
               </Link>
-              <span className="font-semibold text-gray-900">{d.documents_pending}</span>
+              <span className="font-semibold text-gray-900">{d.documents_pending ?? 0}</span>
             </li>
             <li className="flex items-center justify-between">
               <Link href="/hrms/team/directory" className="text-gray-600 hover:text-brand-600">
                 Probation ending soon
               </Link>
-              <span className="font-semibold text-gray-900">{d.probation_ending}</span>
+              <span className="font-semibold text-gray-900">{d.probation_ending ?? 0}</span>
             </li>
             <li className="flex items-center justify-between">
               <Link href="/hrms/team/separation" className="text-gray-600 hover:text-brand-600">

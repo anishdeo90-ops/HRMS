@@ -17,8 +17,8 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_DOCUMENT_TYPES, DEMO_ONBOARDING_FORMS } from "@/lib/hrms/demo-data";
-import type { OnboardingFormMaster } from "@/lib/hrms/types";
+import type { DocumentTypeMaster, OnboardingFormMaster } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/14-onboarding.md §2.2`.
@@ -31,18 +31,31 @@ import type { OnboardingFormMaster } from "@/lib/hrms/types";
 export default function OnboardingFormMasterPage() {
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const documents = useApiData<DocumentTypeMaster[]>("/api/hrms/onboarding/documents", []);
+  const forms = useApiData<OnboardingFormMaster[]>("/api/hrms/onboarding/forms", []);
   const [enabled, setEnabled] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(DEMO_DOCUMENT_TYPES.map((d) => [d.id, d.is_mandatory]))
+    ({})
   );
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ONBOARDING_FORMS.filter(
+    return forms.filter(
       (f) => !q || [f.form_name, f.applies_to].some((x) => x.toLowerCase().includes(q))
     );
-  }, [search]);
+  }, [forms, search]);
 
   const selectedCount = Object.values(enabled).filter(Boolean).length;
+
+  async function addForm() {
+    const res = await fetch("/api/hrms/onboarding/forms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ form_name: "New Onboarding Form", applies_to: "All", sections: 1, documents_required: selectedCount, is_active: true }),
+    });
+    if (!res.ok) return toast.error("Could not create onboarding form");
+    toast.success("Onboarding form created");
+    setAddOpen(false);
+  }
 
   const columns: Column<OnboardingFormMaster>[] = [
     { key: "name", header: "Form Name", render: (f) => <span className="font-medium text-gray-900">{f.form_name}</span> },
@@ -56,16 +69,6 @@ export default function OnboardingFormMasterPage() {
         <Badge tone={f.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}>
           {f.is_active ? "Active" : "Inactive"}
         </Badge>
-      ),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      align: "right",
-      render: (f) => (
-        <Button variant="ghost" onClick={() => toast.success(`${f.form_name} opened`)}>
-          Edit
-        </Button>
       ),
     },
   ];
@@ -95,17 +98,14 @@ export default function OnboardingFormMasterPage() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         title="Create Onboarding Form"
-        subtitle={`${selectedCount} of ${DEMO_DOCUMENT_TYPES.length} documents selected`}
+        subtitle={`${selectedCount} of ${documents.length} documents selected`}
         width="max-w-3xl"
         footer={
           <>
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success("Onboarding form created");
-                setAddOpen(false);
-              }}
+              onClick={addForm}
             >
               Save Form
             </Button>
@@ -133,7 +133,7 @@ export default function OnboardingFormMasterPage() {
             Toggle which documents this form asks a candidate to upload.
           </p>
           <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200">
-            {DEMO_DOCUMENT_TYPES.filter((d) => d.is_active).map((d) => (
+            {documents.filter((d) => d.is_active).map((d) => (
               <li key={d.id} className="flex items-center gap-3 px-4 py-2.5">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-gray-900">{d.name}</p>

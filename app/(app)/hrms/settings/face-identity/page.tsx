@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import toast from "react-hot-toast";
 import { ScanFace, ShieldAlert, Trash2 } from "lucide-react";
 import {
   Badge,
@@ -14,7 +13,7 @@ import {
   type Column,
 } from "@/components/hrms/ui";
 import SettingsPage from "@/components/hrms/settings-page";
-import { DEMO_BRANCHES, DEMO_EMPLOYEES } from "@/lib/hrms/demo-data";
+import { useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDate, initials } from "@/lib/hrms/format";
 import type { Employee } from "@/lib/hrms/types";
 
@@ -39,18 +38,8 @@ export default function FaceIdentityVaultPage() {
   const [search, setSearch] = useState("");
   const [branch, setBranch] = useState("");
   const [state, setState] = useState("");
-
-  const enrolments = useMemo<Enrolment[]>(
-    () =>
-      DEMO_EMPLOYEES.filter((e) => e.status !== "separated").map((e, i) => ({
-        employee: e,
-        enrolled: i % 4 !== 3,
-        enrolled_on: i % 4 !== 3 ? e.date_of_joining : undefined,
-        consent_given: i % 5 !== 4,
-        device_count: i % 4 !== 3 ? 1 + (i % 2) : 0,
-      })),
-    []
-  );
+  const [enrolments] = useHrmsData<Enrolment[]>("/api/hrms/settings/face-identities", []);
+  const [options] = useHrmsData<{ branches: { name: string }[] }>("/api/hrms/options", { branches: [] });
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -127,7 +116,7 @@ export default function FaceIdentityVaultPage() {
             <Button
               variant="ghost"
               icon={Trash2}
-              onClick={() => toast.success(`${r.employee.name}'s face template deleted`)}
+              disabled
             >
               Delete Template
             </Button>
@@ -135,9 +124,8 @@ export default function FaceIdentityVaultPage() {
             <Button
               variant="primary"
               icon={ScanFace}
-              disabled={!r.consent_given}
+              disabled
               title={!r.consent_given ? "Consent must be recorded before enrolment" : undefined}
-              onClick={() => toast.success(`Enrolment link sent to ${r.employee.name}`)}
             >
               Enrol
             </Button>
@@ -186,7 +174,7 @@ export default function FaceIdentityVaultPage() {
               label="All Branches"
               value={branch}
               onChange={setBranch}
-              options={DEMO_BRANCHES.map((b) => ({ value: b.name, label: b.name }))}
+              options={options.branches.map((b) => ({ value: b.name, label: b.name }))}
             />
             <SelectFilter
               label="All States"

@@ -17,7 +17,7 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import { DEMO_TEMPLATES } from "@/lib/hrms/demo-data";
+import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import type { AppraisalTemplate } from "@/lib/hrms/types";
 
 /**
@@ -51,13 +51,14 @@ export default function AppraisalTemplatesPage() {
   const [questions, setQuestions] = useState<QuestionDraft[]>([
     { key: "q1", text: "", type: "rating_5", weightage: "20", mandatory: true },
   ]);
+  const [templates, reload] = useHrmsData<AppraisalTemplate[]>("/api/hrms/performance/templates", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_TEMPLATES.filter(
+    return templates.filter(
       (t) => !q || [t.template_name, t.template_type].some((f) => f.toLowerCase().includes(q))
     );
-  }, [search]);
+  }, [templates, search]);
 
   const totalWeightage = questions.reduce((s, q) => s + (Number(q.weightage) || 0), 0);
 
@@ -84,7 +85,7 @@ export default function AppraisalTemplatesPage() {
       header: "Actions",
       align: "right",
       render: (t) => (
-        <Button variant="ghost" onClick={() => toast.success(`${t.template_name} opened`)}>
+        <Button variant="ghost" disabled>
           Edit
         </Button>
       ),
@@ -123,7 +124,15 @@ export default function AppraisalTemplatesPage() {
             <Button
               variant="primary"
               disabled={totalWeightage !== 100}
-              onClick={() => {
+              onClick={async () => {
+                await saveHrmsData("/api/hrms/performance/templates", {
+                  template_name: `Template ${templates.length + 1}`,
+                  template_type: "Annual",
+                  sections: 1,
+                  questions: questions.length,
+                  config: { questions },
+                });
+                await reload();
                 toast.success("Template created");
                 setAddOpen(false);
               }}

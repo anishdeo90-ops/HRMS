@@ -13,8 +13,9 @@ import {
   Select,
   Textarea,
 } from "@/components/hrms/ui";
-import { DEMO_EXPENSE_TYPES } from "@/lib/hrms/demo-data";
 import { fmtMoney, todayISO } from "@/lib/hrms/format";
+import type { LookupItem } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/04-me.md §5`.
@@ -50,6 +51,7 @@ export default function AddReimbursementPage() {
   const [expenseName, setExpenseName] = useState("");
   const [notes, setNotes] = useState("");
   const [lines, setLines] = useState<LineDraft[]>([emptyLine()]);
+  const expenseTypes = useApiData<LookupItem[]>("/api/hrms/masters/expense-type", []);
 
   const totalPaise = lines.reduce((sum, l) => sum + Math.round((Number(l.amount) || 0) * 100), 0);
   const valid =
@@ -60,7 +62,22 @@ export default function AddReimbursementPage() {
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
   }
 
-  function submit() {
+  async function submit() {
+    const res = await fetch("/api/hrms/expenses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        notes: [expenseName, notes].filter(Boolean).join("\n"),
+        lines: lines.map((l) => ({
+          expense_date: l.expense_date,
+          expense_type: l.expense_type,
+          amount_paise: Math.round(Number(l.amount) * 100),
+          description: l.description,
+          has_receipt: false,
+        })),
+      }),
+    });
+    if (!res.ok) return toast.error("Could not submit reimbursement claim");
     toast.success("Reimbursement claim submitted for approval");
     router.push("/hrms/me/reimbursement");
   }
@@ -124,7 +141,7 @@ export default function AddReimbursementPage() {
                       className="w-52"
                     >
                       <option value="">Select expense type</option>
-                      {DEMO_EXPENSE_TYPES.filter((t) => t.is_active).map((t) => (
+                      {expenseTypes.filter((t) => t.is_active).map((t) => (
                         <option key={t.id} value={t.name}>
                           {t.name}
                         </option>

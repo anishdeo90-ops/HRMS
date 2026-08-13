@@ -20,15 +20,10 @@ import {
   Toolbar,
   type Column,
 } from "@/components/hrms/ui";
-import {
-  DEMO_ANNOUNCEMENTS,
-  DEMO_ANNOUNCEMENT_CATEGORIES,
-  DEMO_BRANCHES,
-  DEMO_DEPARTMENTS,
-} from "@/lib/hrms/demo-data";
 import { EMPTY, fmtDate, todayISO } from "@/lib/hrms/format";
 import { titleCase } from "@/lib/hrms/status";
-import type { Announcement } from "@/lib/hrms/types";
+import type { Announcement, LookupItem } from "@/lib/hrms/types";
+import { useApiData } from "@/lib/hrms/use-api-data";
 
 /**
  * `docs/hrms/15-more-module.md §2`.
@@ -46,23 +41,38 @@ export default function AnnouncementsPage() {
   const [scope, setScope] = useState<Announcement["audience_scope"]>("organization");
   const [pinned, setPinned] = useState(false);
   const [neverExpires, setNeverExpires] = useState(false);
+  const announcements = useApiData<Announcement[]>("/api/hrms/announcements", []);
+  const categories = useApiData<LookupItem[]>("/api/hrms/masters/announcement-category", []);
+  const branches = useApiData<LookupItem[]>("/api/hrms/masters/branch", []);
+  const departments = useApiData<LookupItem[]>("/api/hrms/masters/department", []);
 
   const today = todayISO();
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return DEMO_ANNOUNCEMENTS.filter((a) => {
+    return announcements.filter((a) => {
       if (category && a.category !== category) return false;
       if (!q) return true;
       return [a.title, a.body, a.category].some((f) =>
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [search, category]);
+  }, [announcements, search, category]);
 
-  const live = DEMO_ANNOUNCEMENTS.filter(
+  const live = announcements.filter(
     (a) => !a.expires_at || a.expires_at.slice(0, 10) >= today
   ).length;
+
+  async function publish() {
+    const res = await fetch("/api/hrms/announcements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Announcement", body: "", category: categories[0]?.name ?? "General", audience_scope: scope, is_pinned: pinned, expires_at: neverExpires ? null : null }),
+    });
+    if (!res.ok) return toast.error("Could not publish announcement");
+    toast.success("Announcement published");
+    setAddOpen(false);
+  }
 
   const columns: Column<Announcement>[] = [
     {
@@ -110,16 +120,6 @@ export default function AnnouncementsPage() {
         );
       },
     },
-    {
-      key: "actions",
-      header: "Actions",
-      align: "right",
-      render: (a) => (
-        <Button variant="ghost" onClick={() => toast.success(`${a.title} opened`)}>
-          Edit
-        </Button>
-      ),
-    },
   ];
 
   return (
@@ -128,12 +128,12 @@ export default function AnnouncementsPage() {
         <StatCard label="Live" value={live} icon={Megaphone} tint="bg-brand-50 text-brand-600" />
         <StatCard
           label="Pinned"
-          value={DEMO_ANNOUNCEMENTS.filter((a) => a.is_pinned).length}
+          value={announcements.filter((a) => a.is_pinned).length}
           tint="bg-amber-50 text-amber-600"
         />
         <StatCard
           label="Expired"
-          value={DEMO_ANNOUNCEMENTS.length - live}
+          value={announcements.length - live}
           tint="bg-gray-100 text-graphite"
         />
       </div>
@@ -162,7 +162,7 @@ export default function AnnouncementsPage() {
             label="All Categories"
             value={category}
             onChange={setCategory}
-            options={DEMO_ANNOUNCEMENT_CATEGORIES.map((c) => ({ value: c.name, label: c.name }))}
+            options={categories.map((c) => ({ value: c.name, label: c.name }))}
           />
         </Toolbar>
 
@@ -179,10 +179,7 @@ export default function AnnouncementsPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
-              onClick={() => {
-                toast.success("Announcement published");
-                setAddOpen(false);
-              }}
+              onClick={publish}
             >
               Publish
             </Button>
@@ -196,7 +193,7 @@ export default function AnnouncementsPage() {
           <FormField label="Category" required>
             <Select defaultValue="">
               <option value="">Select</option>
-              {DEMO_ANNOUNCEMENT_CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c.id}>{c.name}</option>
               ))}
             </Select>
@@ -216,7 +213,7 @@ export default function AnnouncementsPage() {
             <FormField label={titleCase(scope)} required span>
               <Select defaultValue="">
                 <option value="">Select</option>
-                {(scope === "branch" ? DEMO_BRANCHES : DEMO_DEPARTMENTS).map((x) => (
+                {(scope === "branch" ? branches : departments).map((x) => (
                   <option key={x.id}>{x.name}</option>
                 ))}
               </Select>
