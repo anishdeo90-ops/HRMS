@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import * as XLSX from "xlsx";
 import { CalendarClock, ChevronRight, FileSpreadsheet, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button, Card, FormField, FormGrid, Input, Modal, Select } from "@/components/hrms/ui";
@@ -22,7 +23,40 @@ const GROUPS: { title: string; icon: LucideIcon; tint: string; reports: ReportDe
 
 export default function TeamReportsPage() {
   const [open, setOpen] = useState<ReportDef | null>(null);
+  const [running, setRunning] = useState(false);
+  const [filters, setFilters] = useState({ from_date: todayISO(), to_date: todayISO(), branch: "", department: "", format: "xlsx" });
   const { data } = useHrmsApi<{ branches: LookupItem[]; departments: LookupItem[] }>("/api/hrms/team-reports", { branches: [], departments: [] });
+
+  async function runReport() {
+    if (!open) return;
+    setRunning(true);
+    try {
+      const res = await fetch("/api/hrms/team-reports", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ report: open.key, ...filters }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Report failed");
+      const rows = json.data.rows as Record<string, unknown>[];
+      const sheet = XLSX.utils.json_to_sheet(rows);
+      if (filters.format === "csv") {
+        const url = URL.createObjectURL(new Blob([XLSX.utils.sheet_to_csv(sheet)], { type: "text/csv;charset=utf-8" }));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = json.data.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const book = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(book, sheet, "Report");
+        XLSX.writeFile(book, json.data.filename);
+      }
+      setOpen(null);
+    } finally {
+      setRunning(false);
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -33,13 +67,13 @@ export default function TeamReportsPage() {
           </Card>
         ))}
       </div>
-      <Modal open={!!open} onClose={() => setOpen(null)} title={open?.name ?? ""} subtitle={`Reads from ${open?.source ?? ""}`} footer={<><Button onClick={() => setOpen(null)}>Cancel</Button><Button variant="primary" disabled>Run Report</Button></>}>
+      <Modal open={!!open} onClose={() => setOpen(null)} title={open?.name ?? ""} subtitle={`Reads from ${open?.source ?? ""}`} footer={<><Button onClick={() => setOpen(null)}>Cancel</Button><Button variant="primary" onClick={runReport} disabled={running}>{running ? "Running..." : "Run Report"}</Button></>}>
         <FormGrid columns={2}>
-          <FormField label="From Date" required><Input type="date" defaultValue={todayISO()} /></FormField>
-          <FormField label="To Date" required><Input type="date" defaultValue={todayISO()} /></FormField>
-          <FormField label="Branch"><Select defaultValue=""><option value="">All branches</option>{data.branches.map((b) => <option key={b.id}>{b.name}</option>)}</Select></FormField>
-          <FormField label="Department"><Select defaultValue=""><option value="">All departments</option>{data.departments.map((d) => <option key={d.id}>{d.name}</option>)}</Select></FormField>
-          <FormField label="Format" span><Select defaultValue="xlsx"><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV</option></Select></FormField>
+          <FormField label="From Date" required><Input type="date" value={filters.from_date} onChange={(e) => setFilters((f) => ({ ...f, from_date: e.target.value }))} /></FormField>
+          <FormField label="To Date" required><Input type="date" value={filters.to_date} onChange={(e) => setFilters((f) => ({ ...f, to_date: e.target.value }))} /></FormField>
+          <FormField label="Branch"><Select value={filters.branch} onChange={(e) => setFilters((f) => ({ ...f, branch: e.target.value }))}><option value="">All branches</option>{data.branches.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}</Select></FormField>
+          <FormField label="Department"><Select value={filters.department} onChange={(e) => setFilters((f) => ({ ...f, department: e.target.value }))}><option value="">All departments</option>{data.departments.map((d) => <option key={d.id} value={d.name}>{d.name}</option>)}</Select></FormField>
+          <FormField label="Format" span><Select value={filters.format} onChange={(e) => setFilters((f) => ({ ...f, format: e.target.value }))}><option value="xlsx">Excel (.xlsx)</option><option value="csv">CSV</option></Select></FormField>
         </FormGrid>
       </Modal>
     </div>

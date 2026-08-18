@@ -205,7 +205,6 @@ export default function CandidateGrid({ profile, sites, designations, sources, r
   const colDefs: ColDef<Candidate>[] = useMemo(() => {
     const e = canEdit; // shorthand
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dateCol = (field: string, header: string, opts: Partial<ColDef> = {}): ColDef<any> => ({
       field, headerName: header, width: 110, editable: e,
       cellEditor: "agDateCellEditor",
@@ -214,7 +213,6 @@ export default function CandidateGrid({ profile, sites, designations, sources, r
       ...opts,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const selectCol = (field: string, header: string, values: string[], opts: Partial<ColDef> = {}): ColDef<any> => ({
       field, headerName: header, width: 100, editable: e,
       cellEditor: "agSelectCellEditor",
@@ -223,12 +221,10 @@ export default function CandidateGrid({ profile, sites, designations, sources, r
       ...opts,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const textCol = (field: string, header: string, opts: Partial<ColDef> = {}): ColDef<any> => ({
       field, headerName: header, width: 140, editable: e, filter: true, ...opts,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const memoCol = (field: string, header: string, opts: Partial<ColDef> = {}): ColDef<any> => ({
       field, headerName: header, width: 200, editable: e,
       cellEditor: "agLargeTextCellEditor",

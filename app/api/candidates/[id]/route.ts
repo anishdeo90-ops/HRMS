@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { enqueueStageChangeTriggers } from "@/lib/automation/triggers";
+import { ensureHrmsEmployeeForJoinedCandidate } from "@/lib/hrms/ats-employee-sync";
 import { monthFromApplicationDate } from "@/lib/utils";
 import candidateTags from "@/lib/candidates/tags";
 
@@ -224,6 +225,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (typeof payload.final_status === "string" && payload.final_status !== previousCandidate?.final_status) {
     await enqueueStageChangeTriggers(id, payload.final_status, previousCandidate);
   }
+  if (
+    ["joined", "active employee"].includes(String(data.final_status ?? "").toLowerCase()) ||
+    data.doj_actual ||
+    data.doj
+  ) await ensureHrmsEmployeeForJoinedCandidate(id, user.id);
 
   const { data: rowWithTags } = await supabase
     .from("v_pipeline_funnel")

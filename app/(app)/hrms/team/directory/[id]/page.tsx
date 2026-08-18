@@ -11,6 +11,7 @@ import {
   FileText,
   Handshake,
   IdCard,
+  Pencil,
   UserCircle,
 } from "lucide-react";
 import {
@@ -21,6 +22,11 @@ import {
   EmptyState,
   Field,
   FieldGrid,
+  FormField,
+  FormGrid,
+  Input,
+  Modal,
+  Select,
   SubTabs,
   type Column,
 } from "@/components/hrms/ui";
@@ -52,6 +58,35 @@ type TabKey =
   | "assets"
   | "separation"
   | "tickets";
+type LookupOption = { id: string; name: string };
+type Options = {
+  branches?: LookupOption[];
+  departments?: LookupOption[];
+  designations?: LookupOption[];
+  employment_types?: LookupOption[];
+  shifts?: LookupOption[];
+  employees?: LookupOption[];
+};
+type EditForm = {
+  name: string;
+  email: string;
+  mobile: string;
+  status: string;
+  date_of_joining: string;
+  date_of_birth: string;
+  gender: string;
+  blood_group: string;
+  marital_status: string;
+  personal_email: string;
+  current_address: string;
+  permanent_address: string;
+  branch_id: string;
+  department_id: string;
+  designation_id: string;
+  employment_type_id: string;
+  reporting_manager_id: string;
+  shift_id: string;
+};
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "personal", label: "Personal Details" },
@@ -78,10 +113,33 @@ export default function EmployeeRecordPage() {
   const params = useParams<{ id: string }>();
   const [tab, setTab] = useState<TabKey>("personal");
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [options, setOptions] = useState<Options>({});
+  const [editOpen, setEditOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<EditForm>({
+    name: "",
+    email: "",
+    mobile: "",
+    status: "active",
+    date_of_joining: "",
+    date_of_birth: "",
+    gender: "",
+    blood_group: "",
+    marital_status: "",
+    personal_email: "",
+    current_address: "",
+    permanent_address: "",
+    branch_id: "",
+    department_id: "",
+    designation_id: "",
+    employment_type_id: "",
+    reporting_manager_id: "",
+    shift_id: "",
+  });
   const [loading, setLoading] = useState(true);
   const [assets] = useHrmsData<Asset[]>("/api/hrms/assets", []);
-  const [ticketsAll] = useHrmsData<Ticket[]>("/api/hrms/tickets", []);
-  const [separations] = useHrmsData<Separation[]>("/api/hrms/separations", []);
+  const [ticketData] = useHrmsData<{ tickets: Ticket[] } | Ticket[]>("/api/hrms/tickets", { tickets: [] });
+  const [separationData] = useHrmsData<{ separations: Separation[] } | Separation[]>("/api/hrms/separations", { separations: [] });
   const [goalsAll] = useHrmsData<Goal[]>("/api/hrms/performance/goals", []);
   const [appraisalsAll] = useHrmsData<Appraisal[]>("/api/hrms/performance/appraisals", []);
   const [rankingAll] = useHrmsData<RankingEntry[]>("/api/hrms/performance/ranking", []);
@@ -92,11 +150,20 @@ export default function EmployeeRecordPage() {
 
   useEffect(() => {
     let alive = true;
-    fetch(`/api/hrms/employees/${params.id}`)
+    Promise.all([
+      fetch(`/api/hrms/employees/${params.id}`),
+      fetch("/api/hrms/options"),
+    ])
       .then(async (res) => {
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error ?? "Unable to load employee");
-        if (alive) setEmployee(json.data);
+        const [employeeRes, optionRes] = res;
+        const employeeJson = await employeeRes.json();
+        const optionJson = await optionRes.json();
+        if (!employeeRes.ok) throw new Error(employeeJson.error ?? "Unable to load employee");
+        if (!optionRes.ok) throw new Error(optionJson.error ?? "Unable to load HRMS options");
+        if (alive) {
+          setEmployee(employeeJson.data);
+          setOptions(optionJson.data ?? {});
+        }
       })
       .catch((error) => toast.error(error instanceof Error ? error.message : "Unable to load employee"))
       .finally(() => alive && setLoading(false));
@@ -104,6 +171,59 @@ export default function EmployeeRecordPage() {
       alive = false;
     };
   }, [params.id]);
+
+  function idFor(items: LookupOption[] | undefined, name?: string) {
+    return items?.find((item) => item.name === name)?.id ?? "";
+  }
+
+  function openEditor() {
+    if (!employee) return;
+    setForm({
+      name: employee.name ?? "",
+      email: employee.email ?? "",
+      mobile: employee.mobile ?? "",
+      status: employee.status ?? "active",
+      date_of_joining: employee.date_of_joining ?? "",
+      date_of_birth: employee.date_of_birth ?? "",
+      gender: employee.gender ?? "",
+      blood_group: employee.blood_group ?? "",
+      marital_status: employee.marital_status ?? "",
+      personal_email: employee.personal_email ?? "",
+      current_address: employee.current_address ?? "",
+      permanent_address: employee.permanent_address ?? "",
+      branch_id: idFor(options.branches, employee.branch),
+      department_id: idFor(options.departments, employee.department),
+      designation_id: idFor(options.designations, employee.designation),
+      employment_type_id: idFor(options.employment_types, employee.employment_type),
+      reporting_manager_id: employee.reporting_manager_id ?? "",
+      shift_id: idFor(options.shifts, employee.shift_name),
+    });
+    setEditOpen(true);
+  }
+
+  async function saveEmployee() {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/hrms/employees/${params.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Unable to save employee");
+      setEmployee(json.data);
+      setEditOpen(false);
+      toast.success("Employee updated");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save employee");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function setField<K extends keyof EditForm>(key: K, value: EditForm[K]) {
+    setForm((next) => ({ ...next, [key]: value }));
+  }
 
   if (loading) {
     return <Card title="Employee Record"><EmptyState title="Loading employee..." /></Card>;
@@ -129,7 +249,9 @@ export default function EmployeeRecordPage() {
   const filled = tracked.filter((v) => v != null && v !== "").length;
   const completion = Math.round((filled / tracked.length) * 100);
 
+  const separations = Array.isArray(separationData) ? separationData : separationData.separations ?? [];
   const separation = separations.find((s) => s.employee_id === employee.id);
+  const ticketsAll = Array.isArray(ticketData) ? ticketData : ticketData.tickets ?? [];
   const tickets = ticketsAll.filter((t) => t.raised_by_id === employee.id);
   const goals = goalsAll.filter((g) => g.employee_id === employee.id);
   const appraisals = appraisalsAll.filter((a) => a.employee_id === employee.id);
@@ -228,6 +350,7 @@ export default function EmployeeRecordPage() {
               )}
             </dl>
           </div>
+          <Button icon={Pencil} onClick={openEditor}>Edit Employee</Button>
           <div className="flex flex-col items-center gap-1">
             <div
               className="grid h-16 w-16 place-items-center rounded-full"
@@ -594,6 +717,35 @@ export default function EmployeeRecordPage() {
           />
         </Card>
       )}
+
+      <Modal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        title="Edit Employee"
+        width="max-w-4xl"
+        footer={<><Button onClick={() => setEditOpen(false)}>Cancel</Button><Button variant="primary" onClick={saveEmployee} disabled={saving}>{saving ? "Saving..." : "Save"}</Button></>}
+      >
+        <FormGrid columns={3}>
+          <FormField label="Full Name" required><Input value={form.name} onChange={(e) => setField("name", e.target.value)} /></FormField>
+          <FormField label="Work Email" required><Input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} /></FormField>
+          <FormField label="Mobile"><Input value={form.mobile} onChange={(e) => setField("mobile", e.target.value)} /></FormField>
+          <FormField label="Status"><Select value={form.status} onChange={(e) => setField("status", e.target.value)}><option value="active">Active</option><option value="probation">Probation</option><option value="notice">Notice</option><option value="on_leave">On Leave</option><option value="separated">Separated</option></Select></FormField>
+          <FormField label="Date of Joining"><Input type="date" value={form.date_of_joining} onChange={(e) => setField("date_of_joining", e.target.value)} /></FormField>
+          <FormField label="Date of Birth"><Input type="date" value={form.date_of_birth} onChange={(e) => setField("date_of_birth", e.target.value)} /></FormField>
+          <FormField label="Designation"><Select value={form.designation_id} onChange={(e) => setField("designation_id", e.target.value)}><option value="">None</option>{(options.designations ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+          <FormField label="Department"><Select value={form.department_id} onChange={(e) => setField("department_id", e.target.value)}><option value="">None</option>{(options.departments ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+          <FormField label="Branch"><Select value={form.branch_id} onChange={(e) => setField("branch_id", e.target.value)}><option value="">None</option>{(options.branches ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+          <FormField label="Employment Type"><Select value={form.employment_type_id} onChange={(e) => setField("employment_type_id", e.target.value)}><option value="">None</option>{(options.employment_types ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+          <FormField label="Reporting Manager"><Select value={form.reporting_manager_id} onChange={(e) => setField("reporting_manager_id", e.target.value)}><option value="">None</option>{(options.employees ?? []).filter((item) => item.id !== employee.id).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+          <FormField label="Shift"><Select value={form.shift_id} onChange={(e) => setField("shift_id", e.target.value)}><option value="">None</option>{(options.shifts ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+          <FormField label="Gender"><Input value={form.gender} onChange={(e) => setField("gender", e.target.value)} /></FormField>
+          <FormField label="Blood Group"><Input value={form.blood_group} onChange={(e) => setField("blood_group", e.target.value)} /></FormField>
+          <FormField label="Marital Status"><Input value={form.marital_status} onChange={(e) => setField("marital_status", e.target.value)} /></FormField>
+          <FormField label="Personal Email"><Input type="email" value={form.personal_email} onChange={(e) => setField("personal_email", e.target.value)} /></FormField>
+          <FormField label="Current Address"><Input value={form.current_address} onChange={(e) => setField("current_address", e.target.value)} /></FormField>
+          <FormField label="Permanent Address"><Input value={form.permanent_address} onChange={(e) => setField("permanent_address", e.target.value)} /></FormField>
+        </FormGrid>
+      </Modal>
     </div>
   );
 }

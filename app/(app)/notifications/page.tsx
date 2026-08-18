@@ -291,7 +291,7 @@ export default function NotificationsPage() {
                           {jr.description && <p className="text-xs text-gray-500 border-t border-gray-50 pt-2">{jr.description}</p>}
                           {jr.note && (
                             <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-2 py-1.5 italic">
-                              Note from {jr.from_profile.name}: "{jr.note}"
+                              Note from {jr.from_profile.name}: &quot;{jr.note}&quot;
                             </p>
                           )}
                         </div>

@@ -53,6 +53,7 @@ export const HRMS_NAV: HrmsModule[] = [
       { href: "/hrms/me/leaves", label: "Leaves" },
       { href: "/hrms/me/ranking", label: "Ranking" },
       { href: "/hrms/me/reimbursement", label: "Bill Reimbursement" },
+      { href: "/hrms/me/tickets", label: "Tickets" },
     ],
   },
   {

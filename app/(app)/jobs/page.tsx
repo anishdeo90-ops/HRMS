@@ -488,7 +488,7 @@ export default function JobsPage() {
                   Sent to <span className="font-medium text-gray-600">{req.to_profile.name}</span>
                   {" · "}{new Date(req.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
                 </p>
-                {req.note && <p className="text-xs text-gray-500 italic">"{req.note}"</p>}
+                {req.note && <p className="text-xs text-gray-500 italic">&quot;{req.note}&quot;</p>}
               </div>
             ))}
           </div>

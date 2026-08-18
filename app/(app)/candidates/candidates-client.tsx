@@ -1473,7 +1473,7 @@ export default function CandidatesClient({
                 {loading ? (
                   <tr><td colSpan={SHEET_COLS.length + 2} className="px-4 py-12 text-center text-gray-400">Loading…</td></tr>
                 ) : visibleCandidates.length === 0 ? (
-                  <tr><td colSpan={SHEET_COLS.length + 2} className="px-4 py-8 text-center text-gray-400">No candidates — click "+ Add Row" to start</td></tr>
+                  <tr><td colSpan={SHEET_COLS.length + 2} className="px-4 py-8 text-center text-gray-400">No candidates — click &quot;+ Add Row&quot; to start</td></tr>
                 ) : visibleCandidates.map((cand, ri) => {
                   const isSaving = saving.has(cand.id);
                   const editable = canEdit(cand);

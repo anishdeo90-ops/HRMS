@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { enqueueOfferTriggers, enqueueStageChangeTriggers } from "@/lib/automation/triggers";
+import { ensureHrmsEmployeeForJoinedCandidate } from "@/lib/hrms/ats-employee-sync";
 
 // GET: fetch offers for a candidate
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -100,6 +101,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       updated_by: user.id,
     }).eq("id", id);
     await enqueueStageChangeTriggers(id, "Joined");
+    await ensureHrmsEmployeeForJoinedCandidate(id, user.id);
   }
 
   const { data, error } = await supabase

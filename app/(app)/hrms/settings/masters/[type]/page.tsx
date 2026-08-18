@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -53,11 +53,7 @@ const BACKEND_TYPES = new Set([
 export default function MasterPage() {
   const params = useParams<{ type: string }>();
   const selectedMaster = masterBySlug(params.type);
-  if (!selectedMaster) {
-    notFound();
-    return null;
-  }
-  const master = selectedMaster!;
+  const master = selectedMaster ?? masterBySlug("branch")!;
 
   const [search, setSearch] = useState("");
   const [showInactive, setShowInactive] = useState(true);
@@ -264,6 +260,8 @@ export default function MasterPage() {
       ),
     },
   ];
+
+  if (!selectedMaster) return null;
 
   return (
     <div className="space-y-4">

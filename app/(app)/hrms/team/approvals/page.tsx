@@ -84,7 +84,7 @@ export default function AdminApprovalsPage() {
       </Toolbar>
       <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
         <span className="text-xs font-medium text-gray-500">{selected.length > 0 ? `${selected.length} selected` : "Select rows to act in bulk"}</span>
-        <div className="ml-auto flex gap-2"><Button variant="success" icon={Check} disabled={!selected.length} onClick={() => act(selected, "approved")}>Approve</Button><Button variant="danger" icon={X} disabled={!selected.length} onClick={() => act(selected, "rejected")}>Reject</Button></div>
+        {selected.length > 0 && <div className="ml-auto flex gap-2"><Button variant="success" icon={Check} onClick={() => act(selected, "approved")}>Approve</Button><Button variant="danger" icon={X} onClick={() => act(selected, "rejected")}>Reject</Button></div>}
       </div>
       <DataTable columns={columns} rows={rows} getKey={(r) => r.id} selectable selected={selected} onSelectedChange={setSelected} empty="Nothing waiting in this queue" dense />
     </Card>

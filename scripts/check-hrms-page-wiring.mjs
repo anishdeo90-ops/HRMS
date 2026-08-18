@@ -24,6 +24,17 @@ for (const needle of [
   assert(sql.includes(needle), `migration missing: ${needle}`);
 }
 
+for (const needle of [
+  "join ctx on ctx.org_id = t.org_id",
+  "raised_by_id",
+  "'ticket.created'",
+  "public.entity_events",
+]) {
+  assert(sql.includes(needle), `ticket audit wiring missing: ${needle}`);
+}
+
+assert(!sql.includes("ctx.employee_id = t.raised_by_id"), "team tickets must stay org-wide, not only mine");
+
 assert(!sql.includes("security definer"), "do not bypass RLS with SECURITY DEFINER");
 assert(!sql.includes("auth.role()"), "use TO authenticated, not auth.role()");
 
@@ -47,6 +58,7 @@ for (const path of [
   "app/(app)/hrms/me/in-out/page.tsx",
   "app/(app)/hrms/me/leaves/page.tsx",
   "app/(app)/hrms/me/leaves/add/page.tsx",
+  "app/(app)/hrms/me/tickets/page.tsx",
   "app/(app)/hrms/team/in-out/page.tsx",
   "app/(app)/hrms/team/regularization/page.tsx",
   "app/(app)/hrms/team/approvals/page.tsx",
@@ -58,4 +70,16 @@ for (const path of [
   const source = readFileSync(path, "utf8");
   assert(!/DEMO_|demo-data/.test(source), `${path} still imports runtime demo data`);
   assert(/\/api\/hrms\//.test(source), `${path} is not wired to HRMS API`);
+}
+
+{
+  const source = readFileSync("app/(app)/hrms/team/directory/[id]/page.tsx", "utf8");
+  assert(!source.includes('useHrmsData<Separation[]>("/api/hrms/separations"'), "directory detail must unwrap hrms_separations().separations");
+  assert(source.includes("Array.isArray(separationData)"), "directory detail must tolerate older separation array payloads");
+  assert(!source.includes('useHrmsData<Ticket[]>("/api/hrms/tickets"'), "directory detail must unwrap hrms_tickets().tickets");
+}
+
+{
+  const nav = readFileSync("lib/hrms/nav.ts", "utf8");
+  assert(nav.includes('/hrms/me/tickets'), "Me navigation must include tickets");
 }

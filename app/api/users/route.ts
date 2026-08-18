@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { ensureHrmsEmployeeForProfile } from "@/lib/hrms/ats-employee-sync";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
     .eq("id", authData.user.id);
 
   if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 });
+  await ensureHrmsEmployeeForProfile(authData.user.id, user.id);
 
   return NextResponse.json({ success: true, userId: authData.user.id });
 }
@@ -71,5 +73,6 @@ export async function PATCH(req: NextRequest) {
     .eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await ensureHrmsEmployeeForProfile(id, user.id);
   return NextResponse.json({ success: true });
 }

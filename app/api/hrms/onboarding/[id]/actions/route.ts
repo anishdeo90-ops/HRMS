@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { event, hrmsContext, link, status } from "@/lib/hrms/api-server";
+import { ensureHrmsEmployeeForJoinedCandidate } from "@/lib/hrms/ats-employee-sync";
 
 const NEXT_STATUS: Record<string, string> = {
   approve: "approved",
@@ -48,16 +49,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   });
 
   if (action === "join" && data.ats_candidate_id) {
-    const { data: employee } = await ctx.supabase.rpc("hrms_create_employee", {
-      payload: {
-        first_name: String(body.first_name ?? body.candidate_name ?? "New").split(" ")[0],
-        last_name: String(body.last_name ?? body.candidate_name ?? "Joinee").split(" ").slice(1).join(" ") || "Joinee",
-        work_email: body.email ?? `joined-${data.id}@example.invalid`,
-        mobile: body.mobile ?? null,
-        date_of_joining: patch.actual_doj,
-        source_candidate_id: data.ats_candidate_id,
-      },
-    });
+    await ctx.supabase.from("candidates").update({
+      final_status: "Joined",
+      doj_actual: patch.actual_doj,
+      updated_by: ctx.user.id,
+    }).eq("id", data.ats_candidate_id);
+    const employee = await ensureHrmsEmployeeForJoinedCandidate(data.ats_candidate_id, ctx.user.id);
     if (employee?.id) {
       await link(ctx.supabase, {
         org_id: ctx.orgId,

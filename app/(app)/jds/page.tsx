@@ -693,7 +693,7 @@ export default function JDsPage() {
 
                 {fbFields.length === 0 ? (
                   <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 text-sm">
-                    No fields yet. Click "Add Field" or "Load Application Defaults".
+                    No fields yet. Click &quot;Add Field&quot; or &quot;Load Application Defaults&quot;.
                   </div>
                 ) : (
                   <div className="space-y-2">
