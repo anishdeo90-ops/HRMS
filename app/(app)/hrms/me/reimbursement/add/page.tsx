@@ -34,6 +34,7 @@ interface LineDraft {
   expense_type: string;
   amount: string;
   description: string;
+  attachmentNames: string[];
 }
 
 function emptyLine(): LineDraft {
@@ -43,6 +44,7 @@ function emptyLine(): LineDraft {
     expense_type: "",
     amount: "",
     description: "",
+    attachmentNames: [],
   };
 }
 
@@ -54,6 +56,11 @@ export default function AddReimbursementPage() {
   const expenseTypes = useApiData<LookupItem[]>("/api/hrms/masters/expense-type", []);
 
   const totalPaise = lines.reduce((sum, l) => sum + Math.round((Number(l.amount) || 0) * 100), 0);
+  const claimHint = expenseName.trim().length === 0
+    ? "Expense name is required"
+    : lines.some((l) => !l.expense_type || Number(l.amount) <= 0 || !l.expense_date)
+      ? "Complete every expense line"
+      : "";
   const valid =
     expenseName.trim().length > 0 &&
     lines.every((l) => l.expense_type && Number(l.amount) > 0 && l.expense_date);
@@ -73,7 +80,7 @@ export default function AddReimbursementPage() {
           expense_type: l.expense_type,
           amount_paise: Math.round(Number(l.amount) * 100),
           description: l.description,
-          has_receipt: false,
+          has_receipt: l.attachmentNames.length > 0,
         })),
       }),
     });
@@ -161,13 +168,21 @@ export default function AddReimbursementPage() {
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      className="flex w-40 items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 hover:border-brand-300 hover:text-brand-600"
-                    >
+                    <label className="flex w-40 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 hover:border-brand-300 hover:text-brand-600">
+                      <input
+                        type="file"
+                        multiple
+                        className="sr-only"
+                        onChange={(e) => update(l.key, { attachmentNames: Array.from(e.target.files ?? []).map((file) => file.name) })}
+                      />
                       <Paperclip size={12} />
-                      Choose files
-                    </button>
+                      <span className="truncate">{l.attachmentNames.length ? `${l.attachmentNames.length} file${l.attachmentNames.length > 1 ? "s" : ""}` : "Choose files"}</span>
+                    </label>
+                    {l.attachmentNames.length > 0 && (
+                      <p className="mt-1 max-w-40 truncate text-[11px] text-gray-400" title={l.attachmentNames.join(", ")}>
+                        {l.attachmentNames.join(", ")}
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <Textarea
@@ -210,6 +225,7 @@ export default function AddReimbursementPage() {
           placeholder="Anything the approver should know about this claim"
         />
         <div className="mt-4 flex items-center justify-end gap-2">
+          {claimHint && <span className="mr-auto text-xs text-red-600">{claimHint}</span>}
           <Button onClick={() => router.push("/hrms/me/reimbursement")}>Cancel</Button>
           <Button variant="primary" disabled={!valid} onClick={submit}>
             Submit Claim

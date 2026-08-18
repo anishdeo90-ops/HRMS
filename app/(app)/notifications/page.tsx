@@ -99,6 +99,10 @@ export default function NotificationsPage() {
       }
       return;
     }
+    if (n.type === "expense_claim_submitted") {
+      router.push("/hrms/more/reimbursement-approval");
+      return;
+    }
     if (n.candidate_id) {
       router.push(`/candidates?open=${n.candidate_id}`);
     }
@@ -160,6 +164,7 @@ export default function NotificationsPage() {
     if (type === "candidate_forwarded") return <span className="text-white font-bold text-sm">→</span>;
     if (type === "form_submitted") return <span>📋</span>;
     if (type === "job_requested") return <span>📝</span>;
+    if (type === "expense_claim_submitted") return <span>Rs</span>;
     if (type === "job_request_approved") return <CheckCircle2 size={16} className="text-white" />;
     if (type === "job_request_rejected") return <XCircle size={16} className="text-white" />;
     if (type === "job_assigned") return <span>💼</span>;
@@ -170,6 +175,7 @@ export default function NotificationsPage() {
     if (type === "candidate_forwarded") return "bg-indigo-500";
     if (type === "form_submitted") return "bg-brand-500";
     if (type === "job_requested") return "bg-amber-500";
+    if (type === "expense_claim_submitted") return "bg-green-600";
     if (type === "job_request_approved") return "bg-green-500";
     if (type === "job_request_rejected") return "bg-red-400";
     if (type === "job_assigned") return "bg-blue-500";
