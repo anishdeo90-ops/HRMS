@@ -14,6 +14,9 @@ assert(!latest.includes("case when v_manager_id is null then 'admin' else 'manag
 assert(latest.includes("v_approver_id"), "approval routing must resolve a concrete approver employee");
 assert(latest.includes("p.role = 'hr_manager'"), "approval routing must fall back to an HR manager employee");
 assert(latest.includes("v_hr_manager_id"), "approval routing must resolve HR manager separately");
+assert(latest.includes("v_requester_role"), "approval routing must read the requester's role");
+assert(latest.includes("v_requester_role in ('hod','manager','hr_manager')"), "HOD/manager/HR manager requests must route to admin");
+assert(latest.includes("raise exception 'No approver configured for this request'"), "approval routing must fail clearly when no approver exists");
 assert(latest.includes("insert into hrms.approval_steps"), "approval routing must create approval step rows");
 assert(latest.includes("v_approver_source as approver_source, v_approver_id as approver_id"), "approval routing must create manager/HOD step");
 assert(latest.includes("select 'admin', v_hr_manager_id"), "approval routing must also create HR manager step");

@@ -63,12 +63,27 @@ const DAY_LABEL: Record<DayStatus, string> = {
   wfh: "Work From Home",
 };
 
+const DAY_SHORT_LABEL: Record<DayStatus, string> = {
+  present: "P",
+  half_day: "HP/HA",
+  absent: "AB",
+  weekly_off: "WO",
+  holiday: "H",
+  on_leave: "L",
+  on_duty: "OD",
+  wfh: "WFH",
+};
+
 export function dayTone(status: string): string {
   return DAY_TONE[status as DayStatus] ?? "bg-gray-100 text-gray-500";
 }
 
 export function dayLabel(status: string): string {
   return DAY_LABEL[status as DayStatus] ?? titleCase(status);
+}
+
+export function dayShortLabel(status: string): string {
+  return DAY_SHORT_LABEL[status as DayStatus] ?? status.toUpperCase();
 }
 
 /** Employment status on the directory. */

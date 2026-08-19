@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { Clock } from "lucide-react";
+import { Clock, Pencil } from "lucide-react";
+import { CorrectionModal } from "@/components/hrms/attendance-correction-modal";
 import { Badge, Button, Card, DataTable, StatCard, SubTabs, Toolbar, type Column } from "@/components/hrms/ui";
 import { hrmsMutation, useHrmsApi } from "@/lib/hrms/api-client";
 import { EMPTY, fmtDate, fmtDuration, fmtTime } from "@/lib/hrms/format";
-import { dayLabel, dayTone } from "@/lib/hrms/status";
+import { dayLabel, dayShortLabel, dayTone } from "@/lib/hrms/status";
 import type { AttendanceDay, AttendancePunch } from "@/lib/hrms/types";
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -20,6 +21,7 @@ export default function MyInOutPage() {
   const [view, setView] = useState<"register" | "punches">("register");
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
   const [status, setStatus] = useState("");
+  const [correction, setCorrection] = useState<AttendanceDay | null>(null);
   const { data, reload } = useHrmsApi<{ rows: AttendanceDay[] }>(
     `/api/hrms/attendance?scope=me&month=${month}`,
     { rows: [] }
@@ -52,9 +54,10 @@ export default function MyInOutPage() {
     { key: "out", header: "Out-Time", render: (r) => fmtTime(r.last_out) },
     { key: "duration", header: "Duration", render: (r) => fmtDuration(r.worked_minutes) },
     { key: "extra", header: "Extra Hours", render: (r) => (r.extra_minutes ? fmtDuration(r.extra_minutes) : EMPTY) },
-    { key: "status", header: "Status", render: (r) => <Badge tone={dayTone(r.day_status)}>{dayLabel(r.day_status)}</Badge> },
+    { key: "status", header: "Status", render: (r) => <Badge tone={dayTone(r.day_status)} title={dayLabel(r.day_status)}>{dayShortLabel(r.day_status)}</Badge> },
     { key: "payable", header: "Payable", align: "right", render: (r) => r.payable_fraction },
     { key: "remarks", header: "Remarks", render: (r) => r.penalty_reason ?? (r.is_regularized ? "Regularized" : EMPTY) },
+    { key: "action", header: "Action", align: "right", render: (r) => <Button icon={Pencil} onClick={() => setCorrection(r)}>Apply Approval</Button> },
   ];
 
   const punchRows = rows.flatMap((r) => (r.punches ?? []).map((p) => ({ ...p, work_date: r.work_date })));
@@ -100,6 +103,7 @@ export default function MyInOutPage() {
           <DataTable columns={punchColumns} rows={punchRows} getKey={(r) => r.id} empty="No punches recorded" dense />
         )}
       </Card>
+      <CorrectionModal row={correction} onClose={() => setCorrection(null)} onSaved={reload} />
     </div>
   );
 }

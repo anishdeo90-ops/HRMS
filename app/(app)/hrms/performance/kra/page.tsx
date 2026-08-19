@@ -19,7 +19,7 @@ import {
 } from "@/components/hrms/ui";
 import { saveHrmsData, useHrmsData } from "@/lib/hrms/client-api";
 import { EMPTY, fmtDate, fmtPercent } from "@/lib/hrms/format";
-import type { Kra } from "@/lib/hrms/types";
+import type { Employee, Kra } from "@/lib/hrms/types";
 
 /**
  * `docs/hrms/13-performance-review.md §3` — My KRAs and the KRA Master.
@@ -33,8 +33,38 @@ export default function KraPage() {
   const [search, setSearch] = useState("");
   const [designation, setDesignation] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [kraForm, setKraForm] = useState({
+    department_id: "",
+    designation_id: "",
+    kpi_name: "",
+    measurement: "",
+    weightage: 20,
+  });
   const [kras, reload] = useHrmsData<Kra[]>("/api/hrms/performance/kra", []);
-  const [options] = useHrmsData<{ designations: { id: string; name: string }[] }>("/api/hrms/options", { designations: [] });
+  const [employees] = useHrmsData<Employee[]>("/api/hrms/performance/employees", []);
+
+  const assignmentOptions = useMemo(() => {
+    const departments = new Map<string, string>();
+    const designations = new Map<string, { id: string; name: string; department_id: string }>();
+    for (const e of employees) {
+      if (e.department_id && e.department) departments.set(e.department_id, e.department);
+      if (e.designation_id && e.designation && e.department_id) {
+        designations.set(`${e.department_id}:${e.designation_id}`, {
+          id: e.designation_id,
+          name: e.designation,
+          department_id: e.department_id,
+        });
+      }
+    }
+    return {
+      departments: Array.from(departments, ([id, name]) => ({ id, name })),
+      designations: Array.from(designations.values()),
+    };
+  }, [employees]);
+
+  const designationOptions = assignmentOptions.designations.filter(
+    (d) => !kraForm.department_id || d.department_id === kraForm.department_id
+  );
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -45,7 +75,7 @@ export default function KraPage() {
         String(f ?? "").toLowerCase().includes(q)
       );
     });
-  }, [kras, view, search, designation]);
+  }, [kras, search, designation]);
 
   const totalWeightage = rows.reduce((s, k) => s + k.weightage, 0);
 
@@ -124,8 +154,8 @@ export default function KraPage() {
             className="rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-700"
           >
             <option value="">All designations</option>
-            {options.designations.map((d) => (
-              <option key={d.id} value={d.name}>
+            {assignmentOptions.designations.map((d) => (
+              <option key={`${d.department_id}:${d.id}`} value={d.name}>
                 {d.name}
               </option>
             ))}
@@ -152,13 +182,9 @@ export default function KraPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
+              disabled={!kraForm.department_id || !kraForm.designation_id || !kraForm.kpi_name || !kraForm.measurement}
               onClick={async () => {
-                await saveHrmsData("/api/hrms/performance/kra", {
-                  kpi_name: "New KPI",
-                  measurement: "Rating",
-                  weightage: 20,
-                  designation: options.designations[0]?.name,
-                });
+                await saveHrmsData("/api/hrms/performance/kra", kraForm);
                 await reload();
                 toast.success("KRA added");
                 setAddOpen(false);
@@ -173,22 +199,50 @@ export default function KraPage() {
           <FormField label="KRA Code" hint="Auto-generated">
             <Input placeholder="Auto-generated" disabled />
           </FormField>
+          <FormField label="Department" required>
+            <Select
+              value={kraForm.department_id}
+              onChange={(e) => setKraForm((f) => ({ ...f, department_id: e.target.value, designation_id: "" }))}
+            >
+              <option value="">Select department</option>
+              {assignmentOptions.departments.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </Select>
+          </FormField>
           <FormField label="Designation" required>
-            <Select defaultValue="">
+            <Select
+              value={kraForm.designation_id}
+              onChange={(e) => setKraForm((f) => ({ ...f, designation_id: e.target.value }))}
+            >
               <option value="">Select</option>
-              {options.designations.map((d) => (
-                <option key={d.id}>{d.name}</option>
+              {designationOptions.map((d) => (
+                <option key={`${d.department_id}:${d.id}`} value={d.id}>{d.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="KPI Name" required span>
-            <Input placeholder="e.g. Offer-to-join ratio" />
+            <Input
+              value={kraForm.kpi_name}
+              onChange={(e) => setKraForm((f) => ({ ...f, kpi_name: e.target.value }))}
+              placeholder="e.g. Offer-to-join ratio"
+            />
           </FormField>
           <FormField label="Measurement" required hint="How the KPI is counted">
-            <Input placeholder="e.g. Percentage" />
+            <Input
+              value={kraForm.measurement}
+              onChange={(e) => setKraForm((f) => ({ ...f, measurement: e.target.value }))}
+              placeholder="e.g. Percentage"
+            />
           </FormField>
           <FormField label="Weightage %" required>
-            <Input type="number" min={1} max={100} defaultValue={20} />
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              value={kraForm.weightage}
+              onChange={(e) => setKraForm((f) => ({ ...f, weightage: Number(e.target.value) }))}
+            />
           </FormField>
         </FormGrid>
       </Modal>

@@ -185,13 +185,15 @@ export function Badge({
   tone = "bg-gray-100 text-gray-600",
   className,
   children,
-}: {
+  ...rest
+}: React.HTMLAttributes<HTMLSpanElement> & {
   tone?: string;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <span
+      {...rest}
       className={cn(
         "inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold capitalize",
         tone,

@@ -35,9 +35,17 @@ export default function GoalsPage() {
   const [cycle, setCycle] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [goalForm, setGoalForm] = useState({
+    title: "",
+    employee_id: "",
+    cycle_name: "",
+    weightage: 25,
+    target: "",
+    due_date: todayISO(),
+  });
   const [goals, reload] = useHrmsData<Goal[]>("/api/hrms/performance/goals", []);
   const [cycles] = useHrmsData<PerformanceCycle[]>("/api/hrms/performance/cycles", []);
-  const [employees] = useHrmsData<Employee[]>("/api/hrms/employees", []);
+  const [employees] = useHrmsData<Employee[]>("/api/hrms/performance/employees", []);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -205,15 +213,9 @@ export default function GoalsPage() {
             <Button onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button
               variant="primary"
+              disabled={!goalForm.title || !goalForm.employee_id || !goalForm.cycle_name || !goalForm.target}
               onClick={async () => {
-                await saveHrmsData("/api/hrms/performance/goals", {
-                  title: "New Goal",
-                  employee_id: employees[0]?.id,
-                  cycle_name: cycles.find((c) => c.status === "active")?.cycle_name,
-                  weightage: 25,
-                  target: "Target",
-                  due_date: todayISO(),
-                });
+                await saveHrmsData("/api/hrms/performance/goals", goalForm);
                 await reload();
                 toast.success("Goal submitted for approval");
                 setAddOpen(false);
@@ -226,31 +228,56 @@ export default function GoalsPage() {
       >
         <FormGrid columns={2}>
           <FormField label="Goal Title" required span>
-            <Input placeholder="e.g. Reduce time-to-fill to under 21 days" />
+            <Input
+              value={goalForm.title}
+              onChange={(e) => setGoalForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="e.g. Reduce time-to-fill to under 21 days"
+            />
           </FormField>
           <FormField label="Employee" required>
-            <Select defaultValue={employees[0]?.name ?? ""}>
+            <Select
+              value={goalForm.employee_id}
+              onChange={(e) => setGoalForm((f) => ({ ...f, employee_id: e.target.value }))}
+            >
+              <option value="">Select</option>
               {employees.filter((e) => e.status !== "separated").map((e) => (
-                <option key={e.id}>{e.name}</option>
+                <option key={e.id} value={e.id}>{e.name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Performance Cycle" required>
-            <Select defaultValue="">
+            <Select
+              value={goalForm.cycle_name}
+              onChange={(e) => setGoalForm((f) => ({ ...f, cycle_name: e.target.value }))}
+            >
               <option value="">Select</option>
               {cycles.filter((c) => c.status === "active").map((c) => (
-                <option key={c.id}>{c.cycle_name}</option>
+                <option key={c.id} value={c.cycle_name}>{c.cycle_name}</option>
               ))}
             </Select>
           </FormField>
           <FormField label="Weightage %" required hint="Must total 100% across the cycle">
-            <Input type="number" min={1} max={100} defaultValue={25} />
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              value={goalForm.weightage}
+              onChange={(e) => setGoalForm((f) => ({ ...f, weightage: Number(e.target.value) }))}
+            />
           </FormField>
           <FormField label="Due Date" required>
-            <Input type="date" defaultValue={todayISO()} />
+            <Input
+              type="date"
+              value={goalForm.due_date}
+              onChange={(e) => setGoalForm((f) => ({ ...f, due_date: e.target.value }))}
+            />
           </FormField>
           <FormField label="Target" required span hint="Measurable, so progress is not a matter of opinion">
-            <Textarea placeholder="e.g. 40 permanent placements closed" />
+            <Textarea
+              value={goalForm.target}
+              onChange={(e) => setGoalForm((f) => ({ ...f, target: e.target.value }))}
+              placeholder="e.g. 40 permanent placements closed"
+            />
           </FormField>
         </FormGrid>
       </Modal>

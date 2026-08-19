@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CakeSlice, CalendarDays, ChevronLeft, ChevronRight, PartyPopper, Plane, UserPlus } from "lucide-react";
+import { CakeSlice, CalendarDays, ChevronLeft, ChevronRight, Clock, PartyPopper, Plane, UserPlus } from "lucide-react";
+import { CorrectionModal, type AttendanceCorrectionSource } from "@/components/hrms/attendance-correction-modal";
 import { Badge, Button, Card, EmptyState, Toggle } from "@/components/hrms/ui";
 import { fmtDate } from "@/lib/hrms/format";
 import { useApiData } from "@/lib/hrms/use-api-data";
@@ -16,13 +17,18 @@ import { cn } from "@/lib/utils";
  * drifts, which is why each layer can be toggled independently.
  */
 
-type EventKind = "holiday" | "leave" | "birthday" | "anniversary" | "joinee";
+type EventKind = "holiday" | "leave" | "birthday" | "anniversary" | "joinee" | "attendance";
 
 interface CalendarEvent {
+  id?: string;
   date: string;
   kind: EventKind;
   label: string;
   detail?: string;
+  employee_id?: string;
+  first_in?: string | null;
+  last_out?: string | null;
+  day_status?: string;
 }
 
 const KIND_META: Record<EventKind, { label: string; dot: string; badge: string; icon: typeof CakeSlice }> = {
@@ -31,6 +37,7 @@ const KIND_META: Record<EventKind, { label: string; dot: string; badge: string; 
   birthday: { label: "Birthdays", dot: "bg-amber-400", badge: "bg-amber-100 text-amber-800", icon: CakeSlice },
   anniversary: { label: "Work anniversaries", dot: "bg-green-500", badge: "bg-green-100 text-green-700", icon: PartyPopper },
   joinee: { label: "New joinees", dot: "bg-brand-300", badge: "bg-brand-50 text-brand-600", icon: UserPlus },
+  attendance: { label: "Attendance", dot: "bg-indigo-500", badge: "bg-indigo-50 text-indigo-700", icon: Clock },
 };
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -46,7 +53,9 @@ export default function CalendarPage() {
     birthday: true,
     anniversary: true,
     joinee: true,
+    attendance: true,
   });
+  const [correction, setCorrection] = useState<AttendanceCorrectionSource | null>(null);
 
   const events = useApiData<CalendarEvent[]>("/api/hrms/calendar", []);
 
@@ -68,6 +77,13 @@ export default function CalendarPage() {
 
   const eventsFor = (date: string) =>
     events.filter((e) => e.date.slice(0, 10) === date && layers[e.kind]);
+
+  const applyApproval = (e: CalendarEvent) => setCorrection({
+    employee_id: e.employee_id,
+    work_date: e.date.slice(0, 10),
+    first_in: e.first_in,
+    last_out: e.last_out,
+  });
 
   const monthEvents = useMemo(() => {
     const prefix = `${cursor.year}-${String(cursor.month + 1).padStart(2, "0")}`;
@@ -200,6 +216,7 @@ export default function CalendarPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-gray-900">{e.label}</p>
                       {e.detail && <p className="truncate text-xs text-gray-500">{e.detail}</p>}
+                      {e.kind === "attendance" && <Button className="mt-1" onClick={() => applyApproval(e)}>Apply Approval</Button>}
                     </div>
                     <Badge tone={KIND_META[e.kind].badge} className="flex-shrink-0 text-[10px]">
                       {fmtDate(e.date).slice(0, 5)}
@@ -211,6 +228,7 @@ export default function CalendarPage() {
           )}
         </Card>
       </aside>
+      <CorrectionModal row={correction} onClose={() => setCorrection(null)} />
     </div>
   );
 }

@@ -42,7 +42,9 @@ export interface Employee {
 
   // Current assignment — effective-dated in the schema (§4.5), flattened here.
   designation?: string;
+  designation_id?: string;
   department?: string;
+  department_id?: string;
   sub_department?: string;
   business_unit?: string;
   branch?: string;
@@ -298,6 +300,8 @@ export interface Goal {
   employee_id: string;
   employee_name: string;
   cycle_name?: string;
+  department?: string;
+  designation?: string;
   weightage: number;
   target: string;
   achieved?: string;
@@ -314,7 +318,10 @@ export interface Kra {
   weightage: number;
   score?: number;
   assigned_date?: string;
+  department?: string;
+  department_id?: string;
   designation?: string;
+  designation_id?: string;
 }
 
 export interface PerformanceCycle {
@@ -347,6 +354,7 @@ export interface Appraisal {
   employee_code: string;
   employee_name: string;
   designation?: string;
+  department?: string;
   cycle_name: string;
   template_name?: string;
   self_score?: number;
